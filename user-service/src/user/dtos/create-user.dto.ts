@@ -1,6 +1,7 @@
 import { IsEmail, IsNotEmpty, ValidateIf } from 'class-validator';
+import { IUser } from '../interfaces/user.interface';
 
-export class CreateUserDto {
+export class CreateUserDto implements Partial<IUser> {
     @ValidateIf((o) => !o.username)
     @IsEmail({}, { message: 'Email must be valid if username is not provided' })
     email?: string;
