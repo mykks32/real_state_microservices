@@ -5,7 +5,7 @@ import { IUsers } from './interfaces/user.interface';
 import { LoginUserDto } from './dtos/login.dto';
 
 @Controller('auth')
-export class UsersController {
+export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('create')
