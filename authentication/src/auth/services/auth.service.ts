@@ -2,7 +2,7 @@ import {
   Body,
   Injectable,
   NotFoundException,
-  Post,
+  Res,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,14 +12,15 @@ import { CreateUserDto } from '../dtos/create-user.dto';
 import { IUsers } from '../interfaces/user.interface';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from 'src/auth/dtos/login.dto';
-import { JwtService } from '@nestjs/jwt';
+import { nestRefreshTokenService } from './refresh-token.service';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Users)
     private usersRepository: Repository<Users>,
-    private readonly jwtService: JwtService,
+    private readonly refreshTokenService: nestRefreshTokenService,
   ) {}
 
   async create(data: CreateUserDto): Promise<IUsers> {
@@ -32,7 +33,9 @@ export class AuthService {
     return this.usersRepository.save(user);
   }
 
-  async login(data: LoginUserDto): Promise<{ accessToken: string }> {
+  async login(
+    data: LoginUserDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const { email, username, password } = data;
 
     const userData = await this.usersRepository.findOne({
@@ -43,7 +46,7 @@ export class AuthService {
       throw new NotFoundException('No user data found');
     }
 
-    const isPasswordValid = bcrypt.compare(password, userData.password);
+    const isPasswordValid = await bcrypt.compare(password, userData.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Password not correct');
     }
@@ -52,7 +55,33 @@ export class AuthService {
     await this.usersRepository.save(userData);
     const { password: password1, ...user } = userData;
 
-    return { accessToken: await this.jwtService.sign(user) };
+    const { accessToken, refreshToken } =
+      await this.refreshTokenService.generateRefreshToken(user.id);
+
+    // Set refresh token in HttpOnly cookie
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async verify(
+    userId: string,
+    token: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    await this.refreshTokenService.validateRefreshToken(userId, token);
+
+    const { accessToken, refreshToken } =
+      await this.refreshTokenService.generateRefreshToken(userId);
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async logout(userId: string) {
+    await this.refreshTokenService.revokeRefreshToken(userId);
   }
 
   async findById(id: string): Promise<Users> {
