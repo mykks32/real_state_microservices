@@ -9,6 +9,7 @@ import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { IUser } from './user.interface';
 import { isUUID } from 'class-validator';
+import { UserNotFoundException } from 'src/common/exceptions/user-not-found.exception';
 
 @Injectable()
 export class UserService {
@@ -40,9 +41,7 @@ export class UserService {
 
       const user = await this.userRepository.findOne({ where: { id } });
 
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
+      if (!user) throw new UserNotFoundException()
 
       return user;
     } catch (error) {
