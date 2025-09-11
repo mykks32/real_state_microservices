@@ -9,6 +9,10 @@ import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from 'src/auth/dtos/login.dto';
 import { nestRefreshTokenService } from './refresh-token.service';
 import { UserService } from 'src/user/user.service';
+import { WrongPasswordException } from 'src/common/exceptions/wrong-password.exception';
+import { EmailAlreadyExistsException } from 'src/common/exceptions/email-already-exists.exception';
+import { EmailNotFoundException } from 'src/common/exceptions/email-not-found.exception';
+import { InvalidJwtRefreshException } from 'src/common/exceptions/invalid-jwt-refresh.exception';
 
 @Injectable()
 export class AuthService {
@@ -19,9 +23,9 @@ export class AuthService {
 
   async create(data: CreateUserDto) {
     try {
-      const { email, username, password } = data;
+      const { email, password } = data;
       const exists = await this.userServie.findByEmail({ email });
-      if (exists) throw new BadRequestException('User already Exists');
+      if (exists) throw new EmailAlreadyExistsException();
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await this.userServie.create({
@@ -41,10 +45,10 @@ export class AuthService {
       const { email, password } = data;
 
       const user = await this.userServie.findByEmail({ email });
-      if (!user) throw new NotFoundException('User not Found');
+      if (!user) throw new EmailNotFoundException();
 
-      const isValid = bcrypt.compare(password, user.password);
-      if (!isValid) throw new BadRequestException('Invalid credentials');
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) throw new WrongPasswordException();
 
       const { accessToken, refreshToken } =
         await this.refreshTokenService.generateRefreshToken(user.id);
@@ -67,7 +71,7 @@ export class AuthService {
         userId,
         token,
       );
-      if (!valid) throw new BadRequestException('Invalid Token');
+      if (!valid) throw new InvalidJwtRefreshException();
 
       const { accessToken, refreshToken } =
         await this.refreshTokenService.generateRefreshToken(userId);

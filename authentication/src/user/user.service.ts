@@ -25,22 +25,11 @@ export class UserService {
   }
 
   async findByEmail({ email }: Pick<IUser, 'email'>): Promise<User | null> {
-    try {
-      const userData = await this.userRepository.findOne({
-        where: {
-          email,
-        },
-      });
-      if (!userData) {
-        throw new NotFoundException('User not found');
-      }
-      return userData;
-    } catch (err) {
-      if (err instanceof NotFoundException) {
-        throw err;
-      }
-      throw new BadRequestException('User fetch failed', err?.message);
-    }
+    return await this.userRepository.findOne({
+      where: {
+        email,
+      },
+    });
   }
 
   async findById({ id }: Pick<IUser, 'id'>): Promise<User> {

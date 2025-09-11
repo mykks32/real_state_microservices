@@ -1,6 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as path from 'path';
-import { User } from 'src/user/user.entity';
+import { User } from '../user/user.entity';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
@@ -14,7 +14,7 @@ export const dataSourceOptions: DataSourceOptions = {
   entities: [User],
   migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
   migrationsTableName: 'migrations',
-  migrationsRun: false,
+  migrationsRun: true,
 };
 
 const AppDataSource = new DataSource(dataSourceOptions);

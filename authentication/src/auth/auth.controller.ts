@@ -12,13 +12,14 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { LoginUserDto } from './dtos/login.dto';
 import { Request, Response } from 'express';
+import { JwtRefreshNotFoundException } from 'src/common/exceptions/jwt-refresh-not-found.exception';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('create')
-  async create(@Body() createUserDto: CreateUserDto){
+  async create(@Body() createUserDto: CreateUserDto) {
     return this.authService.create(createUserDto);
   }
 
@@ -49,9 +50,7 @@ export class AuthController {
     @Res() res: Response,
   ): Promise<Response<{ accessToken: string }>> {
     const refreshToken = req.cookies['realState_token'];
-    if (!refreshToken) {
-      throw new UnauthorizedException('No token found');
-    }
+    if (!refreshToken) throw new JwtRefreshNotFoundException();
 
     // console.log("refeshTOken", refreshToken)
     const { accessToken, refreshToken: newRefreshToken } =
