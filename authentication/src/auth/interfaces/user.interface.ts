@@ -1,9 +1,0 @@
-export interface IUsers {
-    id: string,
-    email: string,
-    username: string,
-    password: string,
-    IsAdmin: boolean,
-    createdAt: Date,
-    lastLoginAt: Date | null
-}

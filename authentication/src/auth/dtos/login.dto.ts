@@ -1,15 +1,11 @@
 import { IsNotEmpty, ValidateIf, IsEmail } from 'class-validator';
-import { IUsers } from '../interfaces/user.interface';
+import { IUser } from 'src/user/user.interface';
 
-export class LoginUserDto implements Partial<IUsers> {
-    @ValidateIf((o) => !o.username)
-    @IsEmail({}, { message: 'Email must be valid if username is not provided' })
-    email?: string;
+export class LoginUserDto implements Pick<IUser, 'email' | 'password'> {
+  @IsEmail({}, { message: 'Email must be valid' })
+  @IsNotEmpty({ message: 'Email is requiered' })
+  email: string;
 
-    @ValidateIf((o) => !o.email)
-    @IsNotEmpty({ message: 'Username is required if email is not provided' })
-    username?: string;
-
-    @IsNotEmpty({ message: 'Password is required' })
-    password: string;
+  @IsNotEmpty({ message: 'Password is required' })
+  password: string;
 }

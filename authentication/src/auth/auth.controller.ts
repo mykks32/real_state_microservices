@@ -8,9 +8,8 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService } from './services/auth.service';
+import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { IUsers } from './interfaces/user.interface';
 import { LoginUserDto } from './dtos/login.dto';
 import { Request, Response } from 'express';
 
@@ -19,7 +18,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('create')
-  async create(@Body() createUserDto: CreateUserDto): Promise<IUsers> {
+  async create(@Body() createUserDto: CreateUserDto){
     return this.authService.create(createUserDto);
   }
 
@@ -84,15 +83,5 @@ export class AuthController {
     return res.json({
       message: 'Successfully logout',
     });
-  }
-
-  @Get('id/:id')
-  async findAccount(@Param('id') id: string) {
-    return this.authService.findById(id);
-  }
-
-  @Get('email/:email')
-  async findAccountByEmail(@Param('email') email: string) {
-    return this.authService.findByEmail(email);
   }
 }
