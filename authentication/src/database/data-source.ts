@@ -1,20 +1,21 @@
-import path from 'path';
-import { DataSource } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
+import * as path from 'path';
+import { User } from 'src/user/user.entity';
 
-const AppDataSource = new DataSource({
+export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
-  //   url: '',
   host: 'localhost',
   port: 5432,
   username: 'postgres',
   password: 'postgres',
   database: 'real_state_pg',
   logging: false,
-  synchronize: true,
-  entities: [],
-  migrations: [path.join(__dirname, './database/migrations/*.{ts,js}')],
+  synchronize: false,
+  entities: [User],
+  migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
   migrationsTableName: 'migrations',
   migrationsRun: false,
-});
+};
 
+const AppDataSource = new DataSource(dataSourceOptions);
 export default AppDataSource;

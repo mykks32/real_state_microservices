@@ -7,6 +7,11 @@ export class userController {
 
   @Get(':id')
   async findUserById(@Param('id') id: string) {
-    this.userService.findById({ id });
+    return this.userService.findById({ id });
+  }
+
+  @Get('/email/:email')
+  async findUserByEmail(@Param('email') email: string) {
+    return this.userService.findByEmail({ email });
   }
 }
