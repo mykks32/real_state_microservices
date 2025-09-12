@@ -1,10 +1,6 @@
 import {
-  BadRequestException,
-  Body,
-  ConflictException,
   Injectable,
   Logger,
-  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
@@ -69,30 +65,34 @@ export class AuthService {
     userId: string,
     token: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    try {
+    const valid = await this.refreshTokenService.validateRefreshToken(
+      userId,
+      token,
+    );
+    if (!valid) throw new InvalidJwtRefreshException();
+
+    const { accessToken, refreshToken } =
+      await this.refreshTokenService.generateRefreshToken(userId);
+
+    this.logger.log(
+      `accesssToken: ${accessToken} & refreshToken: ${refreshToken}`,
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async logout(userId: string, token: string) {
       const valid = await this.refreshTokenService.validateRefreshToken(
         userId,
         token,
       );
       if (!valid) throw new InvalidJwtRefreshException();
 
-      const { accessToken, refreshToken } =
-        await this.refreshTokenService.generateRefreshToken(userId);
-
-      return {
-        accessToken,
-        refreshToken,
-      };
-    } catch (err) {
-      throw new BadRequestException('Verify Failed', err?.message);
-    }
-  }
-
-  async logout(userId: string) {
-    try {
       await this.refreshTokenService.revokeRefreshToken(userId);
-    } catch (err) {
-      throw new BadRequestException('Logout Failed', err?.message);
-    }
+
+      this.logger.log(`refresh token deleted`);
   }
 }

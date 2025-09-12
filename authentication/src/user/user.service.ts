@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +14,7 @@ import { UserNotFoundException } from 'src/common/exceptions/user-not-found.exce
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger('User Service');
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -22,37 +24,34 @@ export class UserService {
     data: Pick<IUser, 'username' | 'email' | 'password'>,
   ): Promise<User> {
     const user = this.userRepository.create(data);
+    this.logger.log(`User created with id: ${user.id}`);
     return this.userRepository.save(user);
   }
 
   async findByEmail({ email }: Pick<IUser, 'email'>): Promise<User | null> {
-    return await this.userRepository.findOne({
+    const userData = await this.userRepository.findOne({
       where: {
         email,
       },
     });
+    if (userData) {
+      this.logger.log(`User retrived of email: ${userData.email}`);
+    } else {
+      this.logger.log(`User don't exist on email ${email}`);
+    }
+    return userData;
   }
 
   async findById({ id }: Pick<IUser, 'id'>): Promise<User> {
-    try {
-      if (!isUUID(id)) {
-        throw new BadRequestException('Invalid user ID format');
-      }
-
-      const user = await this.userRepository.findOne({ where: { id } });
-
-      if (!user) throw new UserNotFoundException()
-
-      return user;
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
-        throw error;
-      }
-
-      throw new BadRequestException('Failed to fetch user');
+    if (!isUUID(id)) {
+      throw new BadRequestException('Invalid user ID format');
     }
+
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) throw new UserNotFoundException();
+
+    this.logger.log(`User retrived with id: ${user.id}`);
+
+    return user;
   }
 }

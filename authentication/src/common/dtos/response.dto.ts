@@ -1,3 +1,5 @@
+import { request } from 'express';
+
 export class ApiResponse<T> {
   success: boolean;
   errorName?: string;

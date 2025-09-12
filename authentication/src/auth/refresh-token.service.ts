@@ -20,7 +20,7 @@ export class nestRefreshTokenService {
     const refreshToken = uuidv4();
 
     await this.redis.set(
-      `refresh: ${userId}`,
+      `refresh:${userId}`,
       refreshToken,
       'EX',
       60 * 60 * 24 * 7,
@@ -33,11 +33,11 @@ export class nestRefreshTokenService {
   }
 
   async validateRefreshToken(userId: string, token: string): Promise<boolean> {
-    const storedToken = await this.redis.get(`refresh: ${userId}`);
+    const storedToken = await this.redis.get(`refresh:${userId}`);
 
-    if (!storedToken && storedToken != token) {
-      throw new UnauthorizedException('invalid refresh token');
-    }
+    if (!storedToken || storedToken !== token) {
+    throw new UnauthorizedException('Invalid refresh token');
+  }
     return true;
   }
 

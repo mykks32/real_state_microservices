@@ -16,7 +16,6 @@ import { LoginUserDto } from './dtos/login.dto';
 import { Request, Response } from 'express';
 import { JwtRefreshNotFoundException } from 'src/common/exceptions/jwt-refresh-not-found.exception';
 import { ApiResponse } from 'src/common/dtos/response.dto';
-import { ref } from 'process';
 
 @Controller('auth')
 export class AuthController {
@@ -24,14 +23,22 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('create')
-  async create(@Body() createUserDto: CreateUserDto, @Req() req: Request) {
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
     const userData = await this.authService.create(createUserDto);
-    return ApiResponse.ok(
-      userData,
-      'User Created Successfully',
-      HttpStatus.CREATED,
-      req.headers['x-request-id'] as string,
-    );
+    return res
+      .status(HttpStatus.CREATED)
+      .json(
+        ApiResponse.ok(
+          userData,
+          'User Created Successfully',
+          HttpStatus.CREATED,
+          req.headers['x-request-id'] as string,
+        ),
+      );
   }
 
   @Post('login')
@@ -53,12 +60,16 @@ export class AuthController {
       sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return ApiResponse.ok(
-      { accessToken, refreshToken },
-      'Login Successfull',
-      HttpStatus.OK,
-      req.headers['x-request-id'] as string,
-    );
+    return res
+      .status(HttpStatus.OK)
+      .json(
+        ApiResponse.ok(
+          { accessToken, refreshToken },
+          'Login Successfull',
+          HttpStatus.OK,
+          req.headers['x-request-id'] as string,
+        ),
+      );
   }
 
   @Post('refresh')
@@ -66,15 +77,16 @@ export class AuthController {
     @Body('userId') userId: string,
     @Req() req: Request,
     @Res() res: Response,
-  ): Promise<Response<{ accessToken: string }>> {
+  ) {
     const refreshToken = req.cookies['realState_token'];
     if (!refreshToken) throw new JwtRefreshNotFoundException();
 
-    // console.log("refeshTOken", refreshToken)
     const { accessToken, refreshToken: newRefreshToken } =
       await this.authService.verify(userId, refreshToken);
 
-    // console.log("access& new RefreshTOken", accessToken, "-----", refreshToken)
+    this.logger.log(
+      `accessToken: ${accessToken} & refreshToken: ${refreshToken}`,
+    );
 
     res.cookie('realState_token', newRefreshToken, {
       httpOnly: true,
@@ -83,22 +95,46 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // console.log("res cookie set")
+    this.logger.log(`cookie set: ${res.cookie['realState_token']}`);
 
-    return res.json({
-      accessToken,
-    });
+    return res.status(HttpStatus.OK).json(
+      ApiResponse.ok(
+        {
+          accessToken: accessToken,
+        },
+        'Access Token refreshed successfully',
+        HttpStatus.OK,
+        req.headers['x-request-id'] as string,
+      ),
+    );
   }
 
   @Post('logout')
   async logout(
     @Res() res: Response,
-    userId: string,
-  ): Promise<Response<{ message: string }>> {
-    await this.authService.logout(userId);
+    @Body('userId') userId: string,
+    @Req() req: Request,
+  ) {
+    const refreshToken = req.cookies['realState_token'];
+    console.log(`cookie ${refreshToken}`);
+    if (!refreshToken) throw new JwtRefreshNotFoundException();
+
+    console.log(`cookie logout userId: ${userId} & refreshToke: ${refreshToken}`);
+    await this.authService.logout(userId, refreshToken);
+
     res.clearCookie('realState_token');
-    return res.json({
-      message: 'Successfully logout',
-    });
+
+    this.logger.log(`Cookie cleared`);
+
+    return res
+      .status(HttpStatus.OK)
+      .json(
+        ApiResponse.ok(
+          null,
+          'Successfully logged out',
+          HttpStatus.OK,
+          req.headers['x-request-id'] as string,
+        ),
+      );
   }
 }
