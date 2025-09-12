@@ -1,7 +1,11 @@
 import { IsNotEmpty, ValidateIf, IsEmail } from 'class-validator';
+import { BaseRequestDto } from 'src/common/dtos/base-request.dto';
 import { IUser } from 'src/user/user.interface';
 
-export class LoginUserDto implements Pick<IUser, 'email' | 'password'> {
+export class LoginUserDto
+  extends BaseRequestDto
+  implements Pick<IUser, 'email' | 'password'>
+{
   @IsEmail({}, { message: 'Email must be valid' })
   @IsNotEmpty({ message: 'Email is requiered' })
   email: string;

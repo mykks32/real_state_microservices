@@ -10,7 +10,7 @@ export const dataSourceOptions: DataSourceOptions = {
   password: 'postgres',
   database: 'real_state_pg',
   logging: false,
-  synchronize: false,
+  synchronize: true,
   entities: [User],
   migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
   migrationsTableName: 'migrations',

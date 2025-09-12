@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ApiResponse } from '../dtos/response.dto';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -24,6 +25,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       status = exception.getStatus();
       const res: any = exception.getResponse();
       message = res?.message || res || exception.message;
+    } else if (exception instanceof Error) {
+      // Handle runtime errors, DB errors, etc.
+      message = exception.message || message;
     }
 
     const requestId = request.headers['x-request-id'] as string;

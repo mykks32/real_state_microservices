@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
+  Logger,
   Param,
   Post,
   Req,
@@ -13,23 +15,37 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { LoginUserDto } from './dtos/login.dto';
 import { Request, Response } from 'express';
 import { JwtRefreshNotFoundException } from 'src/common/exceptions/jwt-refresh-not-found.exception';
+import { ApiResponse } from 'src/common/dtos/response.dto';
+import { ref } from 'process';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger('auth controller');
   constructor(private readonly authService: AuthService) {}
 
   @Post('create')
-  async create(@Body() createUserDto: CreateUserDto) {
-    return this.authService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto, @Req() req: Request) {
+    const userData = await this.authService.create(createUserDto);
+    return ApiResponse.ok(
+      userData,
+      'User Created Successfully',
+      HttpStatus.CREATED,
+      req.headers['x-request-id'] as string,
+    );
   }
 
   @Post('login')
   async login(
     @Body() loginUserDto: LoginUserDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken, refreshToken } =
       await this.authService.login(loginUserDto);
+
+    this.logger.log(
+      `accessToken: ${accessToken}, refreshToken: ${refreshToken}`,
+    );
 
     res.cookie('realState_token', refreshToken, {
       httpOnly: true,
@@ -37,10 +53,12 @@ export class AuthController {
       sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return ApiResponse.ok(
+      { accessToken, refreshToken },
+      'Login Successfull',
+      HttpStatus.OK,
+      req.headers['x-request-id'] as string,
+    );
   }
 
   @Post('refresh')

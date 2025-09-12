@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   Body,
+  ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -16,6 +18,7 @@ import { InvalidJwtRefreshException } from 'src/common/exceptions/invalid-jwt-re
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger('auth service');
   constructor(
     private userServie: UserService,
     private readonly refreshTokenService: nestRefreshTokenService,
@@ -32,34 +35,34 @@ export class AuthService {
         ...data,
         password: hashedPassword,
       });
+      this.logger.log(`User created: ${user.id}`);
       return user;
-    } catch (err) {
-      throw new BadRequestException('Registraiton failed', err?.message);
+    } catch (error) {
+      this.logger.error(`Error creating user: ${error.message}`);
+      throw error;
     }
   }
 
   async login(
     data: LoginUserDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    try {
-      const { email, password } = data;
+    const { email, password } = data;
 
-      const user = await this.userServie.findByEmail({ email });
-      if (!user) throw new EmailNotFoundException();
+    const user = await this.userServie.findByEmail({ email });
+    if (!user) throw new EmailNotFoundException();
 
-      const isValid = await bcrypt.compare(password, user.password);
-      if (!isValid) throw new WrongPasswordException();
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) throw new WrongPasswordException();
 
-      const { accessToken, refreshToken } =
-        await this.refreshTokenService.generateRefreshToken(user.id);
+    const { accessToken, refreshToken } =
+      await this.refreshTokenService.generateRefreshToken(user.id);
 
-      return {
-        accessToken,
-        refreshToken,
-      };
-    } catch (err) {
-      throw new BadRequestException('Login Failed', err?.message);
-    }
+    this.logger.log(`Login Successful ${user.id}`);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   async verify(
