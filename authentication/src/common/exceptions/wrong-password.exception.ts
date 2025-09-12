@@ -1,6 +1,13 @@
-export class WrongPasswordException extends Error {
+import { HttpException, HttpStatus } from '@nestjs/common';
+
+export class WrongPasswordException extends HttpException {
   constructor(message = 'Wrong password') {
-    super(message);
-    this.name = WrongPasswordException.name;
+    super(
+      {
+        name: WrongPasswordException.name,
+        message,
+      },
+      HttpStatus.UNAUTHORIZED,
+    );
   }
 }

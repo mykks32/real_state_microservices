@@ -1,5 +1,6 @@
 export class ApiResponse<T> {
   success: boolean;
+  errorName?: string;
   message: string;
   statusCode: number;
   data?: T;
@@ -26,9 +27,15 @@ export class ApiResponse<T> {
     });
   }
 
-  static error(message = 'Error', statusCode = 500, requestId?: string) {
+  static error(
+    errorName?: string,
+    message = 'Error',
+    statusCode = 500,
+    requestId?: string,
+  ) {
     return new ApiResponse<null>({
       success: false,
+      errorName,
       statusCode,
       message,
       requestId,

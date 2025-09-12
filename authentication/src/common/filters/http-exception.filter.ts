@@ -30,11 +30,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message = exception.message || message;
     }
 
+    const errorName =
+      exception instanceof Error ? exception.constructor.name : 'Error';
+
     const requestId = request.headers['x-request-id'] as string;
 
     this.logger.error(
       `[${request.method}] ${request.url} - ${status} - ${message} - requestId: ${requestId}`,
     );
-    response.status(status).json(ApiResponse.error(message, status, requestId));
+    response.status(status).json(ApiResponse.error(errorName, message, status, requestId));
   }
 }

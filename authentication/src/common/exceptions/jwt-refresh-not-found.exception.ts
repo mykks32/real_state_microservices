@@ -1,6 +1,13 @@
-export class JwtRefreshNotFoundException extends Error {
-  constructor(message = 'Jwt refresh token not found') {
-    super(message);
-    this.name = JwtRefreshNotFoundException.name;
+import { HttpException, HttpStatus } from '@nestjs/common';
+
+export class JwtRefreshNotFoundException extends HttpException {
+  constructor(message = 'JWT refresh token not found') {
+    super(
+      {
+        name: JwtRefreshNotFoundException.name,
+        message,
+      },
+      HttpStatus.NOT_FOUND,
+    );
   }
 }
