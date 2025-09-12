@@ -16,7 +16,6 @@ export class nestRefreshTokenService {
     refreshToken: string;
   }> {
     const accessToken = await this.jwtService.sign(userId);
-
     const refreshToken = uuidv4();
 
     await this.redis.set(
@@ -36,8 +35,8 @@ export class nestRefreshTokenService {
     const storedToken = await this.redis.get(`refresh:${userId}`);
 
     if (!storedToken || storedToken !== token) {
-    throw new UnauthorizedException('Invalid refresh token');
-  }
+      throw new UnauthorizedException('Invalid refresh token');
+    }
     return true;
   }
 

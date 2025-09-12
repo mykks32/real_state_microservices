@@ -26,7 +26,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const res: any = exception.getResponse();
       message = res?.message || res || exception.message;
     } else if (exception instanceof Error) {
-      // Handle runtime errors, DB errors, etc.
       message = exception.message || message;
     }
 
@@ -38,6 +37,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     this.logger.error(
       `[${request.method}] ${request.url} - ${status} - ${message} - requestId: ${requestId}`,
     );
-    response.status(status).json(ApiResponse.error(errorName, message, status, requestId));
+    response
+      .status(status)
+      .json(ApiResponse.error(errorName, message, status, requestId));
   }
 }

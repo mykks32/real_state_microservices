@@ -10,14 +10,7 @@ export class nestJwtService {
   }
 
   async sign(userId: string): Promise<string> {
-    return await this.jwtService.signAsync(
-      {
-        userId,
-      },
-      {
-        expiresIn: '15m',
-      },
-    );
+    return await this.jwtService.signAsync({ userId }, { expiresIn: '15m' });
   }
 
   async verify(token: string) {

@@ -11,8 +11,6 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
-  // const loggerMiddleware = new LoggerMiddleware();
-  // app.use(loggerMiddleware.use.bind(loggerMiddleware));
 
   app.use(cookieParser());
   await app.listen(process.env.PORT ?? 3000);

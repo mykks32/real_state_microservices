@@ -1,8 +1,6 @@
 import {
-  BadRequestException,
   Controller,
   Get,
-  HttpException,
   HttpStatus,
   Param,
   Req,
@@ -24,6 +22,7 @@ export class userController {
     @Res() res: Response,
   ) {
     const userData = await this.userService.findById({ id });
+
     return res
       .status(HttpStatus.OK)
       .json(
@@ -43,7 +42,6 @@ export class userController {
     @Res() res: Response,
   ) {
     const userData = await this.userService.findByEmail({ email });
-
     if (!userData) throw new UserNotFoundException();
 
     return res

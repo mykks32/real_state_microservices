@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from 'src/auth/dtos/login.dto';
@@ -15,6 +12,7 @@ import { InvalidJwtRefreshException } from 'src/common/exceptions/invalid-jwt-re
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger('auth service');
+
   constructor(
     private userServie: UserService,
     private readonly refreshTokenService: nestRefreshTokenService,
@@ -23,6 +21,7 @@ export class AuthService {
   async create(data: CreateUserDto) {
     try {
       const { email, password } = data;
+
       const exists = await this.userServie.findByEmail({ email });
       if (exists) throw new EmailAlreadyExistsException();
 
@@ -31,6 +30,7 @@ export class AuthService {
         ...data,
         password: hashedPassword,
       });
+
       this.logger.log(`User created: ${user.id}`);
       return user;
     } catch (error) {
@@ -53,8 +53,9 @@ export class AuthService {
     const { accessToken, refreshToken } =
       await this.refreshTokenService.generateRefreshToken(user.id);
 
-    this.logger.log(`Login Successful ${user.id}`);
-
+    this.logger.log(
+      `Login Successful ${user.id}, refreshToken: ${refreshToken} & accessToken: ${accessToken}`,
+    );
     return {
       accessToken,
       refreshToken,
@@ -77,7 +78,6 @@ export class AuthService {
     this.logger.log(
       `accesssToken: ${accessToken} & refreshToken: ${refreshToken}`,
     );
-
     return {
       accessToken,
       refreshToken,
@@ -85,14 +85,13 @@ export class AuthService {
   }
 
   async logout(userId: string, token: string) {
-      const valid = await this.refreshTokenService.validateRefreshToken(
-        userId,
-        token,
-      );
-      if (!valid) throw new InvalidJwtRefreshException();
+    const valid = await this.refreshTokenService.validateRefreshToken(
+      userId,
+      token,
+    );
+    if (!valid) throw new InvalidJwtRefreshException();
 
-      await this.refreshTokenService.revokeRefreshToken(userId);
-
-      this.logger.log(`refresh token deleted`);
+    await this.refreshTokenService.revokeRefreshToken(userId);
+    this.logger.log(`refresh token deleted`);
   }
 }

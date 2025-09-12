@@ -20,6 +20,7 @@ import { ApiResponse } from 'src/common/dtos/response.dto';
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger('auth controller');
+
   constructor(private readonly authService: AuthService) {}
 
   @Post('create')
@@ -29,6 +30,7 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const userData = await this.authService.create(createUserDto);
+
     return res
       .status(HttpStatus.CREATED)
       .json(
@@ -50,16 +52,16 @@ export class AuthController {
     const { accessToken, refreshToken } =
       await this.authService.login(loginUserDto);
 
-    this.logger.log(
-      `accessToken: ${accessToken}, refreshToken: ${refreshToken}`,
-    );
-
     res.cookie('realState_token', refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    this.logger.log(
+      `cookie set: ${res.cookie['realState_token']} & accessToken: ${accessToken}`,
+    );
     return res
       .status(HttpStatus.OK)
       .json(
@@ -84,10 +86,6 @@ export class AuthController {
     const { accessToken, refreshToken: newRefreshToken } =
       await this.authService.verify(userId, refreshToken);
 
-    this.logger.log(
-      `accessToken: ${accessToken} & refreshToken: ${refreshToken}`,
-    );
-
     res.cookie('realState_token', newRefreshToken, {
       httpOnly: true,
       secure: false,
@@ -95,8 +93,9 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    this.logger.log(`cookie set: ${res.cookie['realState_token']}`);
-
+    this.logger.log(
+      `cookie set: ${res.cookie['realState_token']} & accessToken: ${accessToken}`,
+    );
     return res.status(HttpStatus.OK).json(
       ApiResponse.ok(
         {
@@ -116,16 +115,12 @@ export class AuthController {
     @Req() req: Request,
   ) {
     const refreshToken = req.cookies['realState_token'];
-    console.log(`cookie ${refreshToken}`);
     if (!refreshToken) throw new JwtRefreshNotFoundException();
 
-    console.log(`cookie logout userId: ${userId} & refreshToke: ${refreshToken}`);
     await this.authService.logout(userId, refreshToken);
-
     res.clearCookie('realState_token');
 
     this.logger.log(`Cookie cleared`);
-
     return res
       .status(HttpStatus.OK)
       .json(
