@@ -7,44 +7,16 @@ export class LoggerMiddleware implements NestMiddleware {
   private logger = new Logger('HTTP');
 
   use(req: Request, res: Response, next: NextFunction) {
-    const requestId = uuidv4();
-    (req as any).id = requestId;
+    const { method, originalUrl } = req;
+    const requestId = req.headers['x-request-id'];
     const start = Date.now();
 
-    // Log incoming request
-    this.logger.log(JSON.stringify({
-      type: 'REQUEST',
-      requestId,
-      method: req.method,
-      url: req.originalUrl,
-      ip: req.ip,
-      userAgent: req.get('user-agent'),
-      timestamp: new Date().toISOString(),
-    }));
-
     res.on('finish', () => {
+      const { statusCode } = res;
       const duration = Date.now() - start;
-      this.logger.log(JSON.stringify({
-        type: 'RESPONSE',
-        requestId,
-        method: req.method,
-        url: req.originalUrl,
-        statusCode: res.statusCode,
-        duration: `${duration}ms`,
-        timestamp: new Date().toISOString(),
-      }));
-    });
-
-    res.on('close', () => {
-      const duration = Date.now() - start;
-      this.logger.warn(JSON.stringify({
-        type: 'CONNECTION_CLOSED',
-        requestId,
-        method: req.method,
-        url: req.originalUrl,
-        duration: `${duration}ms`,
-        timestamp: new Date().toISOString(),
-      }));
+      this.logger.log(
+        `[${method}] ${originalUrl} ${statusCode} - ${duration}ms - requestId ${requestId}`,
+      );
     });
 
     next();
