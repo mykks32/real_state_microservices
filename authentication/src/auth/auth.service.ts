@@ -30,9 +30,10 @@ export class AuthService {
         ...data,
         password: hashedPassword,
       });
+      const { password: _, ...safeUser } = user;
 
-      this.logger.log(`User created: ${user.id}`);
-      return user;
+      this.logger.log(`User created: ${safeUser.id}`);
+      return safeUser;
     } catch (error) {
       this.logger.error(`Error creating user: ${error.message}`);
       throw error;
