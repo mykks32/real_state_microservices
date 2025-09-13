@@ -28,6 +28,15 @@ export class AuthController {
 
   constructor(private readonly authService: AuthService) {}
 
+  /**
+   * Register a new user.
+   *
+   * @summary Creates a new user in the system.
+   * @param {CreateUserDto} createUserDto - The user data for registration.
+   * @returns {object} 201 - User created successfully.
+   * @returns {object} 409 - Conflict. Returned if the email already exists.
+   * @returns {object} 500 - Internal Server Error. Returned if an unexpected error occurs on the server.
+   */
   @Post('create')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: CreateUserDto })
@@ -98,6 +107,18 @@ export class AuthController {
       );
   }
 
+  /**
+   * Login a user.
+   *
+   * @summary Authenticates a user and returns access and refresh tokens.
+   * @param {LoginUserDto} loginUserDto.body - Login credentials in request body.
+   * @header {string} x-request-id - Unique request identifier.
+   * @header {string} set-cookie - Authentication cookie (HttpOnly).
+   * @returns {object} 200 - Successful login with access and refresh tokens.
+   * @returns {object} 401 - Unauthorized. Incorrect password.
+   * @returns {object} 404 - Not Found. Email not registered.
+   * @returns {object} 500 - Internal Server Error.
+   */
   @Post('login')
   @ApiOperation({ summary: 'Login user' })
   @ApiBody({ type: LoginUserDto })
@@ -214,6 +235,18 @@ export class AuthController {
       );
   }
 
+  /**
+   * Refreshes the access token for a user.
+   *
+   * @summary Uses the refresh token from the cookie to generate a new access token.
+   * @param {object} body.body - Request body containing the user ID.
+   * @param {string} body.body.userId - The ID of the user whose token is being refreshed.
+   * @header {string} x-request-id - Unique request identifier for tracing.
+   * @header {string} set-cookie - New refresh token cookie (HttpOnly).
+   * @returns {object} 200 - Access token refreshed successfully with new refresh token.
+   * @returns {object} 401 - Unauthorized. Invalid or expired refresh token.
+   * @returns {object} 500 - Internal Server Error. Unexpected server error.
+   */
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh Token' })
   @ApiCookieAuth('realState_token')
@@ -330,6 +363,19 @@ export class AuthController {
     );
   }
 
+  /**
+   * Logs out a user by clearing their refresh token cookie.
+   *
+   * @summary Invalidates the refresh token and removes the authentication cookie.
+   * @param {object} body.body - Request body containing the user ID.
+   * @param {string} body.body.userId - The ID of the user to log out.
+   * @header {string} x-request-id - Unique request identifier for tracing.
+   * @header {string} set-cookie - Clears the authentication cookie.
+   * @returns {object} 200 - Successfully logged out.
+   * @returns {object} 401 - Unauthorized. Returned if the refresh token is invalid.
+   * @returns {object} 404 - Not Found. Returned if the JWT refresh token is not found in the cookie.
+   * @returns {object} 500 - Internal Server Error. Unexpected server error.
+   */
   @Post('logout')
   @ApiCookieAuth('realState_token')
   @ApiBody({
