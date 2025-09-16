@@ -14,7 +14,7 @@ public abstract class Base {
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt; // Fixed variable name (was updateAt)
+    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
@@ -28,7 +28,6 @@ public abstract class Base {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and setters
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -44,4 +43,5 @@ public abstract class Base {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
 }
