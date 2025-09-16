@@ -1,5 +1,7 @@
 package com.realState.property_service.database.entity;
 
+import java.util.UUID;
+
 import com.realState.property_service.database.enums.StatusEnum;
 import com.realState.property_service.database.enums.TypeEnum;
 
@@ -16,11 +18,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.GenerationType;
 
 @Entity
-@Table(name = "property")
+@Table(name = "properties")
 public class Property extends Base {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private long id;
+    private UUID id;
 
     @Column(nullable = false, length = 150)
     private String title;
@@ -40,11 +42,11 @@ public class Property extends Base {
     @JoinColumn(name = "location_id", referencedColumnName = "id", nullable = false)
     private Location location;
 
-    public long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

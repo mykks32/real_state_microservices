@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity()
-@Table(name = "location")
+@Table(name = "locations")
 public class Location {
 
     @Id()

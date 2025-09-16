@@ -1,13 +1,11 @@
 package com.realState.property_service.database.repository;
 
-import java.util.UUID;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.realState.property_service.database.entity.Property;;;;;
+import com.realState.property_service.database.entity.Location;
 
 @Repository
-public interface PropertyRepository extends JpaRepository<Property, UUID> {
+public interface locationRepository extends JpaRepository<Location, Long> {
     
 }
