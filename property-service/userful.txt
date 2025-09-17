@@ -1,4 +1,5 @@
-flyway -url=jdbc:mysql://localhost:3306/your_db \
-       -user=your_user \
-       -password=your_password \
+flyway -url=jdbc:mysql://localhost:3306/realstate_property_mysql \
+       -user=root \
+       -password= \
+       -locations=/Users/shreekrishnayadav/Desktop/real-estate/backend/property-service/src/main/resources/db/migrations \
        migrate
