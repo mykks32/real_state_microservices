@@ -1,0 +1,4 @@
+flyway -url=jdbc:mysql://localhost:3306/your_db \
+       -user=your_user \
+       -password=your_password \
+       migrate
