@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.realState.property_service.database.entity.Location;
 
 @Repository
-public interface locationRepository extends JpaRepository<Location, Long> {
-    
+public interface LocationRepository extends JpaRepository<Location, Long> {
+
 }
