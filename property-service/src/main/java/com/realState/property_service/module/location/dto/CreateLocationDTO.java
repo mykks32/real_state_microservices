@@ -4,11 +4,13 @@ import com.realState.property_service.database.enums.StateEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class CreateLocationDTO {
 
     @NotBlank(message = "Address is required")
@@ -24,15 +26,6 @@ public class CreateLocationDTO {
 
     private String country;
     private Integer zipcode;
-    private Float lattitude;
+    private Float latitude;
     private Float longitude;
-
-    // Custom constructor to set defaults
-    public CreateLocationDTO(String address, String city, StateEnum state) {
-        this.address = address;
-        this.city = city;
-        this.state = state;
-        this.country = "Nepal";
-        this.zipcode = 44200;
-    }
 }

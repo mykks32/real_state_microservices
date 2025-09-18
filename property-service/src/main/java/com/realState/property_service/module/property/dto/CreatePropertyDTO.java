@@ -13,9 +13,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class CreatePropetyDTO {
+@AllArgsConstructor
+public class CreatePropertyDTO {
     @NotBlank(message = "Title is required")
     @Size(max = 150, message = "Title cannot exceed 150 characters")
     private String title;
@@ -32,5 +32,4 @@ public class CreatePropetyDTO {
     @NotNull(message = "Location is required")
     @Valid
     private CreateLocationDTO location;
-
 }

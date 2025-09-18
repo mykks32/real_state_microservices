@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import com.realState.property_service.database.entity.Location;
 import com.realState.property_service.database.repository.LocationRepository;
 import com.realState.property_service.module.location.dto.CreateLocationDTO;
-import com.realState.property_service.module.location.dto.LocationDTO;
 import com.realState.property_service.module.location.service.LocationService;
 
 @Service
@@ -22,29 +21,15 @@ public class LocationServiceImpl implements LocationService {
         location.setState(dto.getState());
         location.setCountry(dto.getCountry());
         location.setZipcode(dto.getZipcode());
-        location.setLattitude(dto.getLattitude());
+        location.setLatitude(dto.getLatitude());
         location.setLongitude(dto.getLongitude());
         return location;
     }
 
-    private LocationDTO mapToDTO(Location location) {
-        LocationDTO dto = new LocationDTO();
-        dto.setId(location.getId());
-        dto.setAddress(location.getAddress());
-        dto.setCity(location.getCity());
-        dto.setState(location.getState());
-        dto.setCountry(location.getCountry());
-        dto.setZipcode(location.getZipcode());
-        dto.setLattitude(location.getLattitude());
-        dto.setLongitude(location.getLongitude());
-        return dto;
-    }
-
     @Override
-    public LocationDTO createLocation(CreateLocationDTO dto) {
+    public Location createLocation(CreateLocationDTO dto) {
         Location location = mapToEntity(dto);
-        location = locationRepository.save(location);
-        return mapToDTO(location);
+        return location = locationRepository.save(location);
     }
 
     @Override
@@ -63,7 +48,7 @@ public class LocationServiceImpl implements LocationService {
         location.setState(dto.getState());
         location.setCountry(dto.getCountry());
         location.setZipcode(dto.getZipcode());
-        location.setLattitude(dto.getLattitude());
+        location.setLatitude(dto.getLatitude());
         location.setLongitude(dto.getLongitude());
 
         return locationRepository.save(location);

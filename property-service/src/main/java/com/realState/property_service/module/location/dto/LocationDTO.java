@@ -16,6 +16,6 @@ public class LocationDTO {
     private StateEnum state;
     private String country;
     private int zipcode;
-    private Float lattitude;
+    private Float latitude;
     private Float longitude;
 }
