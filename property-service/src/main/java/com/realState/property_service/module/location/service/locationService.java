@@ -7,7 +7,7 @@ import com.realState.property_service.module.location.dto.LocationDTO;
 public interface LocationService {
 
     // Create Location
-    LocationDTO createLocation(CreateLocationDTO dto);
+    Location createLocation(CreateLocationDTO dto);
 
     // find Location
     Location getLocation(Long id);

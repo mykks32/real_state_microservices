@@ -35,7 +35,7 @@ public class Location {
     private int zipcode = 44200;
 
     @Column(nullable = true)
-    private float lattitude;
+    private float latitude;
 
     @Column(nullable = true)
     private float longitude;
@@ -88,12 +88,12 @@ public class Location {
         this.zipcode = zipcode;
     }
 
-    public float getLattitude() {
-        return lattitude;
+    public float getLatitude() {
+        return latitude;
     }
 
-    public void setLattitude(float lattitude) {
-        this.lattitude = lattitude;
+    public void setLatitude(float lattitude) {
+        this.latitude = lattitude;
     }
 
     public float getLongitude() {

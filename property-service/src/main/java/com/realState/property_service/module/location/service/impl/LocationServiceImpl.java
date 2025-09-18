@@ -22,7 +22,7 @@ public class LocationServiceImpl implements LocationService {
         location.setState(dto.getState());
         location.setCountry(dto.getCountry());
         location.setZipcode(dto.getZipcode());
-        location.setLattitude(dto.getLattitude());
+        location.setLatitude(dto.getLatitude());
         location.setLongitude(dto.getLongitude());
         return location;
     }
@@ -35,16 +35,16 @@ public class LocationServiceImpl implements LocationService {
         dto.setState(location.getState());
         dto.setCountry(location.getCountry());
         dto.setZipcode(location.getZipcode());
-        dto.setLattitude(location.getLattitude());
+        dto.setLatitude(location.getLatitude());
         dto.setLongitude(location.getLongitude());
         return dto;
     }
 
     @Override
-    public LocationDTO createLocation(CreateLocationDTO dto) {
+    public Location createLocation(CreateLocationDTO dto) {
         Location location = mapToEntity(dto);
-        location = locationRepository.save(location);
-        return mapToDTO(location);
+        return location = locationRepository.save(location);
+        // return mapToDTO(location);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class LocationServiceImpl implements LocationService {
         location.setState(dto.getState());
         location.setCountry(dto.getCountry());
         location.setZipcode(dto.getZipcode());
-        location.setLattitude(dto.getLattitude());
+        location.setLatitude(dto.getLatitude());
         location.setLongitude(dto.getLongitude());
 
         return locationRepository.save(location);
