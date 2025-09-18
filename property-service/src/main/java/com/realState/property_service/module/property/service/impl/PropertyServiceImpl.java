@@ -1,6 +1,7 @@
 package com.realState.property_service.module.property.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -25,20 +26,21 @@ public class PropertyServiceImpl implements PropertyService {
     @Autowired
     private LocationService locationService;
 
+    // Map DTO to Entity
     private Property mapToEntity(CreatePropertyDTO dto, Location location) {
         Property property = new Property();
-
-        property.setTitle((dto.getTitle()));
+        property.setTitle(dto.getTitle());
         property.setDescription(dto.getDescription());
         property.setType(dto.getType());
         property.setStatus(dto.getStatus());
         property.setLocation(location);
+        // Add other fields if needed
         return property;
     }
 
+    // Map Entity to DTO
     private PropertyDTO mapToDto(Property property) {
         PropertyDTO dto = new PropertyDTO();
-
         dto.setId(property.getId());
         dto.setTitle(property.getTitle());
         dto.setDescription(property.getDescription());
@@ -56,39 +58,66 @@ public class PropertyServiceImpl implements PropertyService {
             locationDTO.setZipcode(location.getZipcode());
             locationDTO.setLatitude(location.getLatitude());
             locationDTO.setLongitude(location.getLongitude());
-
             dto.setLocation(locationDTO);
         }
         return dto;
     }
 
+    // CREATE
     @Override
     public PropertyDTO createProperty(CreatePropertyDTO dto) {
         Location location = locationService.createLocation(dto.getLocation());
-
         Property property = mapToEntity(dto, location);
         property = propertyRepository.save(property);
-
-        PropertyDTO propertyDTO = mapToDto(property);
-
-        return propertyDTO;
+        return mapToDto(property);
     }
 
+    // READ by ID
     @Override
     public PropertyDTO getPropertyById(UUID id) {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
-
-        PropertyDTO propertyDTO = mapToDto(property);
-
-        return propertyDTO;
+        return mapToDto(property);
     }
 
+    // READ all
     @Override
     public List<PropertyDTO> getAllProperty() {
-        List<Property> properties = propertyRepository.findAll();
-        return properties.stream()
-                .map(property -> mapToDto(property))
+        return propertyRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    // UPDATE
+    @Override
+    public PropertyDTO updatePropertyById(UUID id, Optional<CreatePropertyDTO> dtoOptional) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        if (dtoOptional.isPresent()) {
+            CreatePropertyDTO dto = dtoOptional.get();
+
+            if (dto.getTitle() != null) property.setTitle(dto.getTitle());
+            if (dto.getDescription() != null) property.setDescription(dto.getDescription());
+            if (dto.getType() != null) property.setType(dto.getType());
+            if (dto.getStatus() != null) property.setStatus(dto.getStatus());
+
+            if (dto.getLocation() != null) {
+                Location updatedLocation = locationService.createLocation(dto.getLocation());
+                property.setLocation(updatedLocation);
+            }
+
+            property = propertyRepository.save(property);
+        }
+        return mapToDto(property);
+    }
+
+    // DELETE
+    @Override
+    public void deletePropertyById(UUID id) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+        propertyRepository.delete(property);
     }
 }
