@@ -1,5 +1,9 @@
 package com.realState.property_service.module.property.service.impl;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,7 +12,7 @@ import com.realState.property_service.database.entity.Property;
 import com.realState.property_service.database.repository.PropertyRepository;
 import com.realState.property_service.module.location.dto.LocationDTO;
 import com.realState.property_service.module.location.service.LocationService;
-import com.realState.property_service.module.property.dto.CreatePropetyDTO;
+import com.realState.property_service.module.property.dto.CreatePropertyDTO;
 import com.realState.property_service.module.property.dto.PropertyDTO;
 import com.realState.property_service.module.property.service.PropertyService;
 
@@ -21,7 +25,7 @@ public class PropertyServiceImpl implements PropertyService {
     @Autowired
     private LocationService locationService;
 
-    private Property mapToEntity(CreatePropetyDTO dto, Location location) {
+    private Property mapToEntity(CreatePropertyDTO dto, Location location) {
         Property property = new Property();
 
         property.setTitle((dto.getTitle()));
@@ -43,21 +47,23 @@ public class PropertyServiceImpl implements PropertyService {
 
         Location location = property.getLocation();
         if (location != null) {
-            dto.setLocation(new LocationDTO(
-                    location.getId(),
-                    location.getAddress(),
-                    location.getCity(),
-                    location.getState(),
-                    location.getCountry(),
-                    location.getZipcode(),
-                    location.getLatitude(),
-                    location.getLongitude()));
+            LocationDTO locationDTO = new LocationDTO();
+            locationDTO.setId(location.getId());
+            locationDTO.setAddress(location.getAddress());
+            locationDTO.setCity(location.getCity());
+            locationDTO.setState(location.getState());
+            locationDTO.setCountry(location.getCountry());
+            locationDTO.setZipcode(location.getZipcode());
+            locationDTO.setLatitude(location.getLatitude());
+            locationDTO.setLongitude(location.getLongitude());
+
+            dto.setLocation(locationDTO);
         }
         return dto;
     }
 
     @Override
-    public PropertyDTO createProperty(CreatePropetyDTO dto) {
+    public PropertyDTO createProperty(CreatePropertyDTO dto) {
         Location location = locationService.createLocation(dto.getLocation());
 
         Property property = mapToEntity(dto, location);
@@ -66,5 +72,23 @@ public class PropertyServiceImpl implements PropertyService {
         PropertyDTO propertyDTO = mapToDto(property);
 
         return propertyDTO;
+    }
+
+    @Override
+    public PropertyDTO getPropertyById(UUID id) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        PropertyDTO propertyDTO = mapToDto(property);
+
+        return propertyDTO;
+    }
+
+    @Override
+    public List<PropertyDTO> getAllProperty() {
+        List<Property> properties = propertyRepository.findAll();
+        return properties.stream()
+                .map(property -> mapToDto(property))
+                .collect(Collectors.toList());
     }
 }

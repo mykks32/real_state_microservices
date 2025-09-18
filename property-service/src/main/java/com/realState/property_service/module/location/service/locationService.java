@@ -2,7 +2,6 @@ package com.realState.property_service.module.location.service;
 
 import com.realState.property_service.database.entity.Location;
 import com.realState.property_service.module.location.dto.CreateLocationDTO;
-import com.realState.property_service.module.location.dto.LocationDTO;
 
 public interface LocationService {
 

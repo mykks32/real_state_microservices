@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import com.realState.property_service.database.entity.Location;
 import com.realState.property_service.database.repository.LocationRepository;
 import com.realState.property_service.module.location.dto.CreateLocationDTO;
-import com.realState.property_service.module.location.dto.LocationDTO;
 import com.realState.property_service.module.location.service.LocationService;
 
 @Service
@@ -27,24 +26,10 @@ public class LocationServiceImpl implements LocationService {
         return location;
     }
 
-    private LocationDTO mapToDTO(Location location) {
-        LocationDTO dto = new LocationDTO();
-        dto.setId(location.getId());
-        dto.setAddress(location.getAddress());
-        dto.setCity(location.getCity());
-        dto.setState(location.getState());
-        dto.setCountry(location.getCountry());
-        dto.setZipcode(location.getZipcode());
-        dto.setLatitude(location.getLatitude());
-        dto.setLongitude(location.getLongitude());
-        return dto;
-    }
-
     @Override
     public Location createLocation(CreateLocationDTO dto) {
         Location location = mapToEntity(dto);
         return location = locationRepository.save(location);
-        // return mapToDTO(location);
     }
 
     @Override

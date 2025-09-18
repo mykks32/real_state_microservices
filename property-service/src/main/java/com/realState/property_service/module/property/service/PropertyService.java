@@ -1,14 +1,22 @@
 package com.realState.property_service.module.property.service;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import com.realState.property_service.module.property.dto.CreatePropetyDTO;
+import com.realState.property_service.module.property.dto.CreatePropertyDTO;
 import com.realState.property_service.module.property.dto.PropertyDTO;
 
 @Service
 public interface PropertyService {
 
     // Create Property
-    PropertyDTO createProperty(CreatePropetyDTO dto);
+    PropertyDTO createProperty(CreatePropertyDTO dto);
+
+    // Get Property By Id
+    PropertyDTO getPropertyById(UUID id);
+
+    List<PropertyDTO> getAllProperty();
     
 } 
