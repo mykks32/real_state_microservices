@@ -2,6 +2,7 @@ package com.realState.property_service.module.location.service;
 
 import com.realState.property_service.database.entity.Location;
 import com.realState.property_service.module.location.dto.CreateLocationDTO;
+import com.realState.property_service.module.location.dto.UpdateLocationDTO;
 
 public interface LocationService {
 
@@ -12,7 +13,7 @@ public interface LocationService {
     Location getLocation(Long id);
 
     // Update Location
-    Location updateLocation(Long id, CreateLocationDTO dto);
+    Location updateLocation(Long id, UpdateLocationDTO dto);
 
     // Delete Location
     void deleteLocation(Long id);

@@ -4,12 +4,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.realState.property_service.module.property.dto.CreatePropertyDTO;
 import com.realState.property_service.module.property.dto.PropertyDTO;
+import com.realState.property_service.module.property.dto.UpdatePropertyDTO;
 import com.realState.property_service.module.property.service.PropertyService;
 
 import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,22 +32,23 @@ public class PropertyController {
 
     // Seller Apis
     // Create Property draft
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<PropertyDTO> createProperty(@Valid @RequestBody() CreatePropertyDTO dto) {
         PropertyDTO property = propertyService.createProperty(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(property);
     }
 
     // list of seller property : all status from draft to approved to reject
-    @GetMapping("/get/all")
-    public ResponseEntity<List<PropertyDTO>> getAllProperty() {
-        return ResponseEntity.status(HttpStatus.OK).body(propertyService.getAllProperty());
+    @GetMapping("/owner/{owner_id}")
+    public ResponseEntity<List<PropertyDTO>> getAllOwnerProperty(@PathVariable String owner_id) {
+        UUID ownerId = UUID.fromString(owner_id);
+        return ResponseEntity.status(HttpStatus.OK).body(propertyService.getAllOwnerProperty(ownerId));
     }
 
     // Update Property Draft
     @PutMapping("/{id}")
     public ResponseEntity<PropertyDTO> updatePropertyById(@PathVariable String id,
-            @RequestBody Optional<CreatePropertyDTO> dto) {
+            @RequestBody UpdatePropertyDTO dto) {
         UUID propertyId = UUID.fromString(id);
         return ResponseEntity.status(HttpStatus.OK).body(propertyService.updatePropertyById(propertyId, dto));
     }

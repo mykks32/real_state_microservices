@@ -1,7 +1,6 @@
 package com.realState.property_service.module.property.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -15,6 +14,7 @@ import com.realState.property_service.module.location.dto.LocationDTO;
 import com.realState.property_service.module.location.service.LocationService;
 import com.realState.property_service.module.property.dto.CreatePropertyDTO;
 import com.realState.property_service.module.property.dto.PropertyDTO;
+import com.realState.property_service.module.property.dto.UpdatePropertyDTO;
 import com.realState.property_service.module.property.service.PropertyService;
 
 @Service
@@ -33,9 +33,9 @@ public class PropertyServiceImpl implements PropertyService {
         property.setDescription(dto.getDescription());
         property.setType(dto.getType());
         property.setStatus(dto.getStatus());
-        property.setApproval_status(dto.getApproval_status());
+        property.setApprovalStatus(dto.getApprovalStatus());
         property.setLocation(location);
-        property.setOwner_id(dto.getOwner_id());
+        property.setOwnerId(dto.getOwnerId());
         return property;
     }
 
@@ -46,9 +46,9 @@ public class PropertyServiceImpl implements PropertyService {
         dto.setTitle(property.getTitle());
         dto.setDescription(property.getDescription());
         dto.setType(property.getType());
-        dto.setApproval_satus(property.getApproval_status());
+        dto.setApprovalStatus(property.getApprovalStatus());
         dto.setStatus(property.getStatus());
-        dto.setOwner_id(property.getOwner_id());
+        dto.setOwnerId(property.getOwnerId());
 
         Location location = property.getLocation();
         if (location != null) {
@@ -63,6 +63,7 @@ public class PropertyServiceImpl implements PropertyService {
             locationDTO.setLongitude(location.getLongitude());
             dto.setLocation(locationDTO);
         }
+        ;
         return dto;
     }
 
@@ -85,8 +86,8 @@ public class PropertyServiceImpl implements PropertyService {
 
     // READ all
     @Override
-    public List<PropertyDTO> getAllProperty() {
-        return propertyRepository.findAll()
+    public List<PropertyDTO> getAllOwnerProperty(UUID ownerId) {
+        return propertyRepository.findByOwnerId(ownerId)
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
@@ -94,29 +95,30 @@ public class PropertyServiceImpl implements PropertyService {
 
     // UPDATE
     @Override
-    public PropertyDTO updatePropertyById(UUID id, Optional<CreatePropertyDTO> dtoOptional) {
+    public PropertyDTO updatePropertyById(UUID id, UpdatePropertyDTO dto) {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
-        if (dtoOptional.isPresent()) {
-            CreatePropertyDTO dto = dtoOptional.get();
+        if (dto.getTitle() != null)
+            property.setTitle(dto.getTitle());
+        if (dto.getDescription() != null)
+            property.setDescription(dto.getDescription());
+        if (dto.getType() != null)
+            property.setType(dto.getType());
+        if (dto.getStatus() != null)
+            property.setStatus(dto.getStatus());
+        if (dto.getApprovalStatus() != null)
+            property.setApprovalStatus(dto.getApprovalStatus());
+        if (dto.getOwnerId() != null)
+            property.setOwnerId(dto.getOwnerId());
 
-            if (dto.getTitle() != null)
-                property.setTitle(dto.getTitle());
-            if (dto.getDescription() != null)
-                property.setDescription(dto.getDescription());
-            if (dto.getType() != null)
-                property.setType(dto.getType());
-            if (dto.getStatus() != null)
-                property.setStatus(dto.getStatus());
-
-            if (dto.getLocation() != null) {
-                Location updatedLocation = locationService.createLocation(dto.getLocation());
-                property.setLocation(updatedLocation);
-            }
-
-            property = propertyRepository.save(property);
+        if (dto.getLocation() != null) {
+            Location updatedLocation = locationService.updateLocation(property.getLocation().getId(),
+                    dto.getLocation());
+            property.setLocation(updatedLocation);
         }
+
+        property = propertyRepository.save(property);
         return mapToDto(property);
     }
 

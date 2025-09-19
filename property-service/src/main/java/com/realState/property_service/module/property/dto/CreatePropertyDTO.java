@@ -33,12 +33,12 @@ public class CreatePropertyDTO {
     private StatusEnum status = StatusEnum.Available;
 
     @NotNull(message = "Property approval_status is required")
-    private ApprovalStatusEnum approval_status = ApprovalStatusEnum.draft;
+    private ApprovalStatusEnum approvalStatus = ApprovalStatusEnum.draft;
 
     @NotNull(message = "Location is required")
     @Valid
     private CreateLocationDTO location;
 
     @NotNull(message = "Owner id is required")
-    private UUID owner_id;
+    private UUID ownerId;
 }
