@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
+
 @RestController
 @RequestMapping("/api/properties")
 public class PropertyController {
@@ -34,21 +35,21 @@ public class PropertyController {
     private PropertyService propertyService;
 
     // Seller Apis
-    // Create Property draft
+    // 1. Create Property draft
     @PostMapping()
     public ResponseEntity<PropertyDTO> createProperty(@Valid @RequestBody() CreatePropertyDTO dto) {
         PropertyDTO property = propertyService.createProperty(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(property);
     }
 
-    // list of seller property : all status from draft to approved to reject
+    // 2. list of seller property : all status from draft to approved to reject
     @GetMapping("/owner/{owner_id}")
     public ResponseEntity<List<PropertyDTO>> getAllOwnerProperty(@PathVariable String owner_id) {
         UUID ownerId = UUID.fromString(owner_id);
         return ResponseEntity.status(HttpStatus.OK).body(propertyService.getAllOwnerProperty(ownerId));
     }
 
-    // Update Property Draft
+    // 3. Update Property Draft
     @PutMapping("/{property_id}")
     public ResponseEntity<PropertyDTO> updatePropertyById(@PathVariable String property_id,
             @RequestBody UpdatePropertyDTO dto) {
@@ -56,7 +57,7 @@ public class PropertyController {
         return ResponseEntity.status(HttpStatus.OK).body(propertyService.updatePropertyById(propertyId, dto));
     }
 
-    // Submit Approval Request
+    // 4. Submit Approval Request
     @PatchMapping("/{property_id}/submit")
     public ResponseEntity<Map<String, Object>> submitApprovalRequest(@PathVariable String property_id) {
         UUID propertyId = UUID.fromString(property_id);
@@ -70,7 +71,6 @@ public class PropertyController {
     }
 
     // Buyer Api
-
     // TODO: Implement fetch only approved properties
 
     // Fetch data of Property by Id
@@ -83,7 +83,53 @@ public class PropertyController {
 
     // Admin API
     // TODO: Implement admin endpoints for property management:
-    // - Approve property
+    // 1. List all pending-approval properties
+    @GetMapping("/pending")
+    public ResponseEntity<List<PropertyDTO>> getPropertyPendingApproval() {
+        return ResponseEntity.status(HttpStatus.OK).body(propertyService.getPropertyPendingApproval());
+    }
+    
+
+    // 2. Approve property
+    @PatchMapping("/{property_id}/approve")
+    public ResponseEntity<Map<String, Object>> approveProperty(@PathVariable String property_id) {
+        UUID propertyId = UUID.fromString(property_id);
+        propertyService.approveProperty(propertyId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("approval", true);
+        response.put("message", "Property Approved successfully");
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 3. Reject property
+    @PatchMapping("/{property_id}/reject")
+    public ResponseEntity<Map<String, Object>> rejectProperty(@PathVariable String property_id) {
+        UUID propertyId = UUID.fromString(property_id);
+        propertyService.rejectProperty(propertyId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("approval", true);
+        response.put("message", "Property reject successfully");
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 4. Archived property
+    @PatchMapping("/{property_id}/archive")
+    public ResponseEntity<Map<String, Object>> archivedProperty(@PathVariable String property_id) {
+        UUID propertyId = UUID.fromString(property_id);
+        propertyService.archiveProperty(propertyId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("approval", true);
+        response.put("message", "Property archived successfully");
+
+        return ResponseEntity.ok(response);
+    }
+
+
     // - Reject property (with optional reason)
     // - Archive property
     // TODO: change this delete request to archive request

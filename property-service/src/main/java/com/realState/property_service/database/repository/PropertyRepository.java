@@ -6,7 +6,8 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.realState.property_service.database.entity.Property;;;;;
+import com.realState.property_service.database.entity.Property;
+import com.realState.property_service.database.enums.ApprovalStatusEnum;;;;;
 
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, UUID> {
@@ -15,5 +16,8 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
 
     List<Property> findByOwnerId(UUID ownerId);
 
-    
+    // Find by approval status
+    List<Property> findByApprovalStatus(ApprovalStatusEnum approvalStatus);
+
+
 }

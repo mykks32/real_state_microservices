@@ -26,4 +26,19 @@ public interface PropertyService {
 
     // Submit Approval Request
     void submitApprovalRequest(UUID id);
+
+
+    // Admin
+
+    // Get Pending Approval Property
+    List<PropertyDTO> getPropertyPendingApproval();
+
+    // Approve Property
+    void approveProperty(UUID id);
+
+    // Reject Property
+    void rejectProperty(UUID id);
+
+    // Archive Property
+    void archiveProperty(UUID id);
 } 
