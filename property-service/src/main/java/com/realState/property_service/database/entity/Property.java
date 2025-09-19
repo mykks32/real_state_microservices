@@ -2,6 +2,7 @@ package com.realState.property_service.database.entity;
 
 import java.util.UUID;
 
+import com.realState.property_service.database.enums.ApprovalStatusEnum;
 import com.realState.property_service.database.enums.StatusEnum;
 import com.realState.property_service.database.enums.TypeEnum;
 
@@ -38,9 +39,16 @@ public class Property extends Base {
     @Column(nullable = false)
     private StatusEnum status = StatusEnum.Available;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ApprovalStatusEnum approval_status = ApprovalStatusEnum.draft;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "location_id", referencedColumnName = "id", nullable = false)
     private Location location;
+
+    @Column(name = "owner_id", columnDefinition = "BINARY(16)")
+    private UUID owner_id;
 
     public UUID getId() {
         return id;
@@ -88,6 +96,22 @@ public class Property extends Base {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public ApprovalStatusEnum getApproval_status() {
+        return approval_status;
+    }
+
+    public void setApproval_status(ApprovalStatusEnum approval_status) {
+        this.approval_status = approval_status;
+    }
+
+    public UUID getOwner_id() {
+        return owner_id;
+    }
+
+    public void setOwner_id(UUID owner_id) {
+        this.owner_id = owner_id;
     }
 
 }

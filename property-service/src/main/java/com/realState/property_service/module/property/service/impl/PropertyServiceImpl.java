@@ -33,7 +33,9 @@ public class PropertyServiceImpl implements PropertyService {
         property.setDescription(dto.getDescription());
         property.setType(dto.getType());
         property.setStatus(dto.getStatus());
+        property.setApproval_status(dto.getApproval_status());
         property.setLocation(location);
+        property.setOwner_id(dto.getOwner_id());
         return property;
     }
 
@@ -44,7 +46,9 @@ public class PropertyServiceImpl implements PropertyService {
         dto.setTitle(property.getTitle());
         dto.setDescription(property.getDescription());
         dto.setType(property.getType());
+        dto.setApproval_satus(property.getApproval_status());
         dto.setStatus(property.getStatus());
+        dto.setOwner_id(property.getOwner_id());
 
         Location location = property.getLocation();
         if (location != null) {
@@ -97,10 +101,14 @@ public class PropertyServiceImpl implements PropertyService {
         if (dtoOptional.isPresent()) {
             CreatePropertyDTO dto = dtoOptional.get();
 
-            if (dto.getTitle() != null) property.setTitle(dto.getTitle());
-            if (dto.getDescription() != null) property.setDescription(dto.getDescription());
-            if (dto.getType() != null) property.setType(dto.getType());
-            if (dto.getStatus() != null) property.setStatus(dto.getStatus());
+            if (dto.getTitle() != null)
+                property.setTitle(dto.getTitle());
+            if (dto.getDescription() != null)
+                property.setDescription(dto.getDescription());
+            if (dto.getType() != null)
+                property.setType(dto.getType());
+            if (dto.getStatus() != null)
+                property.setStatus(dto.getStatus());
 
             if (dto.getLocation() != null) {
                 Location updatedLocation = locationService.createLocation(dto.getLocation());
