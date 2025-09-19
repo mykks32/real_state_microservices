@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
-@RequestMapping("/api/properties")
+@RequestMapping(value = {"/api/properties", "/api/properties/"})
 public class PropertyController {
 
     @Autowired
@@ -69,14 +69,7 @@ public class PropertyController {
         return ResponseEntity.ok(response);
     }
 
-    // Buyer Api
-    // TODO: Implement fetch only approved properties
-
-    // Fetch data of Property by Id
-    
-
     // Admin API
-    // TODO: Implement admin endpoints for property management:
     // 1. List all pending-approval properties
     @GetMapping("/pending")
     public ResponseEntity<List<PropertyDTO>> getPropertyPendingApproval() {
@@ -122,6 +115,21 @@ public class PropertyController {
         return ResponseEntity.ok(response);
     }
 
+    // 5. Delete property
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Boolean> deletePropertyById(@PathVariable String id) {
+        UUID propertyId = UUID.fromString(id);
+        propertyService.deletePropertyById(propertyId);
+        return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
+
+    // 6. Get All Property
+    @GetMapping()
+    public ResponseEntity<List<PropertyDTO>> getAllProperty() {
+        return ResponseEntity.status(HttpStatus.OK).body(propertyService.getAllProperty());
+    }
+
+
     // Buyer
     // 1. get only approved property
     @GetMapping("/approved")
@@ -137,15 +145,12 @@ public class PropertyController {
         return ResponseEntity.status(HttpStatus.OK).body(property);
     }
 
+    
+
     // - Reject property (with optional reason)
     // - Archive property
     // TODO: change this delete request to archive request
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Boolean> deletePropertyById(@PathVariable String id) {
-        UUID propertyId = UUID.fromString(id);
-        propertyService.deletePropertyById(propertyId);
-        return ResponseEntity.status(HttpStatus.OK).body(true);
-    }
+    
     // - List all properties for admin dashboard
 
 }

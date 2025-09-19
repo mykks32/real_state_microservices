@@ -177,6 +177,23 @@ public class PropertyServiceImpl implements PropertyService {
         propertyRepository.save(property);
     }
 
+    // 5. Delete property
+    @Override
+    public void deletePropertyById(UUID id) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+        propertyRepository.delete(property);
+    }
+
+    // 6. Get all Property
+        public List<PropertyDTO> getAllProperty() {
+        return propertyRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+
     // Buyer
     // 1. Get approved property
     public List<PropertyDTO> getApprovedProperty() {
@@ -187,10 +204,5 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     // DELETE
-    @Override
-    public void deletePropertyById(UUID id) {
-        Property property = propertyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
-        propertyRepository.delete(property);
-    }
+
 }
