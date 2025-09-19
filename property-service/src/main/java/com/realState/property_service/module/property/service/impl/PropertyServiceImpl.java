@@ -34,7 +34,6 @@ public class PropertyServiceImpl implements PropertyService {
         property.setType(dto.getType());
         property.setStatus(dto.getStatus());
         property.setLocation(location);
-        // Add other fields if needed
         return property;
     }
 
