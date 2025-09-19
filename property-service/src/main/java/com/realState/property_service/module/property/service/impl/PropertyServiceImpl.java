@@ -68,7 +68,6 @@ public class PropertyServiceImpl implements PropertyService {
         return dto;
     }
 
-
     // Seller
     // 1. CREATE
     @Override
@@ -135,18 +134,17 @@ public class PropertyServiceImpl implements PropertyService {
         propertyRepository.save(property);
     }
 
-
     // Admin
     // 1. Get all pending approval property
     public List<PropertyDTO> getPropertyPendingApproval() {
-    List<Property> pendingProperties = propertyRepository.findByApprovalStatus(ApprovalStatusEnum.pending_approval);
-    return pendingProperties.stream()
-                            .map(this::mapToDto)
-                            .collect(Collectors.toList());
-}
+        List<Property> pendingProperties = propertyRepository.findByApprovalStatus(ApprovalStatusEnum.pending_approval);
+        return pendingProperties.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
 
     // 2. Approve property
-       @Override
+    @Override
     public void approveProperty(UUID id) {
         // Fetch the property by ID
         Property property = propertyRepository.findById(id)
@@ -179,6 +177,14 @@ public class PropertyServiceImpl implements PropertyService {
         propertyRepository.save(property);
     }
 
+    // Buyer
+    // 1. Get approved property
+    public List<PropertyDTO> getApprovedProperty() {
+        List<Property> pendingProperties = propertyRepository.findByApprovalStatus(ApprovalStatusEnum.approved);
+        return pendingProperties.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
 
     // DELETE
     @Override

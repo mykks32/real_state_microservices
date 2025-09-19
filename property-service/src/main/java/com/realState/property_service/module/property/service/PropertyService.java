@@ -41,4 +41,8 @@ public interface PropertyService {
 
     // Archive Property
     void archiveProperty(UUID id);
+
+    // Buyer
+    // Get approved property
+    List<PropertyDTO> getApprovedProperty();
 } 
