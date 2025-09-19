@@ -1,5 +1,8 @@
 package com.realState.property_service.module.property.dto;
 
+import java.util.UUID;
+
+import com.realState.property_service.database.enums.ApprovalStatusEnum;
 import com.realState.property_service.database.enums.StatusEnum;
 import com.realState.property_service.database.enums.TypeEnum;
 import com.realState.property_service.module.location.dto.CreateLocationDTO;
@@ -29,7 +32,13 @@ public class CreatePropertyDTO {
     @NotNull(message = "Property status is required")
     private StatusEnum status = StatusEnum.Available;
 
+    @NotNull(message = "Property approval_status is required")
+    private ApprovalStatusEnum approvalStatus = ApprovalStatusEnum.draft;
+
     @NotNull(message = "Location is required")
     @Valid
     private CreateLocationDTO location;
+
+    @NotNull(message = "Owner id is required")
+    private UUID ownerId;
 }

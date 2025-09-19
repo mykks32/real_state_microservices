@@ -1,13 +1,13 @@
 package com.realState.property_service.module.property.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.realState.property_service.module.property.dto.CreatePropertyDTO;
 import com.realState.property_service.module.property.dto.PropertyDTO;
+import com.realState.property_service.module.property.dto.UpdatePropertyDTO;
 
 @Service
 public interface PropertyService {
@@ -18,9 +18,27 @@ public interface PropertyService {
     // Get Property By Id
     PropertyDTO getPropertyById(UUID id);
 
-    List<PropertyDTO> getAllProperty();
+    List<PropertyDTO> getAllOwnerProperty(UUID owner_id);
 
     void deletePropertyById(UUID id);
 
-    PropertyDTO updatePropertyById(UUID id, Optional<CreatePropertyDTO> dtoOptional);
+    PropertyDTO updatePropertyById(UUID id, UpdatePropertyDTO dto);
+
+    // Submit Approval Request
+    void submitApprovalRequest(UUID id);
+
+
+    // Admin
+
+    // Get Pending Approval Property
+    List<PropertyDTO> getPropertyPendingApproval();
+
+    // Approve Property
+    void approveProperty(UUID id);
+
+    // Reject Property
+    void rejectProperty(UUID id);
+
+    // Archive Property
+    void archiveProperty(UUID id);
 } 

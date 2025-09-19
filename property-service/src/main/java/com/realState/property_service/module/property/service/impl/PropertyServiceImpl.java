@@ -1,7 +1,6 @@
 package com.realState.property_service.module.property.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -10,11 +9,13 @@ import org.springframework.stereotype.Service;
 
 import com.realState.property_service.database.entity.Location;
 import com.realState.property_service.database.entity.Property;
+import com.realState.property_service.database.enums.ApprovalStatusEnum;
 import com.realState.property_service.database.repository.PropertyRepository;
 import com.realState.property_service.module.location.dto.LocationDTO;
 import com.realState.property_service.module.location.service.LocationService;
 import com.realState.property_service.module.property.dto.CreatePropertyDTO;
 import com.realState.property_service.module.property.dto.PropertyDTO;
+import com.realState.property_service.module.property.dto.UpdatePropertyDTO;
 import com.realState.property_service.module.property.service.PropertyService;
 
 @Service
@@ -33,8 +34,9 @@ public class PropertyServiceImpl implements PropertyService {
         property.setDescription(dto.getDescription());
         property.setType(dto.getType());
         property.setStatus(dto.getStatus());
+        property.setApprovalStatus(dto.getApprovalStatus());
         property.setLocation(location);
-        // Add other fields if needed
+        property.setOwnerId(dto.getOwnerId());
         return property;
     }
 
@@ -45,7 +47,9 @@ public class PropertyServiceImpl implements PropertyService {
         dto.setTitle(property.getTitle());
         dto.setDescription(property.getDescription());
         dto.setType(property.getType());
+        dto.setApprovalStatus(property.getApprovalStatus());
         dto.setStatus(property.getStatus());
+        dto.setOwnerId(property.getOwnerId());
 
         Location location = property.getLocation();
         if (location != null) {
@@ -60,10 +64,13 @@ public class PropertyServiceImpl implements PropertyService {
             locationDTO.setLongitude(location.getLongitude());
             dto.setLocation(locationDTO);
         }
+        ;
         return dto;
     }
 
-    // CREATE
+
+    // Seller
+    // 1. CREATE
     @Override
     public PropertyDTO createProperty(CreatePropertyDTO dto) {
         Location location = locationService.createLocation(dto.getLocation());
@@ -72,7 +79,7 @@ public class PropertyServiceImpl implements PropertyService {
         return mapToDto(property);
     }
 
-    // READ by ID
+    // 2. READ by ID
     @Override
     public PropertyDTO getPropertyById(UUID id) {
         Property property = propertyRepository.findById(id)
@@ -80,38 +87,98 @@ public class PropertyServiceImpl implements PropertyService {
         return mapToDto(property);
     }
 
-    // READ all
+    // 3. READ all
     @Override
-    public List<PropertyDTO> getAllProperty() {
-        return propertyRepository.findAll()
+    public List<PropertyDTO> getAllOwnerProperty(UUID ownerId) {
+        return propertyRepository.findByOwnerId(ownerId)
                 .stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
-    // UPDATE
+    // 4. UPDATE
     @Override
-    public PropertyDTO updatePropertyById(UUID id, Optional<CreatePropertyDTO> dtoOptional) {
+    public PropertyDTO updatePropertyById(UUID id, UpdatePropertyDTO dto) {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
-        if (dtoOptional.isPresent()) {
-            CreatePropertyDTO dto = dtoOptional.get();
+        if (dto.getTitle() != null)
+            property.setTitle(dto.getTitle());
+        if (dto.getDescription() != null)
+            property.setDescription(dto.getDescription());
+        if (dto.getType() != null)
+            property.setType(dto.getType());
+        if (dto.getStatus() != null)
+            property.setStatus(dto.getStatus());
+        if (dto.getOwnerId() != null)
+            property.setOwnerId(dto.getOwnerId());
 
-            if (dto.getTitle() != null) property.setTitle(dto.getTitle());
-            if (dto.getDescription() != null) property.setDescription(dto.getDescription());
-            if (dto.getType() != null) property.setType(dto.getType());
-            if (dto.getStatus() != null) property.setStatus(dto.getStatus());
-
-            if (dto.getLocation() != null) {
-                Location updatedLocation = locationService.createLocation(dto.getLocation());
-                property.setLocation(updatedLocation);
-            }
-
-            property = propertyRepository.save(property);
+        if (dto.getLocation() != null) {
+            Location updatedLocation = locationService.updateLocation(property.getLocation().getId(),
+                    dto.getLocation());
+            property.setLocation(updatedLocation);
         }
+
+        property = propertyRepository.save(property);
         return mapToDto(property);
     }
+
+    // Approval Request
+    @Override
+    public void submitApprovalRequest(UUID id) {
+        // Fetch the property by ID
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        property.setApprovalStatus(ApprovalStatusEnum.pending_approval);
+
+        propertyRepository.save(property);
+    }
+
+
+    // Admin
+    // 1. Get all pending approval property
+    public List<PropertyDTO> getPropertyPendingApproval() {
+    List<Property> pendingProperties = propertyRepository.findByApprovalStatus(ApprovalStatusEnum.pending_approval);
+    return pendingProperties.stream()
+                            .map(this::mapToDto)
+                            .collect(Collectors.toList());
+}
+
+    // 2. Approve property
+       @Override
+    public void approveProperty(UUID id) {
+        // Fetch the property by ID
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        property.setApprovalStatus(ApprovalStatusEnum.approved);
+
+        propertyRepository.save(property);
+    }
+
+    // 3. Reject property
+    public void rejectProperty(UUID id) {
+        // Fetch the property by ID
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        property.setApprovalStatus(ApprovalStatusEnum.rejected);
+
+        propertyRepository.save(property);
+    }
+
+    // 4. Archived property
+    public void archiveProperty(UUID id) {
+        // Fetch the property by ID
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        property.setApprovalStatus(ApprovalStatusEnum.archived);
+
+        propertyRepository.save(property);
+    }
+
 
     // DELETE
     @Override
