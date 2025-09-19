@@ -12,37 +12,43 @@ import com.realState.property_service.module.property.dto.UpdatePropertyDTO;
 @Service
 public interface PropertyService {
 
-    // Create Property
+    // Seller 
+    // 1. Create Property
     PropertyDTO createProperty(CreatePropertyDTO dto);
 
-    // Get Property By Id
-    PropertyDTO getPropertyById(UUID id);
-
+    // 2. Get all seller property
     List<PropertyDTO> getAllOwnerProperty(UUID owner_id);
 
-    void deletePropertyById(UUID id);
-
+    // 3. Update property by id
     PropertyDTO updatePropertyById(UUID id, UpdatePropertyDTO dto);
 
-    // Submit Approval Request
+    // 4. Submit Approval Request
     void submitApprovalRequest(UUID id);
 
 
     // Admin
-
-    // Get Pending Approval Property
+    // 1. Get Pending Approval Property
     List<PropertyDTO> getPropertyPendingApproval();
 
-    // Approve Property
+    // 2. Approve Property
     void approveProperty(UUID id);
 
-    // Reject Property
+    // 3. Reject Property
     void rejectProperty(UUID id);
 
-    // Archive Property
+    // 4. Archive Property
     void archiveProperty(UUID id);
 
+    // 5. Delete Property
+    void deletePropertyById(UUID id);
+
+    // 6. Get All Property
+    List<PropertyDTO> getAllProperty();
+
     // Buyer
-    // Get approved property
+    // 1. Get approved property
     List<PropertyDTO> getApprovedProperty();
+
+    // 2. Get Property By Id
+    PropertyDTO getPropertyById(UUID id);
 } 
