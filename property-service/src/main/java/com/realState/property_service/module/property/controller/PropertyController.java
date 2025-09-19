@@ -9,7 +9,9 @@ import com.realState.property_service.module.property.service.PropertyService;
 
 import jakarta.validation.Valid;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -46,14 +49,25 @@ public class PropertyController {
     }
 
     // Update Property Draft
-    @PutMapping("/{id}")
-    public ResponseEntity<PropertyDTO> updatePropertyById(@PathVariable String id,
+    @PutMapping("/{property_id}")
+    public ResponseEntity<PropertyDTO> updatePropertyById(@PathVariable String property_id,
             @RequestBody UpdatePropertyDTO dto) {
-        UUID propertyId = UUID.fromString(id);
+        UUID propertyId = UUID.fromString(property_id);
         return ResponseEntity.status(HttpStatus.OK).body(propertyService.updatePropertyById(propertyId, dto));
     }
 
-    // TODO: Implement admin approval request by seller
+    // Submit Approval Request
+    @PatchMapping("/{property_id}/submit")
+    public ResponseEntity<Map<String, Object>> submitApprovalRequest(@PathVariable String property_id) {
+        UUID propertyId = UUID.fromString(property_id);
+        propertyService.submitApprovalRequest(propertyId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("approval", true);
+        response.put("message", "Approval request submitted successfully");
+
+        return ResponseEntity.ok(response);
+    }
 
     // Buyer Api
 

@@ -2,7 +2,6 @@ package com.realState.property_service.module.property.dto;
 
 import java.util.UUID;
 
-import com.realState.property_service.database.enums.ApprovalStatusEnum;
 import com.realState.property_service.database.enums.StatusEnum;
 import com.realState.property_service.database.enums.TypeEnum;
 import com.realState.property_service.module.location.dto.UpdateLocationDTO;
@@ -22,7 +21,6 @@ public class UpdatePropertyDTO {
     private String description;
     private TypeEnum type;
     private StatusEnum status;
-    private ApprovalStatusEnum approvalStatus;
 
     @Valid
     private UpdateLocationDTO location;

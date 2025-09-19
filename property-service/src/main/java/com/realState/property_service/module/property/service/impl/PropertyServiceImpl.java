@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.realState.property_service.database.entity.Location;
 import com.realState.property_service.database.entity.Property;
+import com.realState.property_service.database.enums.ApprovalStatusEnum;
 import com.realState.property_service.database.repository.PropertyRepository;
 import com.realState.property_service.module.location.dto.LocationDTO;
 import com.realState.property_service.module.location.service.LocationService;
@@ -107,8 +108,6 @@ public class PropertyServiceImpl implements PropertyService {
             property.setType(dto.getType());
         if (dto.getStatus() != null)
             property.setStatus(dto.getStatus());
-        if (dto.getApprovalStatus() != null)
-            property.setApprovalStatus(dto.getApprovalStatus());
         if (dto.getOwnerId() != null)
             property.setOwnerId(dto.getOwnerId());
 
@@ -120,6 +119,18 @@ public class PropertyServiceImpl implements PropertyService {
 
         property = propertyRepository.save(property);
         return mapToDto(property);
+    }
+
+    // Approval Request
+    @Override
+    public void submitApprovalRequest(UUID id) {
+        // Fetch the property by ID
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
+
+        property.setApprovalStatus(ApprovalStatusEnum.pending_approval);
+
+        propertyRepository.save(property);
     }
 
     // DELETE

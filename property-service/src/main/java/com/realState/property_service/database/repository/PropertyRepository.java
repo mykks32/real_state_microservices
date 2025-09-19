@@ -14,4 +14,6 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
     // List<Property> findAllByOwnerId(@Param("owner_id") UUID owner_id);
 
     List<Property> findByOwnerId(UUID ownerId);
+
+    
 }

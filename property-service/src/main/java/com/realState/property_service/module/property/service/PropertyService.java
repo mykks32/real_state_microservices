@@ -23,4 +23,7 @@ public interface PropertyService {
     void deletePropertyById(UUID id);
 
     PropertyDTO updatePropertyById(UUID id, UpdatePropertyDTO dto);
+
+    // Submit Approval Request
+    void submitApprovalRequest(UUID id);
 } 
