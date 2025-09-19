@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
 @RestController
 @RequestMapping("/api/properties")
 public class PropertyController {
@@ -74,12 +73,7 @@ public class PropertyController {
     // TODO: Implement fetch only approved properties
 
     // Fetch data of Property by Id
-    @GetMapping("/{id}")
-    public ResponseEntity<PropertyDTO> getPropertyById(@PathVariable String id) {
-        UUID propertyId = UUID.fromString(id);
-        PropertyDTO property = propertyService.getPropertyById(propertyId);
-        return ResponseEntity.status(HttpStatus.OK).body(property);
-    }
+    
 
     // Admin API
     // TODO: Implement admin endpoints for property management:
@@ -88,7 +82,6 @@ public class PropertyController {
     public ResponseEntity<List<PropertyDTO>> getPropertyPendingApproval() {
         return ResponseEntity.status(HttpStatus.OK).body(propertyService.getPropertyPendingApproval());
     }
-    
 
     // 2. Approve property
     @PatchMapping("/{property_id}/approve")
@@ -129,6 +122,20 @@ public class PropertyController {
         return ResponseEntity.ok(response);
     }
 
+    // Buyer
+    // 1. get only approved property
+    @GetMapping("/approved")
+    public ResponseEntity<List<PropertyDTO>> getApprovedProperty() {
+        return ResponseEntity.status(HttpStatus.OK).body(propertyService.getApprovedProperty());
+    }
+
+    // 2. Get property info by id
+    @GetMapping("/{id}")
+    public ResponseEntity<PropertyDTO> getPropertyById(@PathVariable String id) {
+        UUID propertyId = UUID.fromString(id);
+        PropertyDTO property = propertyService.getPropertyById(propertyId);
+        return ResponseEntity.status(HttpStatus.OK).body(property);
+    }
 
     // - Reject property (with optional reason)
     // - Archive property
