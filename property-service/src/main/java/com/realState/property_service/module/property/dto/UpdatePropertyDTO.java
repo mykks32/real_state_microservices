@@ -1,19 +1,17 @@
 package com.realState.property_service.module.property.dto;
 
 import java.util.UUID;
-
 import com.realState.property_service.database.enums.StatusEnum;
 import com.realState.property_service.database.enums.TypeEnum;
 import com.realState.property_service.module.location.dto.UpdateLocationDTO;
-
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
+/**
+ * DTO for updating Property details.
+ * All fields are optional for partial updates.
+ */
 public class UpdatePropertyDTO {
 
-    // All fields optional for partial update
     private String title;
     private String description;
     private TypeEnum type;
@@ -24,6 +22,7 @@ public class UpdatePropertyDTO {
 
     private UUID ownerId;
 
+    // Getters and Setters
     public String getTitle() {
         return title;
     }
@@ -71,5 +70,4 @@ public class UpdatePropertyDTO {
     public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
     }
-    
 }

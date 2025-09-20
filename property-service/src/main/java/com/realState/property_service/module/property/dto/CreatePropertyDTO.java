@@ -1,21 +1,20 @@
 package com.realState.property_service.module.property.dto;
 
 import java.util.UUID;
-
 import com.realState.property_service.database.enums.ApprovalStatusEnum;
 import com.realState.property_service.database.enums.StatusEnum;
 import com.realState.property_service.database.enums.TypeEnum;
 import com.realState.property_service.module.location.dto.CreateLocationDTO;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
+/**
+ * DTO for creating a new Property.
+ */
 public class CreatePropertyDTO {
+
     @NotBlank(message = "Title is required")
     @Size(max = 150, message = "Title cannot exceed 150 characters")
     private String title;
@@ -39,6 +38,7 @@ public class CreatePropertyDTO {
     @NotNull(message = "Owner id is required")
     private UUID ownerId;
 
+    // Getters and Setters
     public String getTitle() {
         return title;
     }
@@ -94,6 +94,4 @@ public class CreatePropertyDTO {
     public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
     }
-
-    
 }
