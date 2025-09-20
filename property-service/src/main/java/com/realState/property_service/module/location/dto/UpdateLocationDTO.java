@@ -1,15 +1,13 @@
 package com.realState.property_service.module.location.dto;
 
 import com.realState.property_service.database.enums.StateEnum;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+/**
+ * DTO for updating Location details.
+ * All fields are optional for partial updates.
+ */
 public class UpdateLocationDTO {
 
-    // All fields are nullable, meaning optional for update
     private String address;
     private String city;
     private StateEnum state;
@@ -18,6 +16,7 @@ public class UpdateLocationDTO {
     private Float latitude;
     private Float longitude;
 
+    // Getters and Setters
     public String getAddress() {
         return address;
     }
@@ -73,5 +72,4 @@ public class UpdateLocationDTO {
     public void setLongitude(Float longitude) {
         this.longitude = longitude;
     }
-
 }
