@@ -1,11 +1,11 @@
 package com.realState.property_service.common.handler;
 
 import com.realState.property_service.common.exceptions.DuplicateResourceException;
-import com.realState.property_service.common.exceptions.LocationCreationException;
-import com.realState.property_service.common.exceptions.OwnerPropertyNotFoundException;
-import com.realState.property_service.common.exceptions.PropertyMappingException;
-import com.realState.property_service.common.exceptions.PropertyNotFoundException;
-import com.realState.property_service.common.exceptions.PropertySaveException;
+import com.realState.property_service.common.exceptions.location.LocationCreationException;
+import com.realState.property_service.common.exceptions.property.OwnerPropertyNotFoundException;
+import com.realState.property_service.common.exceptions.property.PropertyMappingException;
+import com.realState.property_service.common.exceptions.property.PropertyNotFoundException;
+import com.realState.property_service.common.exceptions.property.PropertySaveException;
 import com.realState.property_service.common.utils.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
