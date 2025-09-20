@@ -1,5 +1,6 @@
 package com.realState.property_service.module.property.controller;
 
+import com.realState.property_service.common.utils.ApiResponse;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.realState.property_service.module.property.dto.CreatePropertyDTO;
@@ -36,29 +37,29 @@ public class PropertyController {
     // Seller Apis
     // 1. Create Property draft
     @PostMapping()
-    public ResponseEntity<PropertyDTO> createProperty(@Valid @RequestBody() CreatePropertyDTO dto) {
+    public ResponseEntity<ApiResponse<PropertyDTO>> createProperty(@Valid @RequestBody() CreatePropertyDTO dto) {
         PropertyDTO property = propertyService.createProperty(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(property);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(property));
     }
 
     // 2. list of seller property : all status from draft to approved to reject
     @GetMapping("/owner/{owner_id}")
-    public ResponseEntity<List<PropertyDTO>> getAllOwnerProperty(@PathVariable String owner_id) {
+    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getAllOwnerProperty(@PathVariable String owner_id) {
         UUID ownerId = UUID.fromString(owner_id);
-        return ResponseEntity.status(HttpStatus.OK).body(propertyService.getAllOwnerProperty(ownerId));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(propertyService.getAllOwnerProperty(ownerId)));
     }
 
     // 3. Update Property Draft
     @PutMapping("/{property_id}")
-    public ResponseEntity<PropertyDTO> updatePropertyById(@PathVariable String property_id,
+    public ResponseEntity<ApiResponse<PropertyDTO>> updatePropertyById(@PathVariable String property_id,
             @RequestBody UpdatePropertyDTO dto) {
         UUID propertyId = UUID.fromString(property_id);
-        return ResponseEntity.status(HttpStatus.OK).body(propertyService.updatePropertyById(propertyId, dto));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(propertyService.updatePropertyById(propertyId, dto)));
     }
 
     // 4. Submit Approval Request
     @PatchMapping("/{property_id}/submit")
-    public ResponseEntity<Map<String, Object>> submitApprovalRequest(@PathVariable String property_id) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> submitApprovalRequest(@PathVariable String property_id) {
         UUID propertyId = UUID.fromString(property_id);
         propertyService.submitApprovalRequest(propertyId);
 
@@ -66,19 +67,19 @@ public class PropertyController {
         response.put("approval", true);
         response.put("message", "Approval request submitted successfully");
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // Admin API
     // 1. List all pending-approval properties
     @GetMapping("/pending")
-    public ResponseEntity<List<PropertyDTO>> getPropertyPendingApproval() {
-        return ResponseEntity.status(HttpStatus.OK).body(propertyService.getPropertyPendingApproval());
+    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getPropertyPendingApproval() {
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(propertyService.getPropertyPendingApproval()));
     }
 
     // 2. Approve property
     @PatchMapping("/{property_id}/approve")
-    public ResponseEntity<Map<String, Object>> approveProperty(@PathVariable String property_id) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> approveProperty(@PathVariable String property_id) {
         UUID propertyId = UUID.fromString(property_id);
         propertyService.approveProperty(propertyId);
 
@@ -86,12 +87,12 @@ public class PropertyController {
         response.put("approval", true);
         response.put("message", "Property Approved successfully");
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 3. Reject property
     @PatchMapping("/{property_id}/reject")
-    public ResponseEntity<Map<String, Object>> rejectProperty(@PathVariable String property_id) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> rejectProperty(@PathVariable String property_id) {
         UUID propertyId = UUID.fromString(property_id);
         propertyService.rejectProperty(propertyId);
 
@@ -99,12 +100,12 @@ public class PropertyController {
         response.put("approval", true);
         response.put("message", "Property reject successfully");
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 4. Archived property
     @PatchMapping("/{property_id}/archive")
-    public ResponseEntity<Map<String, Object>> archivedProperty(@PathVariable String property_id) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> archivedProperty(@PathVariable String property_id) {
         UUID propertyId = UUID.fromString(property_id);
         propertyService.archiveProperty(propertyId);
 
@@ -112,37 +113,37 @@ public class PropertyController {
         response.put("approval", true);
         response.put("message", "Property archived successfully");
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     // 5. Delete property
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Boolean> deletePropertyById(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Boolean>> deletePropertyById(@PathVariable String id) {
         UUID propertyId = UUID.fromString(id);
         propertyService.deletePropertyById(propertyId);
-        return ResponseEntity.status(HttpStatus.OK).body(true);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(true));
     }
 
     // 6. Get All Property
     @GetMapping()
-    public ResponseEntity<List<PropertyDTO>> getAllProperty() {
-        return ResponseEntity.status(HttpStatus.OK).body(propertyService.getAllProperty());
+    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getAllProperty() {
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(propertyService.getAllProperty()));
     }
 
 
     // Buyer
     // 1. get only approved property
     @GetMapping("/approved")
-    public ResponseEntity<List<PropertyDTO>> getApprovedProperty() {
-        return ResponseEntity.status(HttpStatus.OK).body(propertyService.getApprovedProperty());
+    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getApprovedProperty() {
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(propertyService.getApprovedProperty()));
     }
 
     // 2. Get property info by id
     @GetMapping("/{id}")
-    public ResponseEntity<PropertyDTO> getPropertyById(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<PropertyDTO>> getPropertyById(@PathVariable String id) {
         UUID propertyId = UUID.fromString(id);
         PropertyDTO property = propertyService.getPropertyById(propertyId);
-        return ResponseEntity.status(HttpStatus.OK).body(property);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(property));
     }
 
     
