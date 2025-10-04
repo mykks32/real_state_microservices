@@ -1,10 +1,26 @@
-export class ApiResponse<T> {
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IApiResponse } from '../interfaces/api-response.interface';
+
+export class ApiResponse<T> implements IApiResponse<T> {
+  @ApiProperty()
   success: boolean;
+
+  @ApiPropertyOptional({ example: undefined })
   errorName?: string;
+
+  @ApiProperty()
   message: string;
+
+  @ApiProperty()
   statusCode: number;
+
+  @ApiPropertyOptional({ type: Object, example: undefined })
   data?: T;
+
+  @ApiProperty()
   timestamp: string;
+
+  @ApiPropertyOptional({ example: undefined })
   requestId?: string;
 
   constructor(partial: Partial<ApiResponse<T>>) {
