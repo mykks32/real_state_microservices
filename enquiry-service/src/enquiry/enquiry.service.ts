@@ -1,16 +1,18 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Enquiry } from './enquiry.entity';
 import { CreateEnquiryDto } from './dtos/create-enquiry.dto';
 import { EnquiryStatus } from './enquiry-status.enum';
 import { IEnquiry } from './enquiry.interface';
+import { EnquiryNotFoundException } from 'src/common/exceptions/enquiry-not-found.exception';
+import { InvalidEnquiryStatusException } from 'src/common/exceptions/invalid-enquiry-status.exception';
 
+/**
+ * Service responsible for managing Enquiries.
+ *
+ * Provides methods to create, fetch, and update Enquiries.
+ */
 @Injectable()
 export class EnquiryService {
   private readonly logger = new Logger(EnquiryService.name);
@@ -20,7 +22,12 @@ export class EnquiryService {
     private readonly enquiryRepository: Repository<Enquiry>,
   ) {}
 
-  // Helper to map entity to interface
+  /**
+   * Maps a TypeORM Enquiry entity to the IEnquiry interface.
+   *
+   * @param {Enquiry} enquiry - The Enquiry entity to map
+   * @returns {IEnquiry} - The mapped enquiry interface
+   */
   private mapEntityToInterface(enquiry: Enquiry): IEnquiry {
     const { enquiry_id, property_id, user_id, message, status, createdAt } =
       enquiry;
@@ -28,120 +35,121 @@ export class EnquiryService {
   }
 
   /**
-   * Fetches all enquiries from the database.
+   * Retrieves all enquiries from the database.
    *
-   * @returns {Promise<IEnquiry[]>} - Array of enquiries mapped to IEnquiry
+   * @returns {Promise<IEnquiry[]>} - Array of all enquiries
    */
   async getEnquiries(): Promise<IEnquiry[]> {
     const enquiries = await this.enquiryRepository.find();
 
     this.logger.log(
       enquiries.length > 0
-        ? `Enquiries received: ${enquiries.length}`
+        ? `Enquiries retrieved: ${enquiries.length}`
         : 'No enquiries found',
     );
 
-    // map entities to interface safely
-    return enquiries.map((enquiry) => this.mapEntityToInterface(enquiry));
+    return enquiries.map((entity) => this.mapEntityToInterface(entity));
   }
 
   /**
-   * Create a new Enquiry for a Property.
+   * Creates a new enquiry for a property.
    *
-   * @param createEnquiryDto - Data transfer object containing:
-   *   - property_id: UUID of the property
-   *   - user_id: UUID of the user making the enquiry
-   *   - message: Optional message from the user
-   *
-   * @returns {Promise<IEnquiry>} The created enquiry mapped to IEnquiry.
+   * @param {CreateEnquiryDto} createEnquiryDto - DTO containing property_id, user_id, and optional message
+   * @returns {Promise<IEnquiry>} - The created enquiry
    */
   async createEnquiry(createEnquiryDto: CreateEnquiryDto): Promise<IEnquiry> {
-    try {
-      const { property_id, user_id, message } = createEnquiryDto;
+    const { property_id, user_id, message } = createEnquiryDto;
 
-      const enquiry = this.enquiryRepository.create({
-        property_id,
-        user_id,
-        message: message || '',
-        status: EnquiryStatus.IN_PROGRESS,
-      });
+    const enquiry = this.enquiryRepository.create({
+      property_id,
+      user_id,
+      message: message || '',
+      status: EnquiryStatus.IN_PROGRESS,
+    });
 
-      const savedEnquiry = await this.enquiryRepository.save(enquiry);
-      return this.mapEntityToInterface(savedEnquiry);
-    } catch (error) {
-      this.logger.error(error);
-      throw error;
-    }
+    const savedEnquiry = await this.enquiryRepository.save(enquiry);
+    this.logger.log(
+      `Enquiry created successfully: enquiry_id=${savedEnquiry.enquiry_id}`,
+    );
+    return this.mapEntityToInterface(savedEnquiry);
   }
 
   /**
-   * Get all Enquiry for a Property
+   * Retrieves all enquiries for a specific property.
    *
-   * @param property_id - Property id
-   *
-   * @returns {Promise<IEnquiry[]>} All the Enquiries of the property
+   * @param {string} property_id - UUID of the property
+   * @returns {Promise<IEnquiry[]>} - Array of enquiries for the property
+   * @throws {EnquiryNotFoundException} - If no enquiries are found
    */
   async getPropertyEnquiryById(property_id: string): Promise<IEnquiry[]> {
     const enquiries = await this.enquiryRepository.find({
-      where: { property_id }, // change to propertyId if entity uses camelCase
+      where: { property_id },
     });
 
-    if (!enquiries || enquiries.length === 0) {
-      this.logger.warn(`No enquiries found for propertyId=${property_id}`);
-      throw new NotFoundException(
-        `No enquiries found for propertyId=${property_id}`,
+    if (!enquiries.length) {
+      this.logger.warn(`No enquiries found for property_id=${property_id}`);
+      throw new EnquiryNotFoundException(
+        `No enquiries found for property_id=${property_id}`,
       );
     }
 
-    this.logger.log(`Enquiries received: ${enquiries.length}`);
-
+    this.logger.log(
+      `Enquiries retrieved for property_id=${property_id}: ${enquiries.length}`,
+    );
     return enquiries.map((enquiry) => this.mapEntityToInterface(enquiry));
   }
 
   /**
-   * Get Enquiry by enquiry_id
+   * Retrieves an enquiry by its ID.
    *
-   * @param enquiry_id
-   *
-   * @return { Promise<IEnquiry> } Get enquiry of that particular id
+   * @param {string} enquiry_id - UUID of the enquiry
+   * @returns {Promise<IEnquiry>} - The enquiry matching the ID
+   * @throws {EnquiryNotFoundException} - If the enquiry is not found
    */
   async getEnquiryById(enquiry_id: string): Promise<IEnquiry> {
-    return await this.enquiryRepository.findOneByOrFail({
-      enquiry_id,
+    const enquiry = await this.enquiryRepository.findOne({
+      where: { enquiry_id },
     });
+    if (!enquiry) {
+      throw new EnquiryNotFoundException(
+        `Enquiry with ID ${enquiry_id} not found`,
+      );
+    }
+    return this.mapEntityToInterface(enquiry);
   }
 
   /**
-   * Change enquiry status
+   * Updates the status of an existing enquiry.
    *
-   * @param enquiry_id - Enquiry ID
-   * @param status - New enquiry status
-   * @returns Updated enquiry entity
+   * @param {string} enquiry_id - UUID of the enquiry
+   * @param {EnquiryStatus} status - New status to set
+   * @returns {Promise<IEnquiry>} - The updated enquiry
+   * @throws {InvalidEnquiryStatusException} - If the status is invalid
+   * @throws {EnquiryNotFoundException} - If the enquiry is not found
    */
   async changeEnquiryStatus(
     enquiry_id: string,
     status: EnquiryStatus,
-  ): Promise<Enquiry> {
-    // Validate status
+  ): Promise<IEnquiry> {
     if (!Object.values(EnquiryStatus).includes(status)) {
-      throw new BadRequestException(`Invalid status: ${status}`);
+      throw new InvalidEnquiryStatusException(`Invalid status: ${status}`);
     }
 
     const enquiry = await this.enquiryRepository.findOne({
       where: { enquiry_id },
     });
-
     if (!enquiry) {
-      throw new NotFoundException(`Enquiry with ID ${enquiry_id} not found`);
+      throw new EnquiryNotFoundException(
+        `Enquiry with ID ${enquiry_id} not found`,
+      );
     }
 
     enquiry.status = status;
-    const updated = await this.enquiryRepository.save(enquiry);
+    const updatedEnquiry = await this.enquiryRepository.save(enquiry);
 
     this.logger.log(
-      `Enquiry status updated successfully: enquiry_id=${enquiry_id}, newStatus=${status}`,
+      `Enquiry status updated: enquiry_id=${enquiry_id}, status=${status}`,
     );
-
-    return updated;
+    return this.mapEntityToInterface(updatedEnquiry);
   }
 }
