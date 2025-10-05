@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Enquiry } from './enquiry.entity';
 import { CreateEnquiryDto } from './dtos/create-enquiry.dto';
-import { EnquiryStatus } from './enquiry-status.enum';
+import { EnquiryStatus } from './enums/enquiry-status.enum';
 import { IEnquiry } from './enquiry.interface';
 import { EnquiryNotFoundException } from 'src/common/exceptions/enquiry-not-found.exception';
 import { InvalidEnquiryStatusException } from 'src/common/exceptions/invalid-enquiry-status.exception';
