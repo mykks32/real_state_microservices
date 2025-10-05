@@ -39,4 +39,7 @@ async function bootstrap() {
   console.log(`API Gateway is running on: http://localhost:${3001}/`);
   console.log(`API Documentation: http://localhost:${3001}/docs`);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Bootstrap failed', err);
+  process.exit(1);
+});
