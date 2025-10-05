@@ -11,7 +11,12 @@ import {
 import type { Request } from 'express';
 import { ApiResponse } from '../common/dtos/api-response.dto';
 import { EnquiryService } from './enquiry.service';
-import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+} from '@nestjs/swagger';
 import { IApiResponse } from '../common/interfaces/api-response.interface';
 import { IEnquiry } from './enquiry.interface';
 import {
@@ -41,6 +46,14 @@ class EnquiryController {
   @Post('/properties/:property_id/enquiries')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create enquiry' })
+  @ApiParam({
+    name: 'property_id',
+    type: String,
+    format: 'uuid',
+    required: true,
+    description: 'Property ID',
+  })
+  @ApiBody({ type: RequestCreateEnquiryDto })
   @ApiOkResponse({ type: ApiResponse })
   async createEnquiry(
     @Param('property_id')
