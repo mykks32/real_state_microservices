@@ -92,4 +92,17 @@ export class EnquiryService {
 
     return enquiries.map((enquiry) => this.mapEntityToInterface(enquiry));
   }
+
+  /**
+   * Get Enquiry by enquiry_id
+   *
+   * @param enquiry_id
+   *
+   * @return { Promise<IEnquiry> } Get enquiry of that particular id
+   */
+  async getEnquiryById(enquiry_id: string): Promise<IEnquiry> {
+    return await this.enquiryRepository.findOneByOrFail({
+      enquiry_id,
+    });
+  }
 }

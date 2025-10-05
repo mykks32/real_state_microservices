@@ -82,6 +82,24 @@ class EnquiryController {
       req.headers['x-request-id'] as string,
     );
   }
+
+  @Get('/enquiries/:enquiry_id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get enquiries for an id' })
+  @ApiOkResponse({ type: ApiResponse })
+  async getEnquiryById(
+    @Param('enquiry_id') enquiry_id: string,
+    @Req() req: Request,
+  ): Promise<IApiResponse<IEnquiry>> {
+    const enquiry = await this.enquiryService.getEnquiryById(enquiry_id);
+
+    return ApiResponse.ok(
+      enquiry,
+      'enquiry fetched successfully',
+      HttpStatus.OK,
+      req.headers['x-request-id'] as string,
+    );
+  }
 }
 
 export default EnquiryController;
