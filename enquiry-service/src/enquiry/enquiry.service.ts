@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Enquiry } from './enquiry.entity';
+import { Enquiry } from 'src/database/entities/enquiry.entity';
 import { CreateEnquiryDto } from './dtos/create-enquiry.dto';
 import { EnquiryStatus } from './enums/enquiry-status.enum';
-import { IEnquiry } from './enquiry.interface';
+import { IEnquiry } from './interfaces/enquiry.interface';
 import { EnquiryNotFoundException } from 'src/common/exceptions/enquiry-not-found.exception';
 import { InvalidEnquiryStatusException } from 'src/common/exceptions/invalid-enquiry-status.exception';
 

@@ -14,9 +14,9 @@ import { EnquiryService } from './enquiry.service';
 import { ApiResponse } from '../common/dtos/api-response.dto';
 import type { Request } from 'express';
 import { IApiResponse } from '../common/interfaces/api-response.interface';
-import { IEnquiry } from './enquiry.interface';
+import { IEnquiry } from './interfaces/enquiry.interface';
 import { PaginationQueryDto } from './dtos/pagination-query.dto';
-import { RequestCreateEnquiryDto } from './dtos/create-enquiry.dto';
+import { RequestCreateEnquiryDto } from './dtos/request-create-enquiry.dto';
 import { UpdateEnquiryStatusDto } from './dtos/update-enquiry-status.dto';
 import {
   ApiOperation,
