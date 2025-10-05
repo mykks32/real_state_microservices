@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Req,
 } from '@nestjs/common';
@@ -23,6 +24,7 @@ import {
   CreateEnquiryDto,
   RequestCreateEnquiryDto,
 } from './dtos/create-enquiry.dto';
+import { UpdateEnquiryStatusDto } from './dtos/updata-enquiry-status.dto';
 
 @Controller()
 class EnquiryController {
@@ -109,6 +111,36 @@ class EnquiryController {
     return ApiResponse.ok(
       enquiry,
       'enquiry fetched successfully',
+      HttpStatus.OK,
+      req.headers['x-request-id'] as string,
+    );
+  }
+
+  @Patch('enquiries/:enquiry_id/status')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update enquiry status' })
+  @ApiOkResponse({ type: ApiResponse })
+  @ApiParam({
+    name: 'enquiry_id',
+    type: String,
+    format: 'uuid',
+    required: true,
+    description: 'Enquiry ID',
+  })
+  @ApiBody({ type: UpdateEnquiryStatusDto })
+  async changeEnquiryStatus(
+    @Param('enquiry_id') enquiry_id: string,
+    @Body() dto: UpdateEnquiryStatusDto,
+    @Req() req: Request,
+  ): Promise<IApiResponse<IEnquiry>> {
+    const updated = await this.enquiryService.changeEnquiryStatus(
+      enquiry_id,
+      dto.status,
+    );
+
+    return ApiResponse.ok(
+      updated,
+      'Enquiry status updated successfully',
       HttpStatus.OK,
       req.headers['x-request-id'] as string,
     );

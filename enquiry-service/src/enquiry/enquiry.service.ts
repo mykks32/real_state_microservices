@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Enquiry } from './enquiry.entity';
@@ -104,5 +109,39 @@ export class EnquiryService {
     return await this.enquiryRepository.findOneByOrFail({
       enquiry_id,
     });
+  }
+
+  /**
+   * Change enquiry status
+   *
+   * @param enquiry_id - Enquiry ID
+   * @param status - New enquiry status
+   * @returns Updated enquiry entity
+   */
+  async changeEnquiryStatus(
+    enquiry_id: string,
+    status: EnquiryStatus,
+  ): Promise<Enquiry> {
+    // Validate status
+    if (!Object.values(EnquiryStatus).includes(status)) {
+      throw new BadRequestException(`Invalid status: ${status}`);
+    }
+
+    const enquiry = await this.enquiryRepository.findOne({
+      where: { enquiry_id },
+    });
+
+    if (!enquiry) {
+      throw new NotFoundException(`Enquiry with ID ${enquiry_id} not found`);
+    }
+
+    enquiry.status = status;
+    const updated = await this.enquiryRepository.save(enquiry);
+
+    this.logger.log(
+      `Enquiry status updated successfully: enquiry_id=${enquiry_id}, newStatus=${status}`,
+    );
+
+    return updated;
   }
 }
