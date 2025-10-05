@@ -5,8 +5,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { IEnquiry } from './enquiry.interface';
-import { EnquiryStatus } from './enquiry-status.enum';
+import { IEnquiry } from 'src/enquiry/interfaces/enquiry.interface';
+import { EnquiryStatus } from 'src/enquiry/enums/enquiry-status.enum';
 
 @Entity('enquiry')
 export class Enquiry extends BaseEntity implements IEnquiry {

@@ -1,4 +1,4 @@
-import { EnquiryStatus } from './enquiry-status.enum';
+import { EnquiryStatus } from '../enums/enquiry-status.enum';
 
 export interface IEnquiry {
   enquiry_id: string;
