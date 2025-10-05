@@ -26,11 +26,11 @@ import {
 } from './dtos/create-enquiry.dto';
 import { UpdateEnquiryStatusDto } from './dtos/updata-enquiry-status.dto';
 
-@Controller()
+@Controller('/enquiries')
 class EnquiryController {
   constructor(private readonly enquiryService: EnquiryService) {}
 
-  @Get('/enquiry/all')
+  @Get('/all')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get all enquiries' })
   @ApiOkResponse({ type: ApiResponse })
@@ -45,7 +45,7 @@ class EnquiryController {
     );
   }
 
-  @Post('/properties/:property_id/enquiries')
+  @Post('/properties/:property_id')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create enquiry' })
   @ApiParam({
@@ -79,7 +79,7 @@ class EnquiryController {
     );
   }
 
-  @Get('/properties/:property_id/enquiries')
+  @Get('/properties/:property_id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get all enquiries for particular enquiries' })
   @ApiOkResponse({ type: ApiResponse })
@@ -98,7 +98,7 @@ class EnquiryController {
     );
   }
 
-  @Get('/enquiries/:enquiry_id')
+  @Get('/:enquiry_id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get enquiries for an id' })
   @ApiOkResponse({ type: ApiResponse })
@@ -116,7 +116,7 @@ class EnquiryController {
     );
   }
 
-  @Patch('enquiries/:enquiry_id/status')
+  @Patch('/:enquiry_id/status')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update enquiry status' })
   @ApiOkResponse({ type: ApiResponse })
