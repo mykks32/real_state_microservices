@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IApiResponse } from '../interfaces/api-response.interface';
 
 /**
  * Generic API response DTO compatible with ShadCN Table.
@@ -6,7 +7,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
  *
  * @template T - Type of the items in the response data array
  */
-export class ApiResponse<T> {
+export class ApiResponse<T> implements IApiResponse<T> {
   /**
    * Indicates whether the request was successful
    */
