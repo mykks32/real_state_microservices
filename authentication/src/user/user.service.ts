@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
@@ -15,7 +9,7 @@ import { UserNotFoundException } from 'src/common/exceptions/user-not-found.exce
 @Injectable()
 export class UserService {
   private readonly logger = new Logger('User Service');
-  
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
