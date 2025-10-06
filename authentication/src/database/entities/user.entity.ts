@@ -5,7 +5,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { IUser } from '../../user/user.interface';
+import { IUser } from '../../module/user/user.interface';
 
 @Entity()
 export class User extends BaseEntity implements IUser {

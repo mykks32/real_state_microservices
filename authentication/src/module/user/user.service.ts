@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../database/entities/user.entity';
+import { User } from '../../database/entities/user.entity';
 import { Repository } from 'typeorm';
 import { IUser } from './user.interface';
 import { isUUID } from 'class-validator';

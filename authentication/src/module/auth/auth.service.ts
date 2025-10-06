@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { LoginUserDto } from 'src/auth/dtos/login.dto';
+import { LoginUserDto } from 'src/module/auth/dtos/login.dto';
 import { nestRefreshTokenService } from './refresh-token.service';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/module/user/user.service';
 import { WrongPasswordException } from 'src/common/exceptions/wrong-password.exception';
 import { EmailAlreadyExistsException } from 'src/common/exceptions/email-already-exists.exception';
 import { EmailNotFoundException } from 'src/common/exceptions/email-not-found.exception';

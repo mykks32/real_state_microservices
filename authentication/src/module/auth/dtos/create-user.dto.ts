@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { IUser } from 'src/user/user.interface';
+import { IUser } from 'src/module/user/user.interface';
 
 export class CreateUserDto
   implements Pick<IUser, 'email' | 'username' | 'password'>
