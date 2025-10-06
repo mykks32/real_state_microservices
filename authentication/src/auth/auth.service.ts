@@ -14,7 +14,7 @@ export class AuthService {
   private readonly logger = new Logger('auth service');
 
   constructor(
-    private userServie: UserService,
+    private userService: UserService,
     private readonly refreshTokenService: nestRefreshTokenService,
   ) {}
 
@@ -22,11 +22,11 @@ export class AuthService {
     try {
       const { email, password } = data;
 
-      const exists = await this.userServie.findByEmail({ email });
+      const exists = await this.userService.findByEmail({ email });
       if (exists) throw new EmailAlreadyExistsException();
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await this.userServie.create({
+      const user = await this.userService.create({
         ...data,
         password: hashedPassword,
       });
@@ -35,6 +35,7 @@ export class AuthService {
       this.logger.log(`User created: ${safeUser.id}`);
       return safeUser;
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       this.logger.error(`Error creating user: ${error.message}`);
       throw error;
     }
@@ -45,7 +46,7 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const { email, password } = data;
 
-    const user = await this.userServie.findByEmail({ email });
+    const user = await this.userService.findByEmail({ email });
     if (!user) throw new EmailNotFoundException();
 
     const isValid = await bcrypt.compare(password, user.password);
