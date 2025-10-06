@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { nestRefreshTokenService } from './refresh-token.service';
-import { userModule } from 'src/module/user/user.module';
+import { UserModule } from 'src/module/user/user.module';
 
 @Module({
   imports: [
@@ -12,7 +12,7 @@ import { userModule } from 'src/module/user/user.module';
       secret: 'Shree Krishna Yadav',
       signOptions: { expiresIn: '60s' },
     }),
-    userModule,
+    UserModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, nestRefreshTokenService],

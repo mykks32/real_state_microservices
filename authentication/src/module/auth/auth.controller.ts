@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpCode,
   HttpStatus,
   Logger,
   Post,
@@ -19,7 +20,10 @@ import {
   ApiBody,
   ApiCookieAuth,
   ApiTags,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { IUser } from '../user/user.interface';
+import { IApiResponse } from '../../common/interfaces/api-response.interface';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -30,39 +34,37 @@ export class AuthController {
 
   /**
    * Register a new user.
-   * @param createUserDto - User registration payload
-   * @param req - Incoming request
-   * @param res - Response object
+   * @param createUserDto User registration payload
+   * @param req Incoming request
+   * @returns IUser object in ApiResponse
    */
   @Post('create')
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: CreateUserDto })
-  @SwaggerResponse({ status: 201, type: CreateUserDto })
+  @SwaggerResponse({ status: 201, type: ApiResponse })
   async create(
     @Body() createUserDto: CreateUserDto,
     @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    const userData = await this.authService.create(createUserDto);
-    return res
-      .status(HttpStatus.CREATED)
-      .json(
-        ApiResponse.ok(
-          userData,
-          'User Created Successfully',
-          HttpStatus.CREATED,
-          req.headers['x-request-id'] as string,
-        ),
-      );
+  ): Promise<IApiResponse<Omit<IUser, 'password'>>> {
+    const user = await this.authService.create(createUserDto);
+    return ApiResponse.ok(
+      user,
+      'User created successfully',
+      HttpStatus.CREATED,
+      req.headers['x-request-id'] as string,
+    );
   }
 
   /**
-   * Login a user.
-   * @param loginUserDto - Login credentials
-   * @param req - Incoming request
-   * @param res - Response object
+   * Login a user and set refresh token cookie.
+   * @param loginUserDto Login credentials
+   * @param req Incoming request
+   * @param res Response object
+   * @returns Access token and refresh token
    */
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user' })
   @ApiBody({ type: LoginUserDto })
   @SwaggerResponse({ status: 200 })
@@ -70,7 +72,7 @@ export class AuthController {
     @Body() loginUserDto: LoginUserDto,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<IApiResponse<{ accessToken: string }>> {
     const { accessToken, refreshToken } =
       await this.authService.login(loginUserDto);
 
@@ -81,32 +83,31 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    this.logger.log(`User logged in successfully`);
+    this.logger.log('User logged in successfully');
 
-    return {
-      ...ApiResponse.ok(
-        { accessToken },
-        'Login Successful',
-        HttpStatus.OK,
-        req.headers['x-request-id'] as string,
-      ),
-      refreshToken, // optional if needed in response
-    };
+    return ApiResponse.ok(
+      { accessToken },
+      'Login successful',
+      HttpStatus.OK,
+      req.headers['x-request-id'] as string,
+    );
   }
 
   /**
-   * Refresh access token using refresh token from cookie.
-   * @param userId - ID of the user
-   * @param req - Incoming request
-   * @param res - Response object
+   * Refresh access token using refresh token cookie.
+   * @param userId User ID
+   * @param req Incoming request
+   * @param res Response object
+   * @returns New access token
    */
   @Post('refresh')
-  @ApiOperation({ summary: 'Refresh Token' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
   @ApiCookieAuth('realState_token')
   @ApiBody({
     schema: {
       type: 'object',
-      properties: { userId: { type: 'string', example: 'user-uuid' } },
+      properties: { userId: { type: 'string' } },
       required: ['userId'],
     },
   })
@@ -115,11 +116,8 @@ export class AuthController {
     @Body('userId') userId: string,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ) {
-    const refreshToken = req.cookies['realState_token'] as
-      | string
-      | undefined
-      | null;
+  ): Promise<IApiResponse<{ accessToken: string }>> {
+    const refreshToken = req.cookies['realState_token'] as string;
     if (!refreshToken) throw new JwtRefreshNotFoundException();
 
     const { accessToken, refreshToken: newRefreshToken } =
@@ -132,28 +130,27 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    this.logger.log(`Access token refreshed for user ${userId}`);
-
     return ApiResponse.ok(
       { accessToken },
-      'Access Token refreshed successfully',
+      'Access token refreshed successfully',
       HttpStatus.OK,
       req.headers['x-request-id'] as string,
     );
   }
 
   /**
-   * Logout a user by clearing the refresh token cookie.
-   * @param userId - ID of the user
-   * @param req - Incoming request
-   * @param res - Response object
+   * Logout user and clear refresh token cookie.
+   * @param userId User ID
+   * @param req Incoming request
+   * @param res Response object
    */
   @Post('logout')
+  @HttpCode(HttpStatus.OK)
   @ApiCookieAuth('realState_token')
   @ApiBody({
     schema: {
       type: 'object',
-      properties: { userId: { type: 'string', example: 'user-uuid' } },
+      properties: { userId: { type: 'string' } },
       required: ['userId'],
     },
   })
@@ -162,16 +159,13 @@ export class AuthController {
     @Body('userId') userId: string,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ) {
-    const refreshToken = req.cookies['realState_token'] as
-      | string
-      | undefined
-      | null;
+  ): Promise<IApiResponse<null>> {
+    const refreshToken = req.cookies['realState_token'] as string;
     if (!refreshToken) throw new JwtRefreshNotFoundException();
 
     await this.authService.logout(userId, refreshToken);
-
     res.clearCookie('realState_token');
+
     this.logger.log(`User ${userId} logged out, cookie cleared`);
 
     return ApiResponse.ok(
@@ -180,5 +174,29 @@ export class AuthController {
       HttpStatus.OK,
       req.headers['x-request-id'] as string,
     );
+  }
+
+  /**
+   * Verify access token manually without guard (for API Gateway).
+   * @returns IUser object if token is valid
+   * @param token
+   */
+  @Post('verify-access')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify access token and get user info' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { accessToken: { type: 'string' } },
+      required: ['accessToken'],
+    },
+  })
+  @ApiBearerAuth()
+  @SwaggerResponse({ status: 200 })
+  async verifyAccess(
+    @Body('token') token: string,
+  ): Promise<IApiResponse<Omit<IUser, 'password'>>> {
+    const user = await this.authService.verifyAccessToken(token);
+    return ApiResponse.ok(user, 'Access token is valid', HttpStatus.OK);
   }
 }

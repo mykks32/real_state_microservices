@@ -16,6 +16,6 @@ import { AppConfigService } from './config.service';
     }),
   ],
   providers: [AppConfigService],
-  exports: [NestConfigModule, AppConfigService],
+  exports: [AppConfigService],
 })
 export class ConfigModule {}

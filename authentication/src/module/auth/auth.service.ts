@@ -1,26 +1,55 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { CreateUserDto } from './dtos/create-user.dto';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { LoginUserDto } from 'src/module/auth/dtos/login.dto';
-import { nestRefreshTokenService } from './refresh-token.service';
 import { UserService } from 'src/module/user/user.service';
-import { WrongPasswordException } from 'src/common/exceptions/wrong-password.exception';
+import { nestRefreshTokenService } from './refresh-token.service';
+import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { LoginUserDto } from './dtos/login.dto';
 import { EmailAlreadyExistsException } from 'src/common/exceptions/email-already-exists.exception';
 import { EmailNotFoundException } from 'src/common/exceptions/email-not-found.exception';
+import { WrongPasswordException } from 'src/common/exceptions/wrong-password.exception';
 import { InvalidJwtRefreshException } from 'src/common/exceptions/invalid-jwt-refresh.exception';
+import { User } from 'src/database/entities/user.entity';
+import { IUser } from '../user/user.interface';
 
+interface AccessTokenPayload {
+  userId: string;
+  iat: number; // issued at
+  exp: number; // expiration
+}
+
+/**
+ * Service responsible for authentication and user management.
+ */
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger('auth service');
+  private readonly logger = new Logger(AuthService.name);
 
   constructor(
-    private userService: UserService,
+    private readonly userService: UserService,
     private readonly refreshTokenService: nestRefreshTokenService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async create(data: CreateUserDto) {
-    const { email, password } = data;
+  /**
+   * Maps a User entity to a safe user object (without password)
+   * @param user User entity from database
+   * @returns Safe IUser object
+   */
+  private mapEntityToSafeUser(user: User): Omit<IUser, 'password'> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...safeUser } = user;
+    return safeUser;
+  }
 
+  /**
+   * Creates a new user with hashed password.
+   * @param data CreateUserDto containing email and password
+   * @returns IUser object without password
+   * @throws EmailAlreadyExistsException if user with email already exists
+   */
+  async create(data: CreateUserDto): Promise<Omit<IUser, 'password'>> {
+    const { email, password } = data;
     const exists = await this.userService.findByEmail({ email });
     if (exists) throw new EmailAlreadyExistsException();
 
@@ -29,18 +58,23 @@ export class AuthService {
       ...data,
       password: hashedPassword,
     });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...safeUser } = user;
 
+    const safeUser = this.mapEntityToSafeUser(user);
     this.logger.log(`User created: ${safeUser.id}`);
     return safeUser;
   }
 
+  /**
+   * Authenticates a user and generates access and refresh tokens.
+   * @param data LoginUserDto containing email and password
+   * @returns Object containing accessToken and refreshToken
+   * @throws EmailNotFoundException if user not found
+   * @throws WrongPasswordException if password is invalid
+   */
   async login(
     data: LoginUserDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const { email, password } = data;
-
     const user = await this.userService.findByEmail({ email });
     if (!user) throw new EmailNotFoundException();
 
@@ -49,16 +83,17 @@ export class AuthService {
 
     const { accessToken, refreshToken } =
       await this.refreshTokenService.generateRefreshToken(user.id);
-
-    this.logger.log(
-      `Login Successful ${user.id}, refreshToken: ${refreshToken} & accessToken: ${accessToken}`,
-    );
-    return {
-      accessToken,
-      refreshToken,
-    };
+    this.logger.log(`Login successful: ${user.id}`);
+    return { accessToken, refreshToken };
   }
 
+  /**
+   * Verifies a refresh token and issues new access and refresh tokens.
+   * @param userId User ID
+   * @param token Refresh token
+   * @returns Object containing new accessToken and refreshToken
+   * @throws InvalidJwtRefreshException if refresh token is invalid
+   */
   async verify(
     userId: string,
     token: string,
@@ -71,17 +106,17 @@ export class AuthService {
 
     const { accessToken, refreshToken } =
       await this.refreshTokenService.generateRefreshToken(userId);
-
-    this.logger.log(
-      `accessToken: ${accessToken} & refreshToken: ${refreshToken}`,
-    );
-    return {
-      accessToken,
-      refreshToken,
-    };
+    this.logger.log(`Tokens refreshed for user: ${userId}`);
+    return { accessToken, refreshToken };
   }
 
-  async logout(userId: string, token: string) {
+  /**
+   * Logs out a user by revoking their refresh token.
+   * @param userId User ID
+   * @param token Refresh token
+   * @throws InvalidJwtRefreshException if token is invalid
+   */
+  async logout(userId: string, token: string): Promise<void> {
     const valid = await this.refreshTokenService.validateRefreshToken(
       userId,
       token,
@@ -89,6 +124,33 @@ export class AuthService {
     if (!valid) throw new InvalidJwtRefreshException();
 
     await this.refreshTokenService.revokeRefreshToken(userId);
-    this.logger.log(`refresh token deleted`);
+    this.logger.log(`Refresh token revoked for user: ${userId}`);
+  }
+
+  /**
+   * Verifies an access token and returns the corresponding user.
+   * @param accessToken The JWT access token to verify
+   * @returns IUser object of the authenticated user
+   * @throws UnauthorizedException if token is invalid or user not found
+   */
+  async verifyAccessToken(
+    accessToken: string,
+  ): Promise<Omit<IUser, 'password'>> {
+    let payload: AccessTokenPayload;
+
+    try {
+      payload = this.jwtService.verify<AccessTokenPayload>(accessToken);
+    } catch (err) {
+      this.logger.warn('Access token verification failed', err);
+      throw new UnauthorizedException('Invalid access token');
+    }
+
+    const user = await this.userService.findById({ id: payload.userId });
+    if (!user) {
+      this.logger.warn(`User not found for token payload: ${payload.userId}`);
+      throw new UnauthorizedException('User not found');
+    }
+
+    return this.mapEntityToSafeUser(user);
   }
 }

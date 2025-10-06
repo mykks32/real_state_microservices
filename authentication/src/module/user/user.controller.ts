@@ -12,7 +12,7 @@ import {
 
 @ApiTags('User')
 @Controller('user')
-export class userController {
+export class UserController {
   constructor(private userService: UserService) {}
 
   /**
