@@ -24,6 +24,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const res: any = exception.getResponse();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
       message = res?.message || res || exception.message;
     } else if (exception instanceof Error) {
       message = exception.message || message;

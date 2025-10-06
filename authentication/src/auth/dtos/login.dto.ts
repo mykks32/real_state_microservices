@@ -1,19 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, ValidateIf, IsEmail } from 'class-validator';
-import { BaseRequestDto } from 'src/common/dtos/base-request.dto';
+import { IsNotEmpty, IsEmail } from 'class-validator';
 import { IUser } from 'src/user/user.interface';
 
-export class LoginUserDto
-  extends BaseRequestDto
-  implements Pick<IUser, 'email' | 'password'>
-{
+export class LoginUserDto implements Pick<IUser, 'email' | 'password'> {
   @ApiProperty({
     description: 'User email address',
     example: 'user@example.com',
     required: true,
   })
   @IsEmail({}, { message: 'Email must be valid' })
-  @IsNotEmpty({ message: 'Email is requiered' })
+  @IsNotEmpty({ message: 'Email is required' })
   email: string;
 
   @ApiProperty({

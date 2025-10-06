@@ -19,26 +19,21 @@ export class AuthService {
   ) {}
 
   async create(data: CreateUserDto) {
-    try {
-      const { email, password } = data;
+    const { email, password } = data;
 
-      const exists = await this.userService.findByEmail({ email });
-      if (exists) throw new EmailAlreadyExistsException();
+    const exists = await this.userService.findByEmail({ email });
+    if (exists) throw new EmailAlreadyExistsException();
 
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await this.userService.create({
-        ...data,
-        password: hashedPassword,
-      });
-      const { password: _, ...safeUser } = user;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await this.userService.create({
+      ...data,
+      password: hashedPassword,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...safeUser } = user;
 
-      this.logger.log(`User created: ${safeUser.id}`);
-      return safeUser;
-    } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      this.logger.error(`Error creating user: ${error.message}`);
-      throw error;
-    }
+    this.logger.log(`User created: ${safeUser.id}`);
+    return safeUser;
   }
 
   async login(
@@ -78,7 +73,7 @@ export class AuthService {
       await this.refreshTokenService.generateRefreshToken(userId);
 
     this.logger.log(
-      `accesssToken: ${accessToken} & refreshToken: ${refreshToken}`,
+      `accessToken: ${accessToken} & refreshToken: ${refreshToken}`,
     );
     return {
       accessToken,
