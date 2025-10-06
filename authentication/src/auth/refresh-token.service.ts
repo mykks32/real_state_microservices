@@ -1,13 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import Redis from 'ioredis';
-import { nestJwtService } from './jwt.service';
 import { v4 as uuidv4 } from 'uuid';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class nestRefreshTokenService {
   private redis: Redis;
 
-  constructor(private readonly jwtService: nestJwtService) {
+  constructor(private readonly jwtService: JwtService) {
     this.redis = new Redis();
   }
 
@@ -15,7 +15,7 @@ export class nestRefreshTokenService {
     accessToken: string;
     refreshToken: string;
   }> {
-    const accessToken = await this.jwtService.sign(userId);
+    const accessToken = this.jwtService.sign({ userId }, { expiresIn: '15m' });
     const refreshToken = uuidv4();
 
     await this.redis.set(
@@ -41,6 +41,6 @@ export class nestRefreshTokenService {
   }
 
   async revokeRefreshToken(userId: string) {
-    return await this.redis.del(`refresh: ${userId}`);
+    return this.redis.del(`refresh: ${userId}`);
   }
 }
