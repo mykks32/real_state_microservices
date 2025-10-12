@@ -1,7 +1,17 @@
 import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
-import { RequestCreateEnquiryDto } from './request-create-enquiry.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateEnquiryDto extends RequestCreateEnquiryDto {
+export class CreateEnquiryDto {
+  @IsUUID()
+  @IsNotEmpty()
+  @ApiProperty()
+  user_id: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  message?: string; // optional message
+
   @IsUUID()
   @IsNotEmpty()
   property_id: string;

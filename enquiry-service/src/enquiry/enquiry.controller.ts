@@ -24,6 +24,7 @@ import {
   ApiBody,
   ApiResponse as SwaggerApiResponse,
 } from '@nestjs/swagger';
+import { CreateEnquiryDto } from './dtos/create-enquiry.dto';
 
 /**
  * Controller for handling Enquiry endpoints
@@ -70,7 +71,7 @@ export class EnquiryController {
    * @param req Express request for x-request-id
    * @returns Created enquiry
    */
-  @Post('/properties/:property_id')
+  @Post('/properties')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create enquiry' })
   @ApiParam({
@@ -82,14 +83,10 @@ export class EnquiryController {
   @ApiBody({ type: RequestCreateEnquiryDto })
   @SwaggerApiResponse({ status: 201, type: ApiResponse })
   async createEnquiry(
-    @Param('property_id') property_id: string,
-    @Body() dto: RequestCreateEnquiryDto,
+    @Body() dto: CreateEnquiryDto,
     @Req() req: Request,
   ): Promise<IApiResponse<IEnquiry>> {
-    const enquiry = await this.enquiryService.createEnquiry({
-      ...dto,
-      property_id,
-    });
+    const enquiry = await this.enquiryService.createEnquiry(dto);
     return ApiResponse.ok(
       enquiry,
       'Enquiry created successfully',
