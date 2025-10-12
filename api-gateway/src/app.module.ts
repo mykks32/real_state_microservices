@@ -1,15 +1,17 @@
-import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { HttpModule } from '@nestjs/axios';
+import { AuthModule } from './auth/auth.module';
+import { LoggerMiddleware } from './common/common/middleware/logger.middleware';
+import { RequestIdMiddleware } from './common/common/middleware/request-id.middleware';
 
 @Module({
-  imports: [
-    JwtModule.register({
-      global: true,
-      secret: 'Shree Krishna Yadav',
-      signOptions: { expiresIn: '60s' },
-    }),
-  ],
-  controllers: [],
+  imports: [HttpModule, AuthModule],
+  controllers: [AppController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestIdMiddleware, LoggerMiddleware).forRoutes('*');
+  }
+}
