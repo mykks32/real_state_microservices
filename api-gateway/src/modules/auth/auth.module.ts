@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '../../config/config.module';
 
 /**
  * AuthModule
@@ -14,7 +15,7 @@ import { HttpModule } from '@nestjs/axios';
  * - Stateless: no providers or business logic.
  */
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule, ConfigModule],
   controllers: [AuthController],
 })
 export class AuthModule {}
