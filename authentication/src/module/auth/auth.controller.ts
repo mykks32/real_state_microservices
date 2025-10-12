@@ -6,12 +6,11 @@ import {
   Logger,
   Post,
   Req,
-  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { LoginUserDto } from './dtos/login.dto';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { JwtRefreshNotFoundException } from 'src/common/exceptions/jwt-refresh-not-found.exception';
 import { ApiResponse } from 'src/common/dtos/response.dto';
 import {

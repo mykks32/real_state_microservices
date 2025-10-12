@@ -69,7 +69,7 @@ export class EnquiryController {
    * @param req Express request for x-request-id
    * @returns Created enquiry
    */
-  @Post('/property')
+  @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create enquiry' })
   @ApiParam({
