@@ -7,7 +7,7 @@ export class JwtRefreshNotFoundException extends HttpException {
         name: JwtRefreshNotFoundException.name,
         message,
       },
-      HttpStatus.NOT_FOUND,
+      HttpStatus.UNAUTHORIZED,
     );
   }
 }

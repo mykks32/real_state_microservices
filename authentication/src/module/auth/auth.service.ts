@@ -1,7 +1,7 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/module/user/user.service';
-import { nestRefreshTokenService } from './refresh-token.service';
+import { NestRefreshTokenService } from './refresh-token.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { LoginUserDto } from './dtos/login.dto';
@@ -27,7 +27,7 @@ export class AuthService {
 
   constructor(
     private readonly userService: UserService,
-    private readonly refreshTokenService: nestRefreshTokenService,
+    private readonly refreshTokenService: NestRefreshTokenService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -89,25 +89,30 @@ export class AuthService {
 
   /**
    * Verifies a refresh token and issues new access and refresh tokens.
-   * @param userId User ID
    * @param token Refresh token
    * @returns Object containing new accessToken and refreshToken
    * @throws InvalidJwtRefreshException if refresh token is invalid
    */
-  async verify(
-    userId: string,
+  async refreshTokens(
     token: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
-    const valid = await this.refreshTokenService.validateRefreshToken(
-      userId,
-      token,
-    );
-    if (!valid) throw new InvalidJwtRefreshException();
+  ): Promise<{ accessToken: string; refreshToken: string; userId: string }> {
+    // Get userId from the refresh token stored in Redis
+    const userId = await this.refreshTokenService.getUserIdFromToken(token);
 
+    if (!userId) {
+      throw new InvalidJwtRefreshException();
+    }
+
+    // Validate the refresh token
+    await this.refreshTokenService.validateRefreshToken(userId, token);
+
+    // Generate new tokens
     const { accessToken, refreshToken } =
       await this.refreshTokenService.generateRefreshToken(userId);
+
     this.logger.log(`Tokens refreshed for user: ${userId}`);
-    return { accessToken, refreshToken };
+
+    return { accessToken, refreshToken, userId };
   }
 
   /**

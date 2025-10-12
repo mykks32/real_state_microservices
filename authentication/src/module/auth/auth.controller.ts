@@ -95,7 +95,6 @@ export class AuthController {
 
   /**
    * Refresh access token using refresh token cookie.
-   * @param userId User ID
    * @param req Incoming request
    * @param res Response object
    * @returns New access token
@@ -113,7 +112,6 @@ export class AuthController {
   })
   @SwaggerResponse({ status: 200 })
   async refresh(
-    @Body('userId') userId: string,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<IApiResponse<{ accessToken: string }>> {
@@ -121,7 +119,7 @@ export class AuthController {
     if (!refreshToken) throw new JwtRefreshNotFoundException();
 
     const { accessToken, refreshToken: newRefreshToken } =
-      await this.authService.verify(userId, refreshToken);
+      await this.authService.refreshTokens(refreshToken);
 
     res.cookie('realState_token', newRefreshToken, {
       httpOnly: true,
