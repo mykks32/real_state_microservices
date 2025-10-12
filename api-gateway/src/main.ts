@@ -12,4 +12,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
   await app.listen(8000);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Bootstrap failed', err);
+  process.exit(1);
+});
