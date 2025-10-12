@@ -28,7 +28,7 @@ import { CreateEnquiryDto } from './dtos/create-enquiry.dto';
 /**
  * Controller for handling Enquiry endpoints
  */
-@Controller('/enquiries')
+@Controller('/enquiry')
 export class EnquiryController {
   constructor(private readonly enquiryService: EnquiryService) {}
 
@@ -69,7 +69,7 @@ export class EnquiryController {
    * @param req Express request for x-request-id
    * @returns Created enquiry
    */
-  @Post('/properties')
+  @Post('/property')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create enquiry' })
   @ApiParam({
@@ -100,7 +100,7 @@ export class EnquiryController {
    * @param req Express request for x-request-id
    * @returns Paginated ApiResponse
    */
-  @Get('/properties/:property_id')
+  @Get('/property/:property_id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get enquiries for a property with pagination' })
   @ApiParam({
