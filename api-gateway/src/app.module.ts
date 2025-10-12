@@ -4,9 +4,11 @@ import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/common/middleware/request-id.middleware';
+import { EnquiryModule } from './enquiry/enquiry.module';
+import { ConfigModule } from './config/config.module';
 
 @Module({
-  imports: [HttpModule, AuthModule],
+  imports: [ConfigModule, HttpModule, AuthModule, EnquiryModule],
   controllers: [AppController],
   providers: [],
 })
