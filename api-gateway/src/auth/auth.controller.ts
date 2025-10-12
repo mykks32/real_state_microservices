@@ -69,6 +69,8 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<IApiResponse<Omit<IUser, 'password'>>> {
+    this.logger.log(`Login attempt for email: ${loginUserDto.email}`);
+
     const response = await firstValueFrom(
       this.httpService.post<IApiResponse<Omit<IUser, 'password'>>>(
         this.loginUrl,
@@ -83,6 +85,8 @@ export class AuthController {
     if (setCookieHeader) {
       res.setHeader('set-cookie', setCookieHeader);
     }
+
+    this.logger.log(`Login attempt for email: ${loginUserDto.email}`);
 
     return data;
   }
@@ -105,11 +109,17 @@ export class AuthController {
   async register(
     @Body() createUserDto: CreateUserDto,
   ): Promise<IApiResponse<Omit<IUser, 'password'>>> {
+    this.logger.log(`Registration attempt for email: ${createUserDto.email}`);
+
     const response = await firstValueFrom(
       this.httpService.post<IApiResponse<Omit<IUser, 'password'>>>(
         this.registerUrl,
         createUserDto,
       ),
+    );
+
+    this.logger.log(
+      `Registration successful for email: ${createUserDto.email}`,
     );
 
     return response.data;
