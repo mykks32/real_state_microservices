@@ -66,7 +66,6 @@ export class EnquiryController {
 
   /**
    * Create a new enquiry
-   * @param property_id UUID of the property
    * @param dto Enquiry creation DTO
    * @param req Express request for x-request-id
    * @returns Created enquiry

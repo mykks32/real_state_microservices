@@ -1,6 +1,12 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 
+/**
+ * LoggerMiddleware
+ *
+ * Logs HTTP requests with method, URL, status, duration, and request ID.
+ * Measures request duration and logs on response finish.
+ */
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   private readonly logger = new Logger('HTTP');

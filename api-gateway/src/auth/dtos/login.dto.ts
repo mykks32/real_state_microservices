@@ -2,6 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsEmail } from 'class-validator';
 import { IUser } from 'src/auth/interfaces/user.interface';
 
+/**
+ * DTO for user login.
+ *
+ * Includes email and password fields.
+ */
 export class LoginUserDto implements Pick<IUser, 'email' | 'password'> {
   @ApiProperty({
     description: 'User email address',

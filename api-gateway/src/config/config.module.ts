@@ -3,7 +3,11 @@ import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { envSchema } from './config.schema';
 import { AppConfigService } from './config.service';
 
-/** Global config module with Zod validation */
+/**
+ * ConfigModule
+ *
+ * Loads and globally validates environment variables using Zod.
+ */
 @Module({
   imports: [
     NestConfigModule.forRoot({
