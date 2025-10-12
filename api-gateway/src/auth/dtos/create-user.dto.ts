@@ -2,6 +2,11 @@ import { IUser } from 'src/auth/interfaces/user.interface';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
+/**
+ * DTO for user registration.
+ *
+ * Includes email, username, and password fields.
+ */
 export class CreateUserDto
   implements Pick<IUser, 'email' | 'username' | 'password'>
 {

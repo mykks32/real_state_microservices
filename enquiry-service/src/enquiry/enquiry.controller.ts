@@ -16,7 +16,6 @@ import type { Request } from 'express';
 import { IApiResponse } from '../common/interfaces/api-response.interface';
 import { IEnquiry } from './interfaces/enquiry.interface';
 import { PaginationQueryDto } from './dtos/pagination-query.dto';
-import { RequestCreateEnquiryDto } from './dtos/request-create-enquiry.dto';
 import { UpdateEnquiryStatusDto } from './dtos/update-enquiry-status.dto';
 import {
   ApiOperation,
@@ -24,6 +23,7 @@ import {
   ApiBody,
   ApiResponse as SwaggerApiResponse,
 } from '@nestjs/swagger';
+import { CreateEnquiryDto } from './dtos/create-enquiry.dto';
 
 /**
  * Controller for handling Enquiry endpoints
@@ -65,12 +65,11 @@ export class EnquiryController {
 
   /**
    * Create a new enquiry
-   * @param property_id UUID of the property
    * @param dto Enquiry creation DTO
    * @param req Express request for x-request-id
    * @returns Created enquiry
    */
-  @Post('/properties/:property_id')
+  @Post('/properties')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create enquiry' })
   @ApiParam({
@@ -79,17 +78,13 @@ export class EnquiryController {
     format: 'uuid',
     required: true,
   })
-  @ApiBody({ type: RequestCreateEnquiryDto })
+  @ApiBody({ type: CreateEnquiryDto })
   @SwaggerApiResponse({ status: 201, type: ApiResponse })
   async createEnquiry(
-    @Param('property_id') property_id: string,
-    @Body() dto: RequestCreateEnquiryDto,
+    @Body() dto: CreateEnquiryDto,
     @Req() req: Request,
   ): Promise<IApiResponse<IEnquiry>> {
-    const enquiry = await this.enquiryService.createEnquiry({
-      ...dto,
-      property_id,
-    });
+    const enquiry = await this.enquiryService.createEnquiry(dto);
     return ApiResponse.ok(
       enquiry,
       'Enquiry created successfully',

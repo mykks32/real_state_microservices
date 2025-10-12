@@ -1,3 +1,4 @@
+/** Represents a user entity. */
 export interface IUser {
   id: string;
   email: string;
