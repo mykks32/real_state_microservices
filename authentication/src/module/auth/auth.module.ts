@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { nestRefreshTokenService } from './refresh-token.service';
+import { NestRefreshTokenService } from './refresh-token.service';
 import { UserModule } from 'src/module/user/user.module';
 
 @Module({
@@ -15,6 +15,6 @@ import { UserModule } from 'src/module/user/user.module';
     UserModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, nestRefreshTokenService],
+  providers: [AuthService, NestRefreshTokenService],
 })
 export class AuthModule {}
