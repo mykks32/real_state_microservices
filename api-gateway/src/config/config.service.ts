@@ -11,4 +11,9 @@ export class AppConfigService {
   get authServiceUrl(): string {
     return this.config.get('AUTH_SERVICE_URL', { infer: true });
   }
+
+  /** Enquiry service base URL from env */
+  get enquiryServiceUrl(): string {
+    return this.config.get('ENQUIRY_SERVICE_URL', { infer: true });
+  }
 }

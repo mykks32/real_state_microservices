@@ -9,6 +9,7 @@ import {
   Post,
   Body,
   Patch,
+  Logger,
 } from '@nestjs/common';
 import { EnquiryService } from './enquiry.service';
 import { ApiResponse } from '../common/dtos/api-response.dto';
@@ -28,8 +29,10 @@ import { CreateEnquiryDto } from './dtos/create-enquiry.dto';
 /**
  * Controller for handling Enquiry endpoints
  */
-@Controller('/enquiries')
+@Controller('/enquiry')
 export class EnquiryController {
+  private readonly logger = new Logger(EnquiryController.name);
+
   constructor(private readonly enquiryService: EnquiryService) {}
 
   /**
@@ -69,7 +72,7 @@ export class EnquiryController {
    * @param req Express request for x-request-id
    * @returns Created enquiry
    */
-  @Post('/properties')
+  @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create enquiry' })
   @ApiParam({
@@ -84,7 +87,17 @@ export class EnquiryController {
     @Body() dto: CreateEnquiryDto,
     @Req() req: Request,
   ): Promise<IApiResponse<IEnquiry>> {
+    const requestId = req.headers['x-request-id'] as string;
+    this.logger.log(
+      `[${requestId}] Creating enquiry for property ${dto.property_id}`,
+    );
+
     const enquiry = await this.enquiryService.createEnquiry(dto);
+
+    this.logger.log(
+      `[${requestId}] Enquiry created successfully (ID=${enquiry.enquiry_id})`,
+    );
+
     return ApiResponse.ok(
       enquiry,
       'Enquiry created successfully',
@@ -100,7 +113,7 @@ export class EnquiryController {
    * @param req Express request for x-request-id
    * @returns Paginated ApiResponse
    */
-  @Get('/properties/:property_id')
+  @Get('/property/:property_id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get enquiries for a property with pagination' })
   @ApiParam({
@@ -135,25 +148,31 @@ export class EnquiryController {
 
   /**
    * Get enquiry by ID
-   * @param enquiry_id UUID of the enquiry
+   * @param enquiryId
    * @param req Express request for x-request-id
    * @returns Enquiry ApiResponse
    */
-  @Get('/:enquiry_id')
+  @Get('/:enquiryId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get enquiry by ID' })
   @ApiParam({
-    name: 'enquiry_id',
+    name: 'enquiryId',
     type: String,
     format: 'uuid',
     required: true,
   })
   @SwaggerApiResponse({ status: 200, type: ApiResponse })
   async getEnquiryById(
-    @Param('enquiry_id') enquiry_id: string,
+    @Param('enquiryId') enquiryId: string,
     @Req() req: Request,
   ): Promise<IApiResponse<IEnquiry>> {
-    const enquiry = await this.enquiryService.getEnquiryById(enquiry_id);
+    const requestId = req.headers['x-request-id'] as string;
+    this.logger.log(`[${requestId}] Fetching enquiry with ID: ${enquiryId}`);
+
+    const enquiry = await this.enquiryService.getEnquiryById(enquiryId);
+
+    this.logger.log(`[${requestId}] Enquiry ${enquiryId} fetched successfully`);
+
     return ApiResponse.ok(
       enquiry,
       'Enquiry fetched successfully',

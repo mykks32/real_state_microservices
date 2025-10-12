@@ -6,12 +6,11 @@ import {
   Logger,
   Post,
   Req,
-  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { LoginUserDto } from './dtos/login.dto';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { JwtRefreshNotFoundException } from 'src/common/exceptions/jwt-refresh-not-found.exception';
 import { ApiResponse } from 'src/common/dtos/response.dto';
 import {
@@ -47,7 +46,15 @@ export class AuthController {
     @Body() createUserDto: CreateUserDto,
     @Req() req: Request,
   ): Promise<IApiResponse<Omit<IUser, 'password'>>> {
+    const requestId = req.headers['x-request-id'] as string;
+    this.logger.log(
+      `[${requestId}] Registration attempt for: ${createUserDto.email}`,
+    );
+
     const user = await this.authService.create(createUserDto);
+
+    this.logger.log(`[${requestId}] User registered successfully: ${user.id}`);
+
     return ApiResponse.ok(
       user,
       'User created successfully',
@@ -60,7 +67,6 @@ export class AuthController {
    * Login a user and set refresh token cookie.
    * @param loginUserDto Login credentials
    * @param req Incoming request
-   * @param res Response object
    * @returns Access token and refresh token
    */
   @Post('login')
@@ -71,22 +77,17 @@ export class AuthController {
   async login(
     @Body() loginUserDto: LoginUserDto,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<IApiResponse<{ accessToken: string }>> {
+  ): Promise<IApiResponse<{ accessToken: string; refreshToken: string }>> {
+    const requestId = req.headers['x-request-id'] as string;
+    this.logger.log(`[${requestId}] Login attempt for: ${loginUserDto.email}`);
+
     const { accessToken, refreshToken } =
       await this.authService.login(loginUserDto);
 
-    res.cookie('realState_token', refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    this.logger.log('User logged in successfully');
+    this.logger.log(`[${requestId}] Login successful, tokens issued`);
 
     return ApiResponse.ok(
-      { accessToken },
+      { accessToken, refreshToken },
       'Login successful',
       HttpStatus.OK,
       req.headers['x-request-id'] as string,
@@ -96,7 +97,6 @@ export class AuthController {
   /**
    * Refresh access token using refresh token cookie.
    * @param req Incoming request
-   * @param res Response object
    * @returns New access token
    */
   @Post('refresh')
@@ -113,24 +113,27 @@ export class AuthController {
   @SwaggerResponse({ status: 200 })
   async refresh(
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
   ): Promise<IApiResponse<{ accessToken: string }>> {
-    const refreshToken = req.cookies['realState_token'] as string;
-    if (!refreshToken) throw new JwtRefreshNotFoundException();
+    const requestId = req.headers['x-request-id'] as string;
+    const oldRefreshToken = req.cookies['realState_token'] as string;
 
-    const { accessToken, refreshToken: newRefreshToken } =
-      await this.authService.refreshTokens(refreshToken);
+    if (!oldRefreshToken) {
+      this.logger.warn(`[${requestId}] Refresh token not found`);
+      throw new JwtRefreshNotFoundException();
+    }
 
-    res.cookie('realState_token', newRefreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    this.logger.log(
+      `[${requestId}] Refresh token found, generating new tokens...`,
+    );
+
+    const { accessToken, refreshToken } =
+      await this.authService.refreshTokens(oldRefreshToken);
+
+    this.logger.log(`[${requestId}] Tokens refreshed successfully`);
 
     return ApiResponse.ok(
-      { accessToken },
-      'Access token refreshed successfully',
+      { accessToken, refreshToken },
+      'Login successful',
       HttpStatus.OK,
       req.headers['x-request-id'] as string,
     );
@@ -140,7 +143,6 @@ export class AuthController {
    * Logout user and clear refresh token cookie.
    * @param userId User ID
    * @param req Incoming request
-   * @param res Response object
    */
   @Post('logout')
   @HttpCode(HttpStatus.OK)
@@ -156,16 +158,23 @@ export class AuthController {
   async logout(
     @Body('userId') userId: string,
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
   ): Promise<IApiResponse<null>> {
+    const requestId = req.headers['x-request-id'] as string;
     const refreshToken = req.cookies['realState_token'] as string;
-    if (!refreshToken) throw new JwtRefreshNotFoundException();
 
+    if (!refreshToken) {
+      this.logger.warn(
+        `[${requestId}] Logout attempt failed — no refresh token found`,
+      );
+      throw new JwtRefreshNotFoundException();
+    }
+
+    this.logger.log(`[${requestId}] Logging out user ${userId}...`);
     await this.authService.logout(userId, refreshToken);
-    res.clearCookie('realState_token');
 
-    this.logger.log(`User ${userId} logged out, cookie cleared`);
+    this.logger.log(`[${requestId}] User ${userId} logged out successfully`);
 
+    // API Gateway will clear the cookie
     return ApiResponse.ok(
       null,
       'Successfully logged out',
@@ -177,6 +186,7 @@ export class AuthController {
   /**
    * Verify access token manually without guard (for API Gateway).
    * @returns IUser object if token is valid
+   * @param req
    * @param token
    */
   @Post('verify-access')
@@ -192,9 +202,16 @@ export class AuthController {
   @ApiBearerAuth()
   @SwaggerResponse({ status: 200 })
   async verifyAccess(
+    @Req() req: Request,
     @Body('token') token: string,
   ): Promise<IApiResponse<Omit<IUser, 'password'>>> {
+    const requestId = req.headers['x-request-id'] as string;
+    this.logger.log(`[${requestId}] Verifying access token...`);
+
     const user = await this.authService.verifyAccessToken(token);
+
+    this.logger.log(`[${requestId}] Token verified. User: ${user.id}`);
+
     return ApiResponse.ok(user, 'Access token is valid', HttpStatus.OK);
   }
 }

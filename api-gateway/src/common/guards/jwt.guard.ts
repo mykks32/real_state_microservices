@@ -9,7 +9,8 @@ import {
 import { HttpService } from '@nestjs/axios';
 import type { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
+import { AppConfigService } from '../../config/config.service';
 
 /**
  * Interface representing a user object returned by Auth service
@@ -27,8 +28,7 @@ export interface AuthenticatedUser {
  * Extend Express Request to optionally include user
  */
 export interface RequestWithUser extends Request {
-  user?: AuthenticatedUser;
-  newAccessToken?: string; // optional, if refreshed
+  user: AuthenticatedUser;
 }
 
 /**
@@ -46,7 +46,10 @@ interface AuthServiceVerifyResponse {
 interface AuthServiceRefreshResponse {
   success: boolean;
   message: string;
-  data: { accessToken: string };
+  data: {
+    accessToken: string;
+    refreshToken?: string; // New refresh token if rotation is enabled
+  };
 }
 
 /**
@@ -56,11 +59,39 @@ interface AuthServiceRefreshResponse {
  */
 @Injectable()
 export class JwtGatewayGuard implements CanActivate {
+  /** Logger instance scoped to JwtGatewayGuard. */
   private readonly logger = new Logger(JwtGatewayGuard.name);
-  private readonly VERIFY_URL = 'http://localhost:3000/auth/verify-access';
-  private readonly REFRESH_URL = 'http://localhost:3000/auth/refresh';
 
-  constructor(private readonly httpService: HttpService) {}
+  /**
+   * Constructs the guard with required dependencies.
+   *
+   * @param {HttpService} httpService - Used to send HTTP requests to downstream services.
+   * @param {AppConfigService} configService - Service to access application configuration.
+   */
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: AppConfigService,
+  ) {}
+
+  /**
+   * Refresh token URL built from the auth service base URL.
+   *
+   * @readonly
+   * @type {string}
+   */
+  private getRefreshUrl(): string {
+    return `${this.configService.authServiceUrl}/auth/refresh`;
+  }
+
+  /**
+   * Access token verification URL built from the auth service base URL.
+   *
+   * @readonly
+   * @type {string}
+   */
+  private getVerifyAccessTokenUrl(): string {
+    return `${this.configService.authServiceUrl}/auth/verify-access`;
+  }
 
   /**
    * Guard execution logic
@@ -69,6 +100,7 @@ export class JwtGatewayGuard implements CanActivate {
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestWithUser>();
+    const response = context.switchToHttp().getResponse<Response>();
     const cookies = request.cookies as Record<string, string> | undefined;
 
     let accessToken = '';
@@ -89,9 +121,12 @@ export class JwtGatewayGuard implements CanActivate {
       try {
         const verifyResponse: AxiosResponse<AuthServiceVerifyResponse> =
           await firstValueFrom(
-            this.httpService.post<AuthServiceVerifyResponse>(this.VERIFY_URL, {
-              token: accessToken,
-            }),
+            this.httpService.post<AuthServiceVerifyResponse>(
+              this.getVerifyAccessTokenUrl(),
+              {
+                token: accessToken,
+              },
+            ),
           );
 
         if (verifyResponse.data.success && verifyResponse.data.data) {
@@ -115,7 +150,7 @@ export class JwtGatewayGuard implements CanActivate {
         const refreshResponse: AxiosResponse<AuthServiceRefreshResponse> =
           await firstValueFrom(
             this.httpService.post<AuthServiceRefreshResponse>(
-              this.REFRESH_URL,
+              this.getRefreshUrl(),
               {},
               {
                 headers: {
@@ -130,21 +165,38 @@ export class JwtGatewayGuard implements CanActivate {
           refreshResponse.data.success &&
           refreshResponse.data.data?.accessToken
         ) {
-          request.newAccessToken = refreshResponse.data.data.accessToken;
+          const newAccessToken = refreshResponse.data.data.accessToken;
+          const newRefreshToken = refreshResponse.data.data.refreshToken;
+
+          // CRITICAL FIX: Update refresh token cookie if a new one was issued
+          if (newRefreshToken) {
+            this.logger.debug('Updating refresh token cookie with new token');
+            response.cookie('realState_token', newRefreshToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'strict',
+              maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+              path: '/',
+            });
+          }
 
           // Verify new access token
           const verifyNew: AxiosResponse<AuthServiceVerifyResponse> =
             await firstValueFrom(
               this.httpService.post<AuthServiceVerifyResponse>(
-                this.VERIFY_URL,
+                this.getVerifyAccessTokenUrl(),
                 {
-                  token: request.newAccessToken,
+                  token: newAccessToken,
                 },
               ),
             );
 
           if (verifyNew.data.success && verifyNew.data.data) {
             request.user = verifyNew.data.data;
+
+            // Update authorization header for current request
+            request.headers.authorization = `Bearer ${newAccessToken}`;
+
             this.logger.log(
               `Access token refreshed and verified for user: ${request.user.username}`,
             );
