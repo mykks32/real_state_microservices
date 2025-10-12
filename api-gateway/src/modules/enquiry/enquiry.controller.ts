@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Logger,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -38,7 +40,7 @@ import { firstValueFrom } from 'rxjs';
  */
 @Controller('enquiry')
 export class EnquiryController {
-  /** Logger instance scoped to EquiryController. */
+  /** Logger instance scoped to EnquiryController. */
   private readonly logger = new Logger(EnquiryController.name);
 
   /**
@@ -63,6 +65,16 @@ export class EnquiryController {
   }
 
   /**
+   * Create enquiry URL built from the enquiry service base URL.
+   *
+   * @readonly
+   * @type {string}
+   */
+  private getEnquiryByIdUrl(id: string): string {
+    return `${this.configService.enquiryServiceUrl}/enquiry/${id}`;
+  }
+
+  /**
    * Fetches all enquiries with pagination.
    *
    * @route GET /enquiry/all
@@ -79,14 +91,44 @@ export class EnquiryController {
   /**
    * Retrieves a single enquiry by its ID.
    *
-   * @route GET /enquiry/:enquiry_id
+   * @route GET /enquiry/:enquiryId
    * @param {string} enquiryId - Enquiry unique identifier.
+   * @param {Request} req - Express request object containing headers (e.g. x-request-id).
    * @returns {Promise<IApiResponse<IEnquiry>>} Enquiry details.
    *
    * @remarks
-   * Logs enquiry access attempts.
+   * Propagates x-request-id for traceability across services.
+   * Logs both request initiation and success.
    */
-  // async getEnquiryById(enquiryId: string): Promise<IApiResponse<EnquiryDto>> {}
+  @Get('/:enquiryId')
+  @HttpCode(HttpStatus.OK)
+  async getEnquiryById(
+    @Param('enquiryId') enquiryId: string,
+    @Req() req: Request,
+  ): Promise<IApiResponse<IEnquiry>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `Fetching enquiry | enquiry_id=${enquiryId} | request_id=${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.get<IApiResponse<IEnquiry>>(
+        this.getEnquiryByIdUrl(enquiryId),
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Enquiry fetched successfully | enquiry_id=${enquiryId} | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
 
   /**
    * Fetches enquiries filtered by property ID with pagination.
@@ -122,14 +164,14 @@ export class EnquiryController {
    * Creates a new enquiry.
    *
    * @route POST /enquiry
-   * @param req
-   * @param {CreateEnquiryDto} requestCreateEnquiryDto - Enquiry creation data including user ID.
-   * @returns {Promise<IApiResponse<IEnquiry>>} Newly created enquiry.
    *
-   * @remarks
    * Requires authentication (JWT).
    * Adds user ID from JWT to DTO.
    * Forwards the request to the downstream service.
+   * @param req
+   * @param requestCreateEnquiryDto
+   * @param req
+   * @param requestCreateEnquiryDto
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -139,23 +181,33 @@ export class EnquiryController {
     @Body() requestCreateEnquiryDto: CreateEnquiryDto,
   ): Promise<IApiResponse<IEnquiry>> {
     const userId = req.user.id;
+    const requestId = req.headers['x-request-id'] as string;
+
     const payload: CreateEnquiryDto = {
       ...requestCreateEnquiryDto,
       user_id: userId,
     };
 
     this.logger.log(
-      `Creating enquiry for property: ${payload.property_id}, user: ${userId}`,
+      `Enquiry creation started | property_id=${payload.property_id} | user_id=${userId} | request_id=${requestId}`,
     );
 
     const response = await firstValueFrom(
       this.httpService.post<IApiResponse<IEnquiry>>(
         this.createEnquiryUrl,
         payload,
+        {
+          headers: {
+            'x-request-id': requestId,
+            'Content-Type': 'application/json',
+          },
+        },
       ),
     );
 
-    this.logger.log(`Enquiry created successfully for user: ${userId}`);
+    this.logger.log(
+      `Enquiry created successfully | user_id=${userId} | request_id=${requestId}`,
+    );
 
     return response.data;
   }
