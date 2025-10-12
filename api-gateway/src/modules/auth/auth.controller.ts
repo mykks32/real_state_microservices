@@ -9,13 +9,13 @@ import {
   Res,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { IApiResponse } from '../common/interfaces/api-response.interface';
+import { IApiResponse } from '../../common/interfaces/api-response.interface';
 import { IUser } from './interfaces/user.interface';
 import { firstValueFrom } from 'rxjs';
 import { LoginUserDto } from './dtos/login.dto';
 import { Request, Response } from 'express';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { AppConfigService } from '../config/config.service';
+import { AppConfigService } from '../../config/config.service';
 
 /**
  * AuthController

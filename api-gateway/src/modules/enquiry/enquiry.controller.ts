@@ -1,5 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
-import { AppConfigService } from '../config/config.service';
+import { AppConfigService } from '../../config/config.service';
 import { HttpService } from '@nestjs/axios';
 
 /**
@@ -23,6 +23,10 @@ import { HttpService } from '@nestjs/axios';
 export class EnquiryController {
   private readonly logger = new Logger(EnquiryController.name);
   private readonly configService: AppConfigService;
+
+  private get createEnquiryUrl(): string {
+    return `${this.configService.enquiryServiceUrl}/enquiry`;
+  }
 
   constructor(private readonly httpService: HttpService) {}
 
@@ -87,7 +91,7 @@ export class EnquiryController {
    *
    * @route POST /enquiries
    * @param {CreateEnquiryDto} createEnquiryDto - Enquiry creation data.
-   * @returns {Promise<IApiResponse<EnquiryDto>>} Newly created enquiry.
+   * @returns {Promise<IApiResponse<IEnquiry>>} Newly created enquiry.
    *
    * @remarks
    * Validates creation data and logs creation event.

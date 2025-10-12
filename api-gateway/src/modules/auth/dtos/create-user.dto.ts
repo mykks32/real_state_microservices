@@ -1,4 +1,4 @@
-import { IUser } from 'src/auth/interfaces/user.interface';
+import { IUser } from 'src/modules/auth/interfaces/user.interface';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 

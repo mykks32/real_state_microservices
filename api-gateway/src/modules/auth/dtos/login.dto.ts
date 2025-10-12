@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsEmail } from 'class-validator';
-import { IUser } from 'src/auth/interfaces/user.interface';
+import { IUser } from 'src/modules/auth/interfaces/user.interface';
 
 /**
  * DTO for user login.
