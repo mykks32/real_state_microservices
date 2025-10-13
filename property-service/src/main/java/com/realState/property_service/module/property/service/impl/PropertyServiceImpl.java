@@ -33,7 +33,7 @@ public class PropertyServiceImpl implements PropertyService {
     private final PropertyRepository propertyRepository;
     private final LocationService locationService;
     private final PropertyMapperUtil propertyMapperUtil;
-    private static Logger logger = LoggerFactory.getLogger(PropertyServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertyServiceImpl.class);
 
     public PropertyServiceImpl(PropertyRepository propertyRepository, LocationService locationService,
             PropertyMapperUtil propertyMapperUtil) {
