@@ -89,6 +89,23 @@ export class EnquiryController {
   }
 
   /**
+   * Get Enquiries by propertyId
+   *
+   * @private
+   * @param {string} propertyId
+   * @param {number} page
+   * @param {number} limit
+   * @returns {string}
+   */
+  private getEnquiryByPropertyId(
+    propertyId: string,
+    page?: number,
+    limit?: number,
+  ): string {
+    return `${this.configService.enquiryServiceUrl}/enquiry/property/${propertyId}?page=${page}&limit=${limit}`;
+  }
+
+  /**
    * Fetches all enquiries with pagination.
    *
    * @route GET /enquiry/all
@@ -175,18 +192,45 @@ export class EnquiryController {
    * Fetches enquiries filtered by property ID with pagination.
    *
    * @route GET /enquiry/property/:property_id
-   * @param {string} propertyId - Property unique identifier.
-   * @param {number} [page=1] - Page number.
-   * @param {number} [limit=10] - Items per page.
+   * @param {string} propertyId
+   * @param {Request} req
+   * @param {PaginationQueryInterface} query
    * @returns {Promise<IApiResponse<IEnquiry>>} Paginated enquiries for the property.
-   *
-   * @example
-   * GET /enquiry/property/123e4567-e89b-12d3-a456-426614174000?page=2&limit=2
    *
    * @remarks
    * Supports query params: `page`, `limit`.
    */
-  // async getEnquiriesByProperty(propertyId: string, page?: number, limit?: number): Promise<IApiResponse<EnquiryListDto>> {}
+  @Get('/property/:propertyId')
+  async getEnquiriesByProperty(
+    @Param('propertyId') propertyId: string,
+    @Req() req: Request,
+    @Query() query: PaginationQueryDto,
+  ): Promise<IApiResponse<IEnquiry[]>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `Fetching Enquiry | property_id= ${propertyId} | request_id = ${requestId}`,
+    );
+
+    const { page, limit } = query;
+
+    const response = await firstValueFrom(
+      this.httpService.get<IApiResponse<IEnquiry[]>>(
+        this.getEnquiryByPropertyId(propertyId, page, limit),
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Enquiry fetched successfully | property_id=${propertyId} | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
 
   /**
    * Updates the status of an enquiry.
