@@ -7,6 +7,7 @@ import {
   Logger,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import {
   RequestWithUser,
 } from '../../common/guards/jwt.guard';
 import { firstValueFrom } from 'rxjs';
+import { PaginationQueryDto } from './dtos/pagination-query.dto';
 
 /**
  * EnquiryController
@@ -75,18 +77,57 @@ export class EnquiryController {
   }
 
   /**
+   * Get all the enquiry
+   *
+   * @private
+   * @param {number} page
+   * @param {number} limit
+   * @returns {string}
+   */
+  private getAllEnquiryUrl(page?: number, limit?: number): string {
+    return `${this.configService.enquiryServiceUrl}/enquiry/all?page=${page}&limit=${limit}`;
+  }
+
+  /**
    * Fetches all enquiries with pagination.
    *
    * @route GET /enquiry/all
-   * @param {number} [page=1] - Page number for pagination.
-   * @param {number} [limit=10] - Number of items per page.
-   * @returns {Promise<IApiResponse<IEnquiry>>} Paginated list of enquiries.
+   * @param {Request} req
+   * @param query
+   * @returns {Promise<IApiResponse<IEnquiry[]>>} Paginated list of enquiries.
    *
    * @remarks
    * Supports query params: `page`, `limit`.
    * Logs request info.
+   *
    */
-  // async getAllEnquiries(page?: number, limit?: number): Promise<IApiResponse<EnquiryListDto>> {}
+  @Get('/all')
+  @HttpCode(HttpStatus.OK)
+  async getEnquiries(
+    @Req() req: Request,
+    @Query() query: PaginationQueryDto,
+  ): Promise<IApiResponse<IEnquiry[]>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(`Fetching Enquiries | request_id=${requestId}`);
+
+    const { page, limit } = query;
+
+    const response = await firstValueFrom(
+      this.httpService.get<IApiResponse<IEnquiry[]>>(
+        this.getAllEnquiryUrl(page, limit),
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(`Enquiry fetched successfully | request_id=${requestId}`);
+
+    return response.data;
+  }
 
   /**
    * Retrieves a single enquiry by its ID.

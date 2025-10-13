@@ -1,5 +1,6 @@
 import { EnquiryStatus } from '../enums/enquiry-status.enum';
 
+/** Represents a Enquiry Entity. */
 export interface IEnquiry {
   enquiry_id: string;
   property_id: string;
