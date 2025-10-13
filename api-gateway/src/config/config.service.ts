@@ -16,4 +16,9 @@ export class AppConfigService {
   get enquiryServiceUrl(): string {
     return this.config.get('ENQUIRY_SERVICE_URL', { infer: true });
   }
+
+  /** Property service base URL from env */
+  get propertyServiceUrl(): string {
+    return this.config.get('PROPERTY_SERVICE_URL', { infer: true });
+  }
 }

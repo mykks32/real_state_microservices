@@ -6,9 +6,16 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { EnquiryModule } from './modules/enquiry/enquiry.module';
 import { ConfigModule } from './config/config.module';
+import { PropertyModule } from './modules/property/property.module';
 
 @Module({
-  imports: [ConfigModule, HttpModule, AuthModule, EnquiryModule],
+  imports: [
+    ConfigModule,
+    HttpModule,
+    AuthModule,
+    EnquiryModule,
+    PropertyModule,
+  ],
   controllers: [AppController],
   providers: [],
 })

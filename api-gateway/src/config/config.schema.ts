@@ -4,6 +4,7 @@ import { z } from 'zod';
 export const envSchema = z.object({
   AUTH_SERVICE_URL: z.string(),
   ENQUIRY_SERVICE_URL: z.string(),
+  PROPERTY_SERVICE_URL: z.string(),
 });
 
 /** Type of validated env */
