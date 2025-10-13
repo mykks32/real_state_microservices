@@ -1,12 +1,15 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Logger,
   Param,
+  Patch,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,6 +24,7 @@ import { firstValueFrom } from 'rxjs';
 import { RequestCreatePropertyDTO } from './dtos/request-create-property.dto';
 import { CreatePropertyDTO } from './dtos/create-property.dto';
 import { IProperty } from './interfaces/property.interface';
+import { UpdatePropertyDTO } from './dtos/update-property.dto';
 
 @Controller('property')
 export class PropertyController {
@@ -46,6 +50,16 @@ export class PropertyController {
    */
   private get createPropertyUrl(): string {
     return `${this.configService.propertyServiceUrl}/properties`;
+  }
+
+  /**
+   * Update property URL built from the property service base URL.
+   * @param {string} propertyId
+   *
+   * @returns string
+   */
+  private updatePropertyUrl(propertyId: string): string {
+    return `${this.configService.propertyServiceUrl}/properties/${propertyId}`;
   }
 
   /**
@@ -80,14 +94,78 @@ export class PropertyController {
   }
 
   /**
-   * Change Enquiry status by enquiryId
+   * Fetch pending properties
+   *
+   * @readonly
+   * @type {string}
+   */
+  private get pendingPropertyUrl(): string {
+    return `${this.configService.propertyServiceUrl}/properties/pending`;
+  }
+
+  /**
+   * Fetch approved properties
+   *
+   * @readonly
+   * @type {string}
+   */
+  private get approvedPropertyUrl(): string {
+    return `${this.configService.propertyServiceUrl}/properties/approved`;
+  }
+
+  /**
+   * Submit property approval URL
    *
    * @private
-   * @param {string} enquiryId
+   * @param {string} propertyId
    * @returns {string}
    */
-  private changeEnquiryStatusByEnquiryId(enquiryId: string): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/${enquiryId}/status`;
+  private submitPropertyApprovalUrl(propertyId: string): string {
+    return `${this.configService.propertyServiceUrl}/properties/${propertyId}/submit`;
+  }
+
+  /**
+   * Approve property URL
+   *
+   * @private
+   * @param {string} propertyId
+   * @returns {string}
+   */
+  private approvePropertyUrl(propertyId: string): string {
+    return `${this.configService.propertyServiceUrl}/properties/${propertyId}/approve`;
+  }
+
+  /**
+   * Reject property URL
+   *
+   * @private
+   * @param {string} propertyId
+   * @returns {string}
+   */
+  private rejectPropertyUrl(propertyId: string): string {
+    return `${this.configService.propertyServiceUrl}/properties/${propertyId}/reject`;
+  }
+
+  /**
+   * Archive property URL
+   *
+   * @private
+   * @param {string} propertyId
+   * @returns {string}
+   */
+  private archivePropertyUrl(propertyId: string): string {
+    return `${this.configService.propertyServiceUrl}/properties/${propertyId}/archive`;
+  }
+
+  /**
+   * Delete property URL
+   *
+   * @private
+   * @param {string} propertyId
+   * @returns {string}
+   */
+  private deletePropertyUrl(propertyId: string): string {
+    return `${this.configService.propertyServiceUrl}/properties/delete/${propertyId}`;
   }
 
   /**
@@ -95,7 +173,7 @@ export class PropertyController {
    *
    * @route POST /properties
    * @param {RequestWithUser} req
-   * @param {RequestCreatePropertyDTO} requestCreateEnquiryDto
+   * @param {RequestCreatePropertyDTO} requestCreatePropertyDto
    *
    * @remarks
    * Requires authentication (JWT).
@@ -107,13 +185,13 @@ export class PropertyController {
   @UseGuards(JwtGatewayGuard)
   async createProperty(
     @Req() req: RequestWithUser,
-    @Body() requestCreateEnquiryDto: RequestCreatePropertyDTO,
+    @Body() requestCreatePropertyDto: RequestCreatePropertyDTO,
   ): Promise<IApiResponse<IProperty>> {
     const userId = req.user.id;
     const requestId = req.headers['x-request-id'] as string;
 
     const payload: CreatePropertyDTO = {
-      ...requestCreateEnquiryDto,
+      ...requestCreatePropertyDto,
       ownerId: userId,
     };
 
@@ -260,6 +338,338 @@ export class PropertyController {
     this.logger.log(
       `Property fetched successfully | propertyId: ${propertyId} | request_id=${requestId}`,
     );
+
+    return response.data;
+  }
+
+  /**
+   * Fetches pending property.
+   *
+   * @route GET /pending
+   * @param {Request} req
+   * @returns {Promise<IApiResponse<IProperty[]>>}
+   *
+   * @remarks
+   * Forwards the request to the downstream service.
+   */
+  @Get('/pending')
+  @HttpCode(HttpStatus.OK)
+  async getPendingProperty(
+    @Req() req: Request,
+    // @Query() query: PaginationQueryDto,
+  ): Promise<IApiResponse<IProperty[]>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(`Fetching Pending Property | request_id = ${requestId}`);
+
+    const response = await firstValueFrom(
+      this.httpService.get<IApiResponse<IProperty[]>>(this.pendingPropertyUrl, {
+        headers: {
+          'x-request-id': requestId,
+        },
+      }),
+    );
+
+    this.logger.log(
+      `Pending Property fetched successfully  | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Fetches approved property.
+   *
+   * @route GET /approved
+   * @param {Request} req
+   * @returns {Promise<IApiResponse<IProperty[]>>}
+   *
+   * @remarks
+   * Forwards the request to the downstream service.
+   */
+  @Get('/approved')
+  @HttpCode(HttpStatus.OK)
+  async getApprovedProperty(
+    @Req() req: Request,
+    // @Query() query: PaginationQueryDto,
+  ): Promise<IApiResponse<IProperty[]>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(`Fetching Approved Property | request_id = ${requestId}`);
+
+    const response = await firstValueFrom(
+      this.httpService.get<IApiResponse<IProperty[]>>(
+        this.approvedPropertyUrl,
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Approved Property fetched successfully  | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Submit for approval.
+   *
+   * @route PATCH /:propertyId/submit
+   * @param {Request} req
+   * @param propertyId
+   * @returns {Promise<IApiResponse<IProperty>>}
+   *
+   * @remarks
+   * Forwards the request to the downstream service.
+   */
+  @Patch('/:propertyId/submit')
+  @HttpCode(HttpStatus.OK)
+  async submitForPropertyApproval(
+    @Req() req: Request,
+    @Param('propertyId') propertyId: string,
+  ): Promise<IApiResponse<{ approval: boolean; message: string }>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `Submitting for Property Approval | request_id = ${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.patch<
+        IApiResponse<{ approval: boolean; message: string }>
+      >(
+        this.submitPropertyApprovalUrl(propertyId),
+        {},
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Submit property Approval successfully  | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Property Approved.
+   *
+   * @route PATCH /:propertyId/approve
+   * @param {Request} req
+   * @param propertyId
+   * @returns {Promise<IApiResponse<{ approval: boolean; message: string }>>}
+   *
+   * @remarks
+   * Forwards the request to the downstream service.
+   */
+  @Patch('/:propertyId/approve')
+  @HttpCode(HttpStatus.OK)
+  async approveProperty(
+    @Req() req: Request,
+    @Param('propertyId') propertyId: string,
+  ): Promise<IApiResponse<{ approval: boolean; message: string }>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `Approve property | propertyId: ${propertyId} | request_id = ${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.patch<
+        IApiResponse<{ approval: boolean; message: string }>
+      >(
+        this.approvePropertyUrl(propertyId),
+        {},
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Property Approve successfully | propertyId: ${propertyId}  | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Property Rejected.
+   *
+   * @route PATCH /:propertyId/reject
+   * @param {Request} req
+   * @param propertyId
+   * @returns {Promise<IApiResponse<{ approval: boolean; message: string }>>}
+   *
+   * @remarks
+   * Forwards the request to the downstream service.
+   */
+  @Patch('/:propertyId/reject')
+  @HttpCode(HttpStatus.OK)
+  async rejectProperty(
+    @Req() req: Request,
+    @Param('propertyId') propertyId: string,
+  ): Promise<IApiResponse<{ approval: boolean; message: string }>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `Reject property | propertyId: ${propertyId} | request_id = ${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.patch<
+        IApiResponse<{ approval: boolean; message: string }>
+      >(
+        this.rejectPropertyUrl(propertyId),
+        {},
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Property Rejected successfully | propertyId: ${propertyId}  | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Archive Property.
+   *
+   * @route PATCH /:propertyId/archive
+   * @param {Request} req
+   * @param propertyId
+   * @returns {Promise<IApiResponse<{ approval: boolean; message: string }>>}
+   *
+   * @remarks
+   * Forwards the request to the downstream service.
+   */
+  @Patch('/:propertyId/archive')
+  @HttpCode(HttpStatus.OK)
+  async archiveProperty(
+    @Req() req: Request,
+    @Param('propertyId') propertyId: string,
+  ): Promise<IApiResponse<{ approval: boolean; message: string }>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `Archived property | propertyId: ${propertyId} | request_id = ${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.patch<
+        IApiResponse<{ approval: boolean; message: string }>
+      >(
+        this.archivePropertyUrl(propertyId),
+        {},
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Property Archived successfully | propertyId: ${propertyId}  | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Delete Property.
+   *
+   * @route DELETE /delete/:propertyId
+   * @param {Request} req
+   * @param propertyId
+   * @returns {Promise<IApiResponse<{ approval: boolean; message: string }>>}
+   *
+   * @remarks
+   * Forwards the request to the downstream service.
+   */
+  @Delete('/delete/:propertyId')
+  @HttpCode(HttpStatus.OK)
+  async deleteProperty(
+    @Req() req: Request,
+    @Param('propertyId') propertyId: string,
+  ): Promise<IApiResponse<boolean>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `Deleting property | propertyId: ${propertyId} | request_id = ${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.delete<IApiResponse<boolean>>(
+        this.deletePropertyUrl(propertyId),
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Property deleted successfully | propertyId: ${propertyId}  | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Update property info.
+   *
+   * @route PUT /property_id
+   * @param {RequestWithUser} req
+   * @param propertyId
+   * @param {UpdatePropertyDTO} updatePropertyDTO
+   *
+   * @remarks
+   * Requires authentication (JWT).
+   * Adds user ID from JWT to DTO.
+   * Forwards the request to the downstream service.
+   */
+  @Put('/:propertyId')
+  @HttpCode(HttpStatus.OK)
+  async updateProperty(
+    @Req() req: Request,
+    @Param('propertyId') propertyId: string,
+    @Body() updatePropertyDTO: UpdatePropertyDTO,
+  ): Promise<IApiResponse<IProperty>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(`Updating Property started | request_id=${requestId}`);
+
+    const response = await firstValueFrom(
+      this.httpService.put<IApiResponse<IProperty>>(
+        this.updatePropertyUrl(propertyId),
+        updatePropertyDTO,
+        {
+          headers: {
+            'x-request-id': requestId,
+            'Content-Type': 'application/json',
+          },
+        },
+      ),
+    );
+
+    this.logger.log(`Property updated successfully | request_id=${requestId}`);
 
     return response.data;
   }
