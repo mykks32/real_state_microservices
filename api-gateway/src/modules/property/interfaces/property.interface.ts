@@ -1,9 +1,10 @@
 import { ApprovalStatusEnum } from '../enums/approval-status.enum';
-import { Base } from './base.interface';
+import { IBase } from './base.interface';
 import { TypeEnum } from '../enums/type.enum';
 import { StatusEnum } from '../enums/status.enum';
+import { ILocation } from './location.interface';
 
-export interface Property extends Base {
+export interface IProperty extends IBase {
   id: string; // UUID
   title: string;
   description?: string;
@@ -11,5 +12,5 @@ export interface Property extends Base {
   status: StatusEnum;
   approvalStatus: ApprovalStatusEnum;
   ownerId?: string; // UUID
-  location: Location;
+  location: ILocation;
 }

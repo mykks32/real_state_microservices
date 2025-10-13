@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Logger,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -15,10 +17,10 @@ import {
   RequestWithUser,
 } from '../../common/guards/jwt.guard';
 import { IApiResponse } from '../../common/interfaces/api-response.interface';
-import { IEnquiry } from '../enquiry/interfaces/enquiry.interface';
 import { firstValueFrom } from 'rxjs';
 import { RequestCreatePropertyDTO } from './dtos/request-create-property.dto';
 import { CreatePropertyDTO } from './dtos/create-property.dto';
+import { IProperty } from './interfaces/property.interface';
 
 @Controller('property')
 export class PropertyController {
@@ -47,42 +49,34 @@ export class PropertyController {
   }
 
   /**
-   * Create enquiry URL built from the enquiry service base URL.
+   * Get property by owner id url.
    *
    * @readonly
    * @type {string}
    */
-  private getEnquiryByIdUrl(id: string): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/${id}`;
+  private getPropertyByOwnerIdUrl(ownerId: string): string {
+    return `${this.configService.propertyServiceUrl}/properties/owner/${ownerId}`;
   }
 
   /**
-   * Get all the enquiry
+   * Get All properties.
    *
-   * @private
-   * @param {number} page
-   * @param {number} limit
-   * @returns {string}
+   * @readonly
+   * @type {string}
    */
-  private getAllEnquiryUrl(page?: number, limit?: number): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/all?page=${page}&limit=${limit}`;
+  private getAllPropertyUrl(): string {
+    return `${this.configService.propertyServiceUrl}/properties`;
   }
 
   /**
-   * Get Enquiries by propertyId
+   * Get property by propertyId
    *
    * @private
    * @param {string} propertyId
-   * @param {number} page
-   * @param {number} limit
    * @returns {string}
    */
-  private getEnquiryByPropertyId(
-    propertyId: string,
-    page?: number,
-    limit?: number,
-  ): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/property/${propertyId}?page=${page}&limit=${limit}`;
+  private getPropertyByPropertyId(propertyId: string): string {
+    return `${this.configService.propertyServiceUrl}/properties/${propertyId}`;
   }
 
   /**
@@ -100,20 +94,21 @@ export class PropertyController {
    * Creates a new property.
    *
    * @route POST /properties
+   * @param {RequestWithUser} req
+   * @param {RequestCreatePropertyDTO} requestCreateEnquiryDto
    *
+   * @remarks
    * Requires authentication (JWT).
    * Adds user ID from JWT to DTO.
    * Forwards the request to the downstream service.
-   * @param {RequestWithUser} req
-   * @param {RequestCreatePropertyDTO} requestCreateEnquiryDto
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtGatewayGuard)
-  async createEnquiry(
+  async createProperty(
     @Req() req: RequestWithUser,
     @Body() requestCreateEnquiryDto: RequestCreatePropertyDTO,
-  ): Promise<IApiResponse<IEnquiry>> {
+  ): Promise<IApiResponse<IProperty>> {
     const userId = req.user.id;
     const requestId = req.headers['x-request-id'] as string;
 
@@ -127,7 +122,7 @@ export class PropertyController {
     );
 
     const response = await firstValueFrom(
-      this.httpService.post<IApiResponse<IEnquiry>>(
+      this.httpService.post<IApiResponse<IProperty>>(
         this.createPropertyUrl,
         payload,
         {
@@ -141,6 +136,129 @@ export class PropertyController {
 
     this.logger.log(
       `Property created successfully | user_id=${userId} | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Fetches property filtered by owner ID.
+   *
+   * @route GET /property/ownerId
+   * @param {RequestWithUser} req
+   * @returns {Promise<IApiResponse<IProperty[]>>} Paginated enquiries for the property.
+   *
+   * @remarks
+   * Requires authentication (JWT).
+   * Adds user ID from JWT to DTO.
+   * Forwards the request to the downstream service.
+   */
+  @Get('/owner')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtGatewayGuard)
+  async getPropertyByOwnerId(
+    @Req() req: RequestWithUser,
+    // @Query() query: PaginationQueryDto,
+  ): Promise<IApiResponse<IProperty[]>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    const ownerId = req.user.id;
+
+    this.logger.log(
+      `Fetching Properties | ownerId= ${ownerId} | request_id = ${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.get<IApiResponse<IProperty[]>>(
+        this.getPropertyByOwnerIdUrl(ownerId),
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Property fetched successfully | ownerId=${ownerId} | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Fetches All properties.
+   *
+   * @route GET /property
+   * @param {RequestWithUser} req
+   * @returns {Promise<IApiResponse<IProperty[]>>} Paginated enquiries for the property.
+   *
+   * @remarks
+   * Forwards the request to the downstream service.
+   */
+  @Get('/all')
+  @HttpCode(HttpStatus.OK)
+  async getAllProperty(
+    @Req() req: RequestWithUser,
+    // @Query() query: PaginationQueryDto,
+  ): Promise<IApiResponse<IProperty[]>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(`Fetching All Properties | request_id = ${requestId}`);
+
+    const response = await firstValueFrom(
+      this.httpService.get<IApiResponse<IProperty[]>>(
+        this.getAllPropertyUrl(),
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(`Property fetched successfully | request_id=${requestId}`);
+
+    return response.data;
+  }
+
+  /**
+   * Fetches property by propertyId.
+   *
+   * @route GET /:propertyId
+   * @param {Request} req
+   * @param {string} propertyId
+   * @returns {Promise<IApiResponse<IProperty>>} Paginated enquiries for the property.
+   *
+   * @remarks
+   * Forwards the request to the downstream service.
+   */
+  @Get('/:propertyId')
+  @HttpCode(HttpStatus.OK)
+  async getPropertyById(
+    @Req() req: Request,
+    @Param('propertyId') propertyId: string,
+    // @Query() query: PaginationQueryDto,
+  ): Promise<IApiResponse<IProperty>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `Fetching Property by propertyId | propertyId: ${propertyId} | request_id = ${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.get<IApiResponse<IProperty>>(
+        this.getPropertyByPropertyId(propertyId),
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Property fetched successfully | propertyId: ${propertyId} | request_id=${requestId}`,
     );
 
     return response.data;

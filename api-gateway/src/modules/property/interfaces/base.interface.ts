@@ -1,4 +1,4 @@
-export interface Base {
+export interface IBase {
   createdAt: string;
   updatedAt: string;
 }

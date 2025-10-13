@@ -1,7 +1,7 @@
 import { StateEnum } from '../enums/state.enum';
-import { Base } from './base.interface';
+import { IBase } from './base.interface';
 
-export interface Location extends Base {
+export interface ILocation extends IBase {
   id: number;
   address: string;
   city: string;
