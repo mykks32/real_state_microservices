@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -22,6 +23,7 @@ import {
 } from '../../common/guards/jwt.guard';
 import { firstValueFrom } from 'rxjs';
 import { PaginationQueryDto } from './dtos/pagination-query.dto';
+import { UpdateEnquiryStatusDto } from './dtos/update-enquiry-status.dto';
 
 /**
  * EnquiryController
@@ -103,6 +105,17 @@ export class EnquiryController {
     limit?: number,
   ): string {
     return `${this.configService.enquiryServiceUrl}/enquiry/property/${propertyId}?page=${page}&limit=${limit}`;
+  }
+
+  /**
+   * Change Enquiry status by enquiryId
+   *
+   * @private
+   * @param {string} enquiryId
+   * @returns {string}
+   */
+  private changeEnquiryStatusByEnquiryId(enquiryId: string): string {
+    return `${this.configService.enquiryServiceUrl}/enquiry/${enquiryId}/status`;
   }
 
   /**
@@ -236,14 +249,45 @@ export class EnquiryController {
    * Updates the status of an enquiry.
    *
    * @route PATCH /enquiry/:enquiry_id/status
-   * @param {string} enquiryId - Enquiry unique identifier.
-   * @param {EnquiryStatus} statusUpdateDto - New status data.
    * @returns {Promise<IApiResponse<IEnquiry>>} Updated enquiry.
    *
    * @remarks
    * Validates and logs status update.
+   * @param enquiryId
+   * @param dto
+   * @param req
    */
-  // async updateEnquiryStatus(enquiryId: string, statusUpdateDto: EnquiryStatusUpdateDto): Promise<IApiResponse<EnquiryDto>> {}
+  @Patch('/:enquiryId/status')
+  @HttpCode(HttpStatus.OK)
+  async changeEnquiryStatus(
+    @Param('enquiryId') enquiryId: string,
+    @Body() dto: UpdateEnquiryStatusDto,
+    @Req() req: Request,
+  ): Promise<IApiResponse<IEnquiry>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `Changing Enquiry Status | enquiryId= ${enquiryId} | request_id = ${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.patch<IApiResponse<IEnquiry>>(
+        this.changeEnquiryStatusByEnquiryId(enquiryId),
+        dto,
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Successfully Changed Enquiry Status | enquiryId= ${enquiryId} | request_id = ${requestId}`,
+    );
+
+    return response.data;
+  }
 
   /**
    * Creates a new enquiry.
@@ -253,10 +297,8 @@ export class EnquiryController {
    * Requires authentication (JWT).
    * Adds user ID from JWT to DTO.
    * Forwards the request to the downstream service.
-   * @param req
-   * @param requestCreateEnquiryDto
-   * @param req
-   * @param requestCreateEnquiryDto
+   * @param {RequestWithUser} req
+   * @param {CreateEnquiryDto} requestCreateEnquiryDto
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
