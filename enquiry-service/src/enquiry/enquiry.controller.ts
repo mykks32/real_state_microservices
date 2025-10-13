@@ -108,30 +108,30 @@ export class EnquiryController {
 
   /**
    * Get enquiries for a property with pagination
-   * @param property_id UUID of the property
+   * @param propertyId
    * @param query Pagination query params
    * @param req Express request for x-request-id
    * @returns Paginated ApiResponse
    */
-  @Get('/property/:property_id')
+  @Get('/property/:propertyId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get enquiries for a property with pagination' })
   @ApiParam({
-    name: 'property_id',
+    name: 'propertyId',
     type: String,
     format: 'uuid',
     required: true,
   })
   @SwaggerApiResponse({ status: 200, type: ApiResponse })
   async getPropertyEnquiries(
-    @Param('property_id') property_id: string,
+    @Param('propertyId') propertyId: string,
     @Query() query: PaginationQueryDto,
     @Req() req: Request,
   ): Promise<IApiResponse<IEnquiry[]>> {
     const page: number = query.page ?? 1;
     const limit: number = query.limit ?? 10;
     const { items, total } = await this.enquiryService.getPropertyEnquiryById(
-      property_id,
+      propertyId,
       page,
       limit,
     );
