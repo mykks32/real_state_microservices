@@ -17,13 +17,11 @@ import { HttpService } from '@nestjs/axios';
 import { IApiResponse } from '../../common/interfaces/api-response.interface';
 import { CreateEnquiryDto } from './dtos/create-enquiry.dto';
 import { IEnquiry } from './interfaces/enquiry.interface';
-import {
-  JwtGatewayGuard,
-  RequestWithUser,
-} from '../../common/guards/jwt.guard';
+import { JwtGatewayGuard } from '../../common/guards/jwt.guard';
 import { firstValueFrom } from 'rxjs';
 import { PaginationQueryDto } from './dtos/pagination-query.dto';
 import { UpdateEnquiryStatusDto } from './dtos/update-enquiry-status.dto';
+import { RequestWithUserContext } from '../../common/types/request-with-context.type';
 
 /**
  * EnquiryController
@@ -297,14 +295,14 @@ export class EnquiryController {
    * Requires authentication (JWT).
    * Adds user ID from JWT to DTO.
    * Forwards the request to the downstream service.
-   * @param {RequestWithUser} req
+   * @param {RequestWithUserContext} req
    * @param {CreateEnquiryDto} requestCreateEnquiryDto
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtGatewayGuard)
   async createEnquiry(
-    @Req() req: RequestWithUser,
+    @Req() req: RequestWithUserContext,
     @Body() requestCreateEnquiryDto: CreateEnquiryDto,
   ): Promise<IApiResponse<IEnquiry>> {
     const userId = req.user.id;
