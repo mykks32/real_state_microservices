@@ -19,7 +19,23 @@ export class AppConfigService {
     return this.config.get('DATABASE_USER', { infer: true });
   }
 
+  get dbPass(): string {
+    return this.config.get('DATABASE_PASS', { infer: true });
+  }
+
   get dbName(): string {
     return this.config.get('DATABASE_NAME', { infer: true });
+  }
+
+  get redisHost(): string {
+    return this.config.get('REDIS_HOST', { infer: true });
+  }
+
+  get redisPort(): string {
+    return this.config.get('REDIS_PORT', { infer: true });
+  }
+
+  get redisPass(): string {
+    return this.config.get('REDIS_PASSWORD', { infer: true });
   }
 }
