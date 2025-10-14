@@ -12,7 +12,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { PropertyController } from './property.controller';
 import { HttpService } from '@nestjs/axios';
 import { IApiResponse } from '../../../common/interfaces/api-response.interface';
 import { IProperty } from '../interfaces/property.interface';
