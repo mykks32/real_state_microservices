@@ -22,6 +22,9 @@ import { firstValueFrom } from 'rxjs';
 import { PaginationQueryDto } from './dtos/pagination-query.dto';
 import { UpdateEnquiryStatusDto } from './dtos/update-enquiry-status.dto';
 import { RequestWithUserContext } from '../../common/types/request-with-context.type';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '../../common/enums/role.enum';
 
 /**
  * EnquiryController
@@ -131,6 +134,8 @@ export class EnquiryController {
    */
   @Get('/all')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtGatewayGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   async getEnquiries(
     @Req() req: Request,
     @Query() query: PaginationQueryDto,
@@ -171,6 +176,8 @@ export class EnquiryController {
    */
   @Get('/:enquiryId')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtGatewayGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   async getEnquiryById(
     @Param('enquiryId') enquiryId: string,
     @Req() req: Request,
@@ -212,6 +219,8 @@ export class EnquiryController {
    * Supports query params: `page`, `limit`.
    */
   @Get('/property/:propertyId')
+  @UseGuards(JwtGatewayGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.SELLER)
   async getEnquiriesByProperty(
     @Param('propertyId') propertyId: string,
     @Req() req: Request,
@@ -257,6 +266,8 @@ export class EnquiryController {
    */
   @Patch('/:enquiryId/status')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtGatewayGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   async changeEnquiryStatus(
     @Param('enquiryId') enquiryId: string,
     @Body() dto: UpdateEnquiryStatusDto,
@@ -300,7 +311,8 @@ export class EnquiryController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UseGuards(JwtGatewayGuard)
+  @UseGuards(JwtGatewayGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.SELLER, Role.BUYER)
   async createEnquiry(
     @Req() req: RequestWithUserContext,
     @Body() requestCreateEnquiryDto: CreateEnquiryDto,
