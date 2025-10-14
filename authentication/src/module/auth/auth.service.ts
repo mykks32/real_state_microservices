@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/module/user/user.service';
 import { NestRefreshTokenService } from './refresh-token.service';
@@ -11,6 +16,7 @@ import { WrongPasswordException } from 'src/common/exceptions/wrong-password.exc
 import { InvalidJwtRefreshException } from 'src/common/exceptions/invalid-jwt-refresh.exception';
 import { User } from 'src/database/entities/user.entity';
 import { IUser } from '../user/user.interface';
+import { Role } from '../../database/enums/roles.enum';
 
 interface AccessTokenPayload {
   userId: string;
@@ -50,6 +56,17 @@ export class AuthService {
    */
   async create(data: CreateUserDto): Promise<Omit<IUser, 'password'>> {
     const { email, password } = data;
+    const allowedRoles = [Role.BUYER, Role.SELLER];
+
+    // If roles are provided, check if any invalid roles exist
+    if (data.roles && data.roles.some((role) => !allowedRoles.includes(role))) {
+      throw new BadRequestException('Only BUYER or SELLER roles are allowed');
+    }
+
+    // If roles not provided, assign default role
+    if (!data.roles || data.roles.length === 0) {
+      data.roles = [Role.BUYER];
+    }
     const exists = await this.userService.findByEmail({ email });
     if (exists) throw new EmailAlreadyExistsException();
 
@@ -80,6 +97,10 @@ export class AuthService {
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) throw new WrongPasswordException();
+
+    // Update lastLoginAt before returning tokens
+    user.lastLoginAt = new Date();
+    await user.save();
 
     const { accessToken, refreshToken } =
       await this.refreshTokenService.generateRefreshToken(user.id);
