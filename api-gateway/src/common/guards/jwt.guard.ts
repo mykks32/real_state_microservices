@@ -1,4 +1,3 @@
-// jwt-gateway.guard.ts
 import {
   CanActivate,
   ExecutionContext,
@@ -9,48 +8,11 @@ import {
 import { HttpService } from '@nestjs/axios';
 import type { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { AppConfigService } from '../../config/config.service';
-
-/**
- * Interface representing a user object returned by Auth service
- */
-export interface AuthenticatedUser {
-  id: string;
-  email: string;
-  username: string;
-  IsAdmin: boolean;
-  createdAt: Date;
-  lastLoginAt: Date | null;
-}
-
-/**
- * Extend Express Request to optionally include user
- */
-export interface RequestWithUser extends Request {
-  user: AuthenticatedUser;
-}
-
-/**
- * Response type expected from Auth Service /verify-access endpoint
- */
-interface AuthServiceVerifyResponse {
-  success: boolean;
-  message: string;
-  data: AuthenticatedUser;
-}
-
-/**
- * Response type expected from Auth Service /refresh endpoint
- */
-interface AuthServiceRefreshResponse {
-  success: boolean;
-  message: string;
-  data: {
-    accessToken: string;
-    refreshToken?: string; // New refresh token if rotation is enabled
-  };
-}
+import { IApiResponse } from '../interfaces/api-response.interface';
+import { IUser } from '../../modules/auth/interfaces/user.interface';
+import { RequestWithUserContext } from '../types/request-with-context.type';
 
 /**
  * Guard to verify access token via Auth microservice.
@@ -99,7 +61,7 @@ export class JwtGatewayGuard implements CanActivate {
    * @returns boolean whether request is authorized
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<RequestWithUser>();
+    const request = context.switchToHttp().getRequest<RequestWithUserContext>();
     const response = context.switchToHttp().getResponse<Response>();
     const cookies = request.cookies as Record<string, string> | undefined;
 
@@ -119,15 +81,16 @@ export class JwtGatewayGuard implements CanActivate {
     // 1. Try verifying access token first
     if (accessToken) {
       try {
-        const verifyResponse: AxiosResponse<AuthServiceVerifyResponse> =
-          await firstValueFrom(
-            this.httpService.post<AuthServiceVerifyResponse>(
-              this.getVerifyAccessTokenUrl(),
-              {
-                token: accessToken,
-              },
-            ),
-          );
+        const verifyResponse: AxiosResponse<
+          IApiResponse<Omit<IUser, 'password'>>
+        > = await firstValueFrom(
+          this.httpService.post<IApiResponse<Omit<IUser, 'password'>>>(
+            this.getVerifyAccessTokenUrl(),
+            {
+              token: accessToken,
+            },
+          ),
+        );
 
         if (verifyResponse.data.success && verifyResponse.data.data) {
           request.user = verifyResponse.data.data;
@@ -147,19 +110,28 @@ export class JwtGatewayGuard implements CanActivate {
     // 2. Fallback to refresh token
     if (refreshToken) {
       try {
-        const refreshResponse: AxiosResponse<AuthServiceRefreshResponse> =
-          await firstValueFrom(
-            this.httpService.post<AuthServiceRefreshResponse>(
-              this.getRefreshUrl(),
-              {},
-              {
-                headers: {
-                  Cookie: `realState_token=${refreshToken}`,
-                },
-                withCredentials: true,
+        const refreshResponse: AxiosResponse<
+          IApiResponse<{
+            accessToken: string;
+            refreshToken: string;
+          }>
+        > = await firstValueFrom(
+          this.httpService.post<
+            IApiResponse<{
+              accessToken: string;
+              refreshToken: string;
+            }>
+          >(
+            this.getRefreshUrl(),
+            {},
+            {
+              headers: {
+                Cookie: `realState_token=${refreshToken}`,
               },
-            ),
-          );
+              withCredentials: true,
+            },
+          ),
+        );
 
         if (
           refreshResponse.data.success &&
@@ -168,7 +140,7 @@ export class JwtGatewayGuard implements CanActivate {
           const newAccessToken = refreshResponse.data.data.accessToken;
           const newRefreshToken = refreshResponse.data.data.refreshToken;
 
-          // CRITICAL FIX: Update refresh token cookie if a new one was issued
+          // Update refresh token cookie if a new one was issued
           if (newRefreshToken) {
             this.logger.debug('Updating refresh token cookie with new token');
             response.cookie('realState_token', newRefreshToken, {
@@ -181,15 +153,16 @@ export class JwtGatewayGuard implements CanActivate {
           }
 
           // Verify new access token
-          const verifyNew: AxiosResponse<AuthServiceVerifyResponse> =
-            await firstValueFrom(
-              this.httpService.post<AuthServiceVerifyResponse>(
-                this.getVerifyAccessTokenUrl(),
-                {
-                  token: newAccessToken,
-                },
-              ),
-            );
+          const verifyNew: AxiosResponse<
+            IApiResponse<Omit<IUser, 'password'>>
+          > = await firstValueFrom(
+            this.httpService.post<IApiResponse<Omit<IUser, 'password'>>>(
+              this.getVerifyAccessTokenUrl(),
+              {
+                token: newAccessToken,
+              },
+            ),
+          );
 
           if (verifyNew.data.success && verifyNew.data.data) {
             request.user = verifyNew.data.data;

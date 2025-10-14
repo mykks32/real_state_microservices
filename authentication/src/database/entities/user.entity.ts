@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IUser } from '../../module/user/user.interface';
+import { Role } from '../enums/roles.enum';
 
 @Entity()
 export class User extends BaseEntity implements IUser {
@@ -25,9 +26,13 @@ export class User extends BaseEntity implements IUser {
   password: string;
 
   @Column({
-    default: false,
+    type: 'enum',
+    enum: Role,
+    array: true,
+    default: [Role.BUYER],
+    nullable: false,
   })
-  IsAdmin: boolean;
+  roles: Role[];
 
   @CreateDateColumn()
   createdAt: Date;
