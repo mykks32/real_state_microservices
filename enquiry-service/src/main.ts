@@ -34,10 +34,14 @@ async function bootstrap() {
   // Register global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
 
-  console.log(`API Gateway is running on: http://localhost:${3001}/`);
-  console.log(`API Documentation: http://localhost:${3001}/docs`);
+  console.log(
+    `API Gateway is running on: http://localhost:${process.env.PORT ?? 3001}/`,
+  );
+  console.log(
+    `API Documentation: http://localhost:${process.env.PORT ?? 3001}/docs`,
+  );
 }
 bootstrap().catch((err) => {
   console.error('Bootstrap failed', err);

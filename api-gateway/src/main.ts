@@ -10,7 +10,13 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.useGlobalFilters(new GlobalExceptionFilter());
-  await app.listen(8000);
+
+  console.log('port', process.env.PORT);
+  await app.listen(process.env.PORT ?? 4000, '0.0.0.0');
+
+  console.log(
+    `API Gateway is running on: http://localhost:${process.env.PORT ?? 4000}/`,
+  );
 }
 bootstrap().catch((err) => {
   console.error('Bootstrap failed', err);

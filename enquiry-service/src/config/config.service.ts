@@ -4,8 +4,6 @@ import { EnvSchema } from './config.schema';
 
 @Injectable()
 export class AppConfigService {
-  private readonly logger = new Logger(AppConfigService.name);
-
   constructor(private config: ConfigService<EnvSchema, true>) {}
 
   get dbHost(): string {

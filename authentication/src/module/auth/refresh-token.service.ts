@@ -1,17 +1,41 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
+import { AppConfigService } from '../../config/config.service';
 
 /**
  * Service to manage JWT access tokens and refresh tokens using Redis.
  */
 @Injectable()
 export class NestRefreshTokenService {
+  private readonly logger = new Logger(NestRefreshTokenService.name);
   private redis: Redis;
 
-  constructor(private readonly jwtService: JwtService) {
-    this.redis = new Redis();
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly config: AppConfigService,
+  ) {
+    // Use environment variables for configuration
+    this.redis = new Redis({
+      host: this.config.redisHost || 'localhost',
+      port: Number(this.config.redisPort) || 6379,
+      password: this.config.redisPass || 'redis',
+    });
+    // Fail fast if Redis connection fails
+    this.redis.on('error', (err) => {
+      this.logger.error('Redis connection error:', err);
+      throw new InternalServerErrorException('Redis service not available');
+    });
+
+    this.redis.on('connect', () => {
+      this.logger.log('Connected to Redis successfully');
+    });
   }
 
   /**

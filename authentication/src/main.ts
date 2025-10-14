@@ -26,11 +26,18 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
-
   app.use(cookieParser());
-  await app.listen(process.env.PORT ?? 3000);
 
-  console.log(`API Gateway is running on: http://localhost:${3000}/`);
-  console.log(`API Documentation: http://localhost:${3000}/docs`);
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+
+  console.log(
+    `Auth-Service is running on: http://localhost:${process.env.PORT ?? 3000}/`,
+  );
+  console.log(
+    `Auth-Service Documentation: http://localhost:${process.env.PORT ?? 3000}/docs`,
+  );
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Bootstrap failed', err);
+  process.exit(1);
+});

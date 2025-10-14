@@ -7,7 +7,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ConfigModule } from './config/config.module';
 
 @Module({
-  imports: [ConfigModule, DBModule, AuthModule, UserModule],
+  imports: [ConfigModule, DBModule, AuthModule, UserModule, ConfigModule],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
