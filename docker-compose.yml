@@ -1,0 +1,126 @@
+services:
+  # ------------------- Enquiry Databases -------------------
+  postgres-enquiry:
+    image: postgres:17
+    container_name: postgres-enquiry
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: real_state_enquiries
+    volumes:
+      - pg_enquiry_data:/var/lib/postgresql/data
+#    ports:
+#      - "5433:5432"
+    networks:
+      - realState_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ------------------- Auth pg Databases -------------------
+  postgres-auth:
+    image: postgres:17
+    container_name: postgres-auth
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: real_state_pg
+    volumes:
+      - pg_auth_data:/var/lib/postgresql/data
+#    ports:
+#      - "5434:5432"
+    networks:
+      - realState_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ------------------- Redis -------------------
+  redis-auth:
+    image: redis:7
+    container_name: redis-auth
+#    ports:
+#      - "6380:6379"
+    networks:
+      - realState_net
+    volumes:
+      - redis_auth_data:/data
+    command: [ "redis-server", "--requirepass", "redis", "--appendonly", "yes" ]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "redis", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---------------- Enquiry Nest Services ----------------
+  enquiry-service:
+    build: ./enquiry-service
+    container_name: enquiry-service
+    env_file:
+      - ./enquiry-service/.env.prod
+    volumes:
+      - enquiry_service_data:/usr/src/app/data
+    depends_on:
+      postgres-enquiry:
+        condition: service_healthy
+    networks:
+      - realState_net
+#    ports:
+#      - "3001:3001"
+
+  # ---------------- Auth Nest Services ----------------
+  auth-service:
+    build: ./authentication
+    container_name: auth-service
+    env_file:
+      - ./authentication/.env.prod
+    volumes:
+      - auth_service_data:/usr/src/app/data
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      redis-auth:
+        condition: service_healthy
+    networks:
+      - realState_net
+#    ports:
+#      - "3002:3000"
+
+  # ---------------- Auth Nest Services ----------------
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    env_file:
+      - ./api-gateway/.env.prod
+    volumes:
+      - api_gateway_data:/usr/src/app/data
+    depends_on:
+      - auth-service
+      - enquiry-service
+    networks:
+      - realState_net
+    ports:
+      - "4000:4000"  # Only expose API Gateway to host
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/public" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+# ---------------- Volumes ----------------
+volumes:
+  pg_enquiry_data:
+  pg_auth_data:
+  enquiry_service_data:
+  auth_service_data:
+  redis_auth_data:
+  api_gateway_data:
+
+# ---------------- Networks ----------------
+networks:
+  realState_net:
+    driver: bridge
