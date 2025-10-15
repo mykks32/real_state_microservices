@@ -2,6 +2,8 @@ name: Deploy Enquiry Service
 
 on:
   push:
+    tags:
+      - 'v*-enquiry'
     branches:
       - production
 
