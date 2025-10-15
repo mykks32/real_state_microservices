@@ -5,9 +5,11 @@ import { DBModule } from './database/database.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ConfigModule } from './config/config.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [ConfigModule, DBModule, AuthModule, UserModule, ConfigModule],
+  controllers: [AppController],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

@@ -1,4 +1,3 @@
-// app.controller.ts
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { JwtGatewayGuard } from './common/guards/jwt.guard';
 import {
@@ -20,7 +19,7 @@ export class AppController {
   }
 
   // Public route
-  @Get('public')
+  @Get('health')
   // @UseGuards(JwtGatewayGuard, RolesGuard)
   // @Roles(Role.SELLER)
   getPublic() {
