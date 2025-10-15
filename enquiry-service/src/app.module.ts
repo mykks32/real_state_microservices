@@ -4,10 +4,9 @@ import { EnquiryModule } from './enquiry/enquiry.module';
 import { RequestIdMiddleware } from './common/middlewares/request-id.middleware';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { AppController } from './app.controller';
-import { TerminusModule } from '@nestjs/terminus';
 
 @Module({
-  imports: [DBModule, EnquiryModule, TerminusModule],
+  imports: [DBModule, EnquiryModule],
   controllers: [AppController],
   providers: [],
 })

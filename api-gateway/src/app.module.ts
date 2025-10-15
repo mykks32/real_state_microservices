@@ -7,7 +7,6 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { EnquiryModule } from './modules/enquiry/enquiry.module';
 import { ConfigModule } from './config/config.module';
 import { PropertyModule } from './modules/property/property.module';
-import { TerminusModule } from '@nestjs/terminus';
 
 @Module({
   imports: [
@@ -16,7 +15,6 @@ import { TerminusModule } from '@nestjs/terminus';
     AuthModule,
     EnquiryModule,
     PropertyModule,
-    TerminusModule,
   ],
   controllers: [AppController],
   providers: [],
