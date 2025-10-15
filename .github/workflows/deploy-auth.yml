@@ -1,4 +1,4 @@
-name: Deploy Enquiry Service
+name: Deploy Auth Service
 
 on:
   push:

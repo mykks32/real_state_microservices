@@ -1,4 +1,4 @@
-name: Deploy Enquiry Service
+name: Deploy Property Service
 
 on:
   push:
