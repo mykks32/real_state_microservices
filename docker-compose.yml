@@ -39,6 +39,25 @@ services:
       timeout: 5s
       retries: 5
 
+  # ------------------- Property Mysql Databases -------------------
+  mysql-property:
+    image: mysql:8.0
+    container_name: mysql-property
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: realState_property_mysql
+        MYSQL_USER: user
+        MYSQL_PASSWORD: password
+    volumes:
+        - mysql_property_data:/var/lib/mysql
+    networks:
+        - realState_net
+    healthcheck:
+        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot" ]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
   # ------------------- Redis -------------------
   redis-auth:
     image: redis:7
@@ -61,7 +80,7 @@ services:
     build: ./enquiry-service
     container_name: enquiry-service
     env_file:
-      - ./enquiry-service/.env.prod
+      - ./env/enquiry-service.env
     volumes:
       - enquiry_service_data:/usr/src/app/data
     depends_on:
@@ -74,10 +93,10 @@ services:
 
   # ---------------- Auth Nest Services ----------------
   auth-service:
-    build: ./authentication
+    build: ./auth-service
     container_name: auth-service
     env_file:
-      - ./authentication/.env.prod
+      - ./env/auth-service.env
     volumes:
       - auth_service_data:/usr/src/app/data
     depends_on:
@@ -90,12 +109,28 @@ services:
 #    ports:
 #      - "3002:3000"
 
-  # ---------------- Auth Nest Services ----------------
+  # ---------------- SpringBoot Property Services ----------------
+  property-service:
+    build: ./property-service
+    container_name: property-service
+    env_file:
+      - ./env/property-service.env
+    volumes:
+      - property_service_data:/app
+    depends_on:
+      mysql-property:
+        condition: service_healthy
+    networks:
+      - realState_net
+#    ports:
+#      - "4000:4000"
+
+  # ---------------- Api Nest Services ----------------
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
     env_file:
-      - ./api-gateway/.env.prod
+      - ./env/api-gateway.env
     volumes:
       - api_gateway_data:/usr/src/app/data
     depends_on:
@@ -119,6 +154,9 @@ volumes:
   auth_service_data:
   redis_auth_data:
   api_gateway_data:
+  mysql_property_data:
+  property_service_data:
+
 
 # ---------------- Networks ----------------
 networks:

@@ -303,7 +303,7 @@ export class EnquiryController {
    *
    * @route POST /enquiry
    *
-   * Requires authentication (JWT).
+   * Requires auth-service (JWT).
    * Adds user ID from JWT to DTO.
    * Forwards the request to the downstream service.
    * @param {RequestWithUserContext} req

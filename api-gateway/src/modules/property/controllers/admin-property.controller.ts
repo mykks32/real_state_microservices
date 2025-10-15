@@ -27,7 +27,7 @@ import { Role } from '../../../common/enums/role.enum';
  * Handles admin-only property-related API endpoints.
  *
  * All routes require:
- * - JWT authentication
+ * - JWT auth-service
  * - ADMIN role
  *
  * Routes:

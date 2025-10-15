@@ -20,7 +20,7 @@ import { AppConfigService } from '../../config/config.service';
 /**
  * AuthController
  *
- * Handles authentication-related API endpoints by forwarding requests
+ * Handles auth-service-related API endpoints by forwarding requests
  * to the downstream auth-service and normalizing responses.
  *
  * Routes:
