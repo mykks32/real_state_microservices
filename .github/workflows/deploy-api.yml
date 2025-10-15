@@ -1,0 +1,52 @@
+name: Deploy Enquiry Service
+
+on:
+  push:
+    tags:
+      - 'v*-api'
+    branches:
+      - production
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - uses: actions/checkout@v3
+
+      # 2. Set Docker image version from tag
+      - name: Set Docker image version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}  # e.g., v1.2.3-api
+          VERSION=${VERSION#v}              # strip leading 'v' → 1.2.3
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Log version
+        run: echo "Docker image version is $VERSION"
+
+      # 3. Docker login
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      # 4. Create env file for property-service
+      - name: Create env file
+        run: |
+          mkdir -p env
+          echo "PORT=4000" >> env/api-gateway.env
+          echo "AUTH_SERVICE_URL=http://auth-service:3000" >> env/api-gateway.env
+          echo "ENQUIRY_SERVICE_URL=http://enquiry-service:3001" >> env/api-gateway.env
+          echo "PROPERTY_SERVICE_URL=http://property-service:8080/api" >> env/api-gateway.env
+
+      - name: Build Docker image
+        run: docker build -t mykks32/realState/api-gateway:$VERSION ./api-gateway
+
+      - name: Push Docker image
+        run: docker push mykks32/realState/api-gateway:$VERSION
+
+      - name: Tag as latest and push
+        run: |
+          docker tag mykks32/realState/api-gateway:$VERSION mykks32/api-gateway:latest
+          docker push mykks32/realState/api-gateway:latest
