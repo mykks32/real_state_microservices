@@ -48,12 +48,12 @@ jobs:
           echo "SPRING_FLYWAY_BASELINE_ON_MIGRATE=true" >> env/property-service.env
 
       - name: Build Docker image
-        run: docker build -t mykks32/real-state/property-service:$VERSION ./property-service
+        run: docker build -t mykks32/realstate-property-service:$VERSION ./property-service
 
       - name: Push Docker image
-        run: docker push mykks32/real-state/property-service:$VERSION
+        run: docker push mykks32/realstate-property-service:$VERSION
 
       - name: Tag as latest and push
         run: |
-          docker tag mykks32/real-state/property-service:$VERSION mykks32/property-service:latest
-          docker push mykks32/real-state/property-service:latest
+          docker tag mykks32/realstate-property-service:$VERSION mykks32/property-service:latest
+          docker push mykks32/realstate-property-service:latest

@@ -46,12 +46,12 @@ jobs:
           echo "DATABASE_NAME=real_state_enquiries" >> env/enquiry-service.env
 
       # 5. Build Docker image
-      - run: docker build -t mykks32/real-state/enquiry-service:$VERSION ./enquiry-service
+      - run: docker build -t mykks32/realstate-enquiry-service:$VERSION ./enquiry-service
 
       # 6. Push Docker image
-      - run: docker push mykks32/real-state/enquiry-service:$VERSION
+      - run: docker push mykks32/realstate-enquiry-service:$VERSION
 
       # 7. Tag as latest and push
       - run: |
-          docker tag mykks32/real-state/enquiry-service:$VERSION mykks32/enquiry-service:latest
-          docker push mykks32/real-state/enquiry-service:latest
+          docker tag mykks32/realstate-enquiry-service:$VERSION mykks32/enquiry-service:latest
+          docker push mykks32/realstate-enquiry-service:latest

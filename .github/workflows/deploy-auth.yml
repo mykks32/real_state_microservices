@@ -49,12 +49,12 @@ jobs:
           echo "REDIS_PASSWORD=${{ secrets.AUTH_REDIS_PASS }}" >> env/auth-service.env
 
       - name: Build Docker image
-        run: docker build -t mykks32/real-state/auth-service:$VERSION ./auth-service
+        run: docker build -t mykks32/realstate-auth-service:$VERSION ./auth-service
 
       - name: Push Docker image
-        run: docker push mykks32/real-state/auth-service:$VERSION
+        run: docker push mykks32/realstate-auth-service:$VERSION
 
       - name: Tag as latest and push
         run: |
-          docker tag mykks32/real-state/auth-service:$VERSION mykks32/auth-service:latest
-          docker push mykks32/real-state/auth-service:latest
+          docker tag mykks32/realstate-auth-service:$VERSION mykks32/auth-service:latest
+          docker push mykks32/realstate-auth-service:latest
