@@ -4,7 +4,7 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { UserService } from 'src/module/user/user.service';
 import { NestRefreshTokenService } from './refresh-token.service';
 import { JwtService } from '@nestjs/jwt';
@@ -25,7 +25,7 @@ interface AccessTokenPayload {
 }
 
 /**
- * Service responsible for authentication and user management.
+ * Service responsible for auth-service and user management.
  */
 @Injectable()
 export class AuthService {
