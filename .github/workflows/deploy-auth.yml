@@ -31,7 +31,7 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-      # 4. Create env file for enquiry-service
+      # 4. Create env file for auth-service
       - name: Create env file
         run: |
           mkdir -p env
