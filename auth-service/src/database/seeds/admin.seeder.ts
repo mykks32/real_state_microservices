@@ -1,6 +1,6 @@
 import { DataSource, Raw } from 'typeorm';
 import { User } from '../entities/user.entity';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Role } from '../enums/roles.enum';
 
 export async function seedAdminUser(dataSource: DataSource) {
