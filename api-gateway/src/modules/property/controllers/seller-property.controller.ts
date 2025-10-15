@@ -32,7 +32,7 @@ import { UpdatePropertyDTO } from '../dtos/update-property.dto';
  * Handles property-related API endpoints for sellers.
  *
  * All routes require:
- * - JWT authentication
+ * - JWT auth-service
  * - The user must have the SELLER or ADMIN role (by default, enforced at route level)
  *
  * Routes:
@@ -72,7 +72,7 @@ export class SellerPropertyController {
    * @param {RequestCreatePropertyDTO} requestCreatePropertyDto
    *
    * @remarks
-   * Requires authentication (JWT).
+   * Requires auth-service (JWT).
    * Adds user ID from JWT to DTO.
    * Forwards the request to the downstream service.
    */
@@ -123,7 +123,7 @@ export class SellerPropertyController {
    * @returns {Promise<IApiResponse<IProperty[]>>} Paginated enquiries for the property.
    *
    * @remarks
-   * Requires authentication (JWT).
+   * Requires auth-service (JWT).
    * Adds user ID from JWT to DTO.
    * Forwards the request to the downstream service.
    */
@@ -213,7 +213,7 @@ export class SellerPropertyController {
    * @param {UpdatePropertyDTO} updatePropertyDTO
    *
    * @remarks
-   * Requires authentication (JWT).
+   * Requires auth-service (JWT).
    * Adds user ID from JWT to DTO.
    * Forwards the request to the downstream service.
    */

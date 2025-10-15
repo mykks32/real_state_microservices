@@ -7,7 +7,7 @@ import { ConfigModule } from '../../config/config.module';
  * AuthModule
  *
  * @description
- * Handles authentication routes at the API Gateway.
+ * Handles auth-service routes at the API Gateway.
  * Forwards requests and normalizes responses only.
  *
  * @remarks

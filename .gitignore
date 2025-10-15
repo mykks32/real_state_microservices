@@ -1,7 +1,7 @@
 # compiled output
-/dist
-/node_modules
-/build
+*/dist
+*/node_modules
+*/build
 
 # Logs
 logs
@@ -21,6 +21,7 @@ lerna-debug.log*
 
 # IDEs and editors
 /.idea
+*/.idea
 .project
 .classpath
 .c9/
@@ -42,6 +43,7 @@ lerna-debug.log*
 .env.production.local
 .env.local
 .env.prod
+/env/*
 
 # temp directory
 .temp
