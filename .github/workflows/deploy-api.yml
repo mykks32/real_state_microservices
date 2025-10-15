@@ -41,12 +41,12 @@ jobs:
           echo "PROPERTY_SERVICE_URL=http://property-service:8080/api" >> env/api-gateway.env
 
       - name: Build Docker image
-        run: docker build -t mykks32/realState/api-gateway:$VERSION ./api-gateway
+        run: docker build -t mykks32/real-state/api-gateway:$VERSION ./api-gateway
 
       - name: Push Docker image
-        run: docker push mykks32/realState/api-gateway:$VERSION
+        run: docker push mykks32/real-state/api-gateway:$VERSION
 
       - name: Tag as latest and push
         run: |
-          docker tag mykks32/realState/api-gateway:$VERSION mykks32/api-gateway:latest
-          docker push mykks32/realState/api-gateway:latest
+          docker tag mykks32/real-state/api-gateway:$VERSION mykks32/api-gateway:latest
+          docker push mykks32/real-state/api-gateway:latest
