@@ -77,7 +77,8 @@ services:
 
   # ---------------- Enquiry Nest Services ----------------
   enquiry-service:
-    build: ./enquiry-service
+#    build: ./enquiry-service
+    image: mykks32/realstate-enquiry-service:latest
     container_name: enquiry-service
     env_file:
       - ./env/enquiry-service.env
@@ -93,7 +94,8 @@ services:
 
   # ---------------- Auth Nest Services ----------------
   auth-service:
-    build: ./auth-service
+#    build: ./auth-service
+    image: mykks32/realstate-auth-service:latest
     container_name: auth-service
     env_file:
       - ./env/auth-service.env
@@ -112,6 +114,7 @@ services:
   # ---------------- SpringBoot Property Services ----------------
   property-service:
     build: ./property-service
+#    image: mykks32/realstate-property-service:latest
     container_name: property-service
     env_file:
       - ./env/property-service.env
@@ -127,7 +130,8 @@ services:
 
   # ---------------- Api Nest Services ----------------
   api-gateway:
-    build: ./api-gateway
+#    build: ./api-gateway
+    image: mykks32/realstate-api-gateway:latest
     container_name: api-gateway
     env_file:
       - ./env/api-gateway.env
@@ -140,11 +144,6 @@ services:
       - realState_net
     ports:
       - "4000:4000"  # Only expose API Gateway to host
-    healthcheck:
-      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/public" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
 # ---------------- Volumes ----------------
 volumes:
