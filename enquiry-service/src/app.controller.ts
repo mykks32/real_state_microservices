@@ -18,7 +18,10 @@ export class AppController {
   check() {
     return this.health.check([
       async () =>
-        this.http.pingCheck('api-gateway', 'http://api-gateway:3001/health'),
+        this.http.pingCheck(
+          'enquiry-service',
+          'http://enquiry-service:3001/health',
+        ),
     ]);
   }
 }
