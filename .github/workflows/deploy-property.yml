@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*-property'
-    branches:
-      - production
 
 jobs:
   docker:
@@ -55,5 +53,5 @@ jobs:
 
       - name: Tag as latest and push
         run: |
-          docker tag mykks32/realstate-property-service:$VERSION mykks32/property-service:latest
+          docker tag mykks32/realstate-property-service:$VERSION mykks32/realstate-property-service:latest
           docker push mykks32/realstate-property-service:latest

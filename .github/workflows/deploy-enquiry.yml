@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*-enquiry'
-    branches:
-      - production
 
 jobs:
   docker:
@@ -53,5 +51,5 @@ jobs:
 
       # 7. Tag as latest and push
       - run: |
-          docker tag mykks32/realstate-enquiry-service:$VERSION mykks32/enquiry-service:latest
+          docker tag mykks32/realstate-enquiry-service:$VERSION mykks32/realstate-enquiry-service:latest
           docker push mykks32/realstate-enquiry-service:latest

@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*-api'
-    branches:
-      - production
 
 jobs:
   docker:
@@ -51,5 +49,5 @@ jobs:
 
       - name: Tag as latest and push
         run: |
-          docker tag mykks32/realstate-api-gateway:$VERSION mykks32/api-gateway:latest
+          docker tag mykks32/realstate-api-gateway:$VERSION mykks32/realstate-api-gateway:latest
           docker push mykks32/realstate-api-gateway:latest
