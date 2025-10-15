@@ -89,16 +89,17 @@ services:
         condition: service_healthy
     networks:
       - realState_net
-#    ports:
-#      - "3001:3001"
+    ports:
+      - "3001:3001"
     restart: unless-stopped
 
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health" ]
-      interval: 5s
-      timeout: 3s
+      interval: 20s
+      timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
+
 
   # ---------------- Auth Nest Services ----------------
   auth-service:
@@ -116,16 +117,16 @@ services:
         condition: service_healthy
     networks:
       - realState_net
-#    ports:
-#      - "3002:3000"
+    ports:
+      - "3002:3000"
     restart: unless-stopped
 
     healthcheck:
-      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health" ]
-      interval: 5s
-      timeout: 3s
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/health" ]
+      interval: 20s
+      timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
 
   # ---------------- SpringBoot Property Services ----------------
   property-service:
@@ -141,15 +142,15 @@ services:
         condition: service_healthy
     networks:
       - realState_net
-#    ports:
-#      - "4000:4000"
+    ports:
+      - "8080:8080"
     restart: unless-stopped
 
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      interval: 20s
+      timeout: 10s
+      retries: 5
       start_period: 60s
 
   # ---------------- Api Nest Services ----------------
@@ -164,6 +165,7 @@ services:
     depends_on:
       - auth-service
       - enquiry-service
+      - property-service
     networks:
       - realState_net
     ports:
@@ -172,10 +174,12 @@ services:
     restart: unless-stopped
 
     healthcheck:
-      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4000/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      test: [ "CMD", "curl", "-f", "http://localhost:4000/health" ]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
 
 # ---------------- Volumes ----------------
 volumes:
