@@ -11,6 +11,9 @@ jobs:
   docker:
     runs-on: ubuntu-latest
 
+    # Run only if this push is BOTH on production branch AND a tag matching v*-api
+    if: github.ref_name == 'production' || startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-property')
+
     steps:
       # 1. Checkout repo
       - uses: actions/checkout@v3
