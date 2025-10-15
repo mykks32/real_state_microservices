@@ -1,0 +1,56 @@
+name: Deploy Enquiry Service
+
+on:
+  push:
+    tags:
+      - 'v*-property'
+    branches:
+      - production
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - uses: actions/checkout@v3
+
+      # 2. Set Docker image version from tag
+      - name: Set Docker image version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}  # e.g., v1.2.3-property
+          VERSION=${VERSION#v}              # strip leading 'v' → 1.2.3
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Log version
+        run: echo "Docker image version is $VERSION"
+
+      # 3. Docker login
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      # 4. Create env file for property-service
+      - name: Create env file
+        run: |
+          mkdir -p env
+          echo "SPRING_APPLICATION_NAME=property-service" >> env/property-service.env
+          echo "SERVER_PORT=8080" >> env/property-service.env
+          echo "SPRING_DATASOURCE_URL=jdbc:mysql://mysql-property/realState_property_mysql" >> env/property-service.env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.PROPERTY_DB_USER }}" >> env/property-service.env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.PROPERTY_DB_PASS }}" >> env/property-service.env
+          echo "SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver" >> env/property-service.env
+          echo "SPRING_FLYWAY_ENABLED=true" >> env/property-service.env
+          echo "SPRING_FLYWAY_BASELINE_ON_MIGRATE=true" >> env/property-service.env
+
+      - name: Build Docker image
+        run: docker build -t mykks32/realState/property-service:$VERSION ./property-service
+
+      - name: Push Docker image
+        run: docker push mykks32/realState/property-service:$VERSION
+
+      - name: Tag as latest and push
+        run: |
+          docker tag mykks32/realState/property-service:$VERSION mykks32/property-service:latest
+          docker push mykks32/realState/property-service:latest
