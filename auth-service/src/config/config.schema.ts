@@ -2,14 +2,8 @@ import { z } from 'zod';
 
 /** Env variables schema */
 export const envSchema = z.object({
-  DATABASE_HOST: z.string(),
-  DATABASE_PORT: z.string().default('5432'),
-  DATABASE_USER: z.string(),
-  DATABASE_PASS: z.string(),
-  DATABASE_NAME: z.string(),
-  REDIS_HOST: z.string(),
-  REDIS_PORT: z.string(),
-  REDIS_PASSWORD: z.string(),
+  DATABASE_URL: z.string(),
+  REDIS_URL: z.string(),
 });
 
 /** Type of validated env */

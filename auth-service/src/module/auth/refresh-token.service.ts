@@ -22,11 +22,7 @@ export class NestRefreshTokenService {
     private readonly config: AppConfigService,
   ) {
     // Use environment variables for configuration
-    this.redis = new Redis({
-      host: this.config.redisHost || 'localhost',
-      port: Number(this.config.redisPort) || 6379,
-      password: this.config.redisPass || 'redis',
-    });
+    this.redis = new Redis(this.config.redisUrl);
     // Fail fast if Redis connection fails
     this.redis.on('error', (err) => {
       this.logger.error('Redis connection error:', err);
