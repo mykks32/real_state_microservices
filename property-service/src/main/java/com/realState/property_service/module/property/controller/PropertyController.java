@@ -17,7 +17,7 @@ import java.util.*;
  * REST controller for managing property-related operations.
  */
 @RestController
-@RequestMapping(value = { "/api/properties", "/api/properties/" })
+@RequestMapping(value = { "/properties", "/properties/" })
 public class PropertyController {
 
     private final PropertyService propertyService;

@@ -36,15 +36,9 @@ jobs:
       - name: Create env file
         run: |
           mkdir -p env
-          echo "PORT=3000" >> env/auth-service.env
-          echo "DATABASE_HOST=postgres-auth" >> env/auth-service.env
-          echo "DATABASE_PORT=5432" >> env/auth-service.env
-          echo "DATABASE_USER=${{ secrets.AUTH_DB_USER }}" >> env/auth-service.env
-          echo "DATABASE_PASS=${{ secrets.AUTH_DB_PASS }}" >> env/auth-service.env
-          echo "DATABASE_NAME=real_state_pg" >> env/auth-service.env
-          echo "REDIS_HOST=redis-auth" >> env/auth-service.env
-          echo "REDIS_PORT=6379" >> env/auth-service.env
-          echo "REDIS_PASSWORD=${{ secrets.AUTH_REDIS_PASS }}" >> env/auth-service.env
+          echo "PORT=${{ secrets.AUTH_PORT }}" >> env/auth-service.env
+          echo "DATABASE_URL=${{ secrets.AUTH_DB_URL }}" >> env/auth-service.env
+          echo "REDIS_URL=${{ secrets.AUTH_REDIS_URL }}" >> env/auth-service.env
 
       - name: Build Docker image
         run: docker build -t mykks32/realstate-auth-service:$VERSION ./auth-service
