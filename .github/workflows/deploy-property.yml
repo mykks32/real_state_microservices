@@ -43,13 +43,22 @@ jobs:
           echo "SPRING_FLYWAY_ENABLED=true" >> env/property-service.env
           echo "SPRING_FLYWAY_BASELINE_ON_MIGRATE=true" >> env/property-service.env
 
+      # 5. Builds Docker image from the property-service directory
       - name: Build Docker image
         run: docker build -t mykks32/realstate-property-service:$VERSION ./property-service
 
+      # 6. Pushes the versioned Docker image to Docker Hub
       - name: Push Docker image
         run: docker push mykks32/realstate-property-service:$VERSION
 
+      # 7. Tags the same image as 'latest' and pushes it
       - name: Tag as latest and push
         run: |
           docker tag mykks32/realstate-property-service:$VERSION mykks32/realstate-property-service:latest
           docker push mykks32/realstate-property-service:latest
+
+      # 8. Calls Render's webhook to deploy the new image
+      - name: Trigger Render Deploy
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.RENDER_PROPERTY_DEPLOY_HOOK }}"
