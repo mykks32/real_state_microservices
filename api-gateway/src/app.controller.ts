@@ -7,12 +7,16 @@ import {
 import { Role } from './common/enums/role.enum';
 import { Roles } from './common/decorators/roles.decorator';
 import { RolesGuard } from './common/guards/roles.guard';
+import { ApiBearerAuth, ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller()
+@ApiTags('Public')
 export class AppController {
   // Secured route
   @Get('hello')
   @UseGuards(JwtGatewayGuard, RolesGuard)
+  @ApiBearerAuth('Bearer')
+  @ApiCookieAuth('realState_token')
   @Roles(Role.ADMIN)
   getHello(@Req() req: RequestWithUserContext): UserPayload | null {
     return req.user ?? null;
