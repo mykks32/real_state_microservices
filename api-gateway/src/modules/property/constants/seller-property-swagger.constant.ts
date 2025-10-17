@@ -10,6 +10,22 @@ export const SellerPropertySwaggerConstant = {
     SELLER_PROPERTY: 'seller-property',
   },
 
+  /** Security scheme definitions */
+  SECURITY: {
+    BEARER_AUTH: 'bearer',
+    COOKIE_AUTH: 'cookie',
+  },
+
+  /** Cookie authentication requirements */
+  COOKIES: {
+    REALSTATE_TOKEN: {
+      name: 'realState_token',
+      description: 'HTTP-only refresh token cookie',
+      required: true,
+      example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    },
+  },
+
   /** API operation metadata for seller */
   OPERATIONS: {
     CREATE_PROPERTY: {

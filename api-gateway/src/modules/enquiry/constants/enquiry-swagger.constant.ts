@@ -56,7 +56,7 @@ export const EnquirySwaggerConstant = {
 
   /** Security scheme definitions */
   SECURITY: {
-    BEARER_AUTH: 'Bearer',
+    BEARER_AUTH: 'bearer',
     COOKIE_AUTH: 'cookie',
   },
 

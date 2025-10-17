@@ -59,8 +59,8 @@ import {
 @UseGuards(JwtGatewayGuard, RolesGuard)
 @Roles(Role.ADMIN, Role.SELLER)
 @ApiTags(SellerPropertySwaggerConstant.TAGS.SELLER_PROPERTY)
-@ApiBearerAuth()
-@ApiCookieAuth()
+@ApiBearerAuth(SellerPropertySwaggerConstant.SECURITY.BEARER_AUTH)
+@ApiCookieAuth(SellerPropertySwaggerConstant.COOKIES.REALSTATE_TOKEN.name)
 export class SellerPropertyController {
   /** Logger instance scoped to SellerPropertyController. */
   private readonly logger = new Logger(SellerPropertyController.name);

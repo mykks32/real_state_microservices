@@ -15,7 +15,7 @@ export class AppController {
   // Secured route
   @Get('hello')
   @UseGuards(JwtGatewayGuard, RolesGuard)
-  @ApiBearerAuth('Bearer')
+  @ApiBearerAuth('bearer')
   @ApiCookieAuth('realState_token')
   @Roles(Role.ADMIN)
   getHello(@Req() req: RequestWithUserContext): UserPayload | null {
