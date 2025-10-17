@@ -13,11 +13,7 @@ import { User } from './entities/user.entity';
       useFactory: (config: AppConfigService) => {
         return {
           type: 'postgres' as const,
-          host: config.dbHost,
-          port: config.dbPort,
-          username: config.dbUser,
-          password: config.dbPass,
-          database: config.dbName,
+          url: config.dbUrl,
           entities: [User],
           migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
           migrationsTableName: 'migrations',

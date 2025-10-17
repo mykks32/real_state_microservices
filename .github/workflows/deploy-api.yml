@@ -36,10 +36,10 @@ jobs:
       - name: Create env file
         run: |
           mkdir -p env
-          echo "PORT=4000" >> env/api-gateway.env
-          echo "AUTH_SERVICE_URL=http://auth-service:3000" >> env/api-gateway.env
-          echo "ENQUIRY_SERVICE_URL=http://enquiry-service:3001" >> env/api-gateway.env
-          echo "PROPERTY_SERVICE_URL=http://property-service:8080/api" >> env/api-gateway.env
+          echo "PORT=${{ secrets.API_PORT }}" >> env/api-gateway.env
+          echo "AUTH_SERVICE_URL=${{ secrets.AUTH_URL }}" >> env/api-gateway.env
+          echo "ENQUIRY_SERVICE_URL=${{ secrets.ENQUIRY_URL }}" >> env/api-gateway.env
+          echo "PROPERTY_SERVICE_URL=${{ secrets.PROPERTY_URL }}" >> env/api-gateway.env
 
       - name: Build Docker image
         run: docker build -t mykks32/realstate-api-gateway:$VERSION ./api-gateway
