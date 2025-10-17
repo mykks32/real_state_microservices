@@ -25,6 +25,19 @@ import { Role } from '../../../common/enums/role.enum';
 import { RequestCreatePropertyDTO } from '../dtos/request-create-property.dto';
 import { CreatePropertyDTO } from '../dtos/create-property.dto';
 import { UpdatePropertyDTO } from '../dtos/update-property.dto';
+import { ApprovalStatusEnum } from '../enums/approval-status.enum';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiCookieAuth,
+} from '@nestjs/swagger';
+import { SellerPropertySwaggerConstant } from '../constants/seller-property-swagger.constant';
+import {
+  ApiCreateProperty,
+  ApiGetPropertiesByOwner,
+  ApiUpdateProperty,
+  ApiSubmitForApproval,
+} from '../decorators/seller-property-swagger.decorator';
 
 /**
  * SellerPropertyController
@@ -49,6 +62,9 @@ import { UpdatePropertyDTO } from '../dtos/update-property.dto';
 @Controller('property')
 @UseGuards(JwtGatewayGuard, RolesGuard)
 @Roles(Role.ADMIN, Role.SELLER)
+@ApiTags(SellerPropertySwaggerConstant.TAGS.SELLER_PROPERTY)
+@ApiBearerAuth()
+@ApiCookieAuth()
 export class SellerPropertyController {
   /** Logger instance scoped to SellerPropertyController. */
   private readonly logger = new Logger(SellerPropertyController.name);
@@ -79,6 +95,7 @@ export class SellerPropertyController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtGatewayGuard)
+  @ApiCreateProperty()
   async createProperty(
     @Req() req: RequestWithUserContext,
     @Body() requestCreatePropertyDto: RequestCreatePropertyDTO,
@@ -88,6 +105,7 @@ export class SellerPropertyController {
 
     const payload: CreatePropertyDTO = {
       ...requestCreatePropertyDto,
+      approvalStatus: ApprovalStatusEnum.Draft,
       ownerId: userId,
     };
 
@@ -130,6 +148,7 @@ export class SellerPropertyController {
   @Get('/owner')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtGatewayGuard)
+  @ApiGetPropertiesByOwner()
   async getPropertyByOwnerId(
     @Req() req: RequestWithUserContext,
     // @Query() query: PaginationQueryDto,
@@ -173,6 +192,7 @@ export class SellerPropertyController {
    */
   @Patch('/:propertyId/submit')
   @HttpCode(HttpStatus.OK)
+  @ApiSubmitForApproval()
   async submitForPropertyApproval(
     @Req() req: Request,
     @Param('propertyId') propertyId: string,
@@ -219,6 +239,7 @@ export class SellerPropertyController {
    */
   @Put('/:propertyId')
   @HttpCode(HttpStatus.OK)
+  @ApiUpdateProperty()
   async updateProperty(
     @Req() req: Request,
     @Param('propertyId') propertyId: string,

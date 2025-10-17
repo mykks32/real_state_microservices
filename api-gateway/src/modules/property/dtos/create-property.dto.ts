@@ -1,8 +1,6 @@
-import { IsEnum, IsUUID, ValidateNested } from 'class-validator';
+import { IsEnum, IsUUID } from 'class-validator';
 import { RequestCreatePropertyDTO } from './request-create-property.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { CreateLocationDTO } from './create-location.dto';
-import { Type } from 'class-transformer';
 import { ApprovalStatusEnum } from '../enums/approval-status.enum';
 
 /**

@@ -20,6 +20,16 @@ import { JwtGatewayGuard } from '../../../common/guards/jwt.guard';
 import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { Role } from '../../../common/enums/role.enum';
+import { ApiBearerAuth, ApiTags, ApiCookieAuth } from '@nestjs/swagger';
+import { AdminPropertySwaggerConstant } from '../constants/admin-property-swagger.constant';
+import {
+  ApiApproveProperty,
+  ApiArchiveProperty,
+  ApiDeleteProperty,
+  ApiGetAllProperties,
+  ApiGetPendingProperties,
+  ApiRejectProperty,
+} from '../decorators/admin-property-swagger.decorator';
 
 /**
  * AdminPropertyController
@@ -41,6 +51,9 @@ import { Role } from '../../../common/enums/role.enum';
 @Controller('property')
 @UseGuards(JwtGatewayGuard, RolesGuard)
 @Roles(Role.ADMIN)
+@ApiTags(AdminPropertySwaggerConstant.TAGS.ADMIN_PROPERTY)
+@ApiBearerAuth(AdminPropertySwaggerConstant.SECURITY.BEARER_AUTH)
+@ApiCookieAuth(AdminPropertySwaggerConstant.COOKIES.REALSTATE_TOKEN.name)
 export class AdminPropertyController {
   /** Logger instance scoped to AdminPropertyController. */
   private readonly logger = new Logger(AdminPropertyController.name);
@@ -68,6 +81,7 @@ export class AdminPropertyController {
    */
   @Get('/all')
   @HttpCode(HttpStatus.OK)
+  @ApiGetAllProperties()
   async getAllProperty(
     @Req() req: RequestWithUserContext,
     // @Query() query: PaginationQueryDto,
@@ -104,6 +118,7 @@ export class AdminPropertyController {
    */
   @Get('/pending')
   @HttpCode(HttpStatus.OK)
+  @ApiGetPendingProperties()
   async getPendingProperty(
     @Req() req: Request,
     // @Query() query: PaginationQueryDto,
@@ -143,6 +158,7 @@ export class AdminPropertyController {
    */
   @Patch('/:propertyId/approve')
   @HttpCode(HttpStatus.OK)
+  @ApiApproveProperty()
   async approveProperty(
     @Req() req: Request,
     @Param('propertyId') propertyId: string,
@@ -187,6 +203,7 @@ export class AdminPropertyController {
    */
   @Patch('/:propertyId/reject')
   @HttpCode(HttpStatus.OK)
+  @ApiRejectProperty()
   async rejectProperty(
     @Req() req: Request,
     @Param('propertyId') propertyId: string,
@@ -231,6 +248,7 @@ export class AdminPropertyController {
    */
   @Patch('/:propertyId/archive')
   @HttpCode(HttpStatus.OK)
+  @ApiArchiveProperty()
   async archiveProperty(
     @Req() req: Request,
     @Param('propertyId') propertyId: string,
@@ -275,6 +293,7 @@ export class AdminPropertyController {
    */
   @Delete('/delete/:propertyId')
   @HttpCode(HttpStatus.OK)
+  @ApiDeleteProperty()
   async deleteProperty(
     @Req() req: Request,
     @Param('propertyId') propertyId: string,
