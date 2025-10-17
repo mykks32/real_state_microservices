@@ -41,13 +41,22 @@ jobs:
           echo "ENQUIRY_SERVICE_URL=${{ secrets.ENQUIRY_URL }}" >> env/api-gateway.env
           echo "PROPERTY_SERVICE_URL=${{ secrets.PROPERTY_URL }}" >> env/api-gateway.env
 
+      # 5. Build Docker image
       - name: Build Docker image
         run: docker build -t mykks32/realstate-api-gateway:$VERSION ./api-gateway
 
+      # 6. Push Docker image
       - name: Push Docker image
         run: docker push mykks32/realstate-api-gateway:$VERSION
 
+      # 7. Tag as latest and push
       - name: Tag as latest and push
         run: |
           docker tag mykks32/realstate-api-gateway:$VERSION mykks32/realstate-api-gateway:latest
           docker push mykks32/realstate-api-gateway:latest
+
+      # 8. Calls Render's webhook to deploy the new image
+      - name: Trigger Render Deploy
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.RENDER_API_DEPLOY_HOOK }}"

@@ -49,3 +49,9 @@ jobs:
       - run: |
           docker tag mykks32/realstate-enquiry-service:$VERSION mykks32/realstate-enquiry-service:latest
           docker push mykks32/realstate-enquiry-service:latest
+
+      # 8. Calls Render's webhook to deploy the new image
+      - name: Trigger Render Deploy
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.RENDER_ENQUIRY_DEPLOY_HOOK }}"
