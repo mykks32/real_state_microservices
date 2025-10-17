@@ -12,9 +12,7 @@ import { IApiResponse } from '../../../common/interfaces/api-response.interface'
 import { firstValueFrom } from 'rxjs';
 import { IProperty } from '../interfaces/property.interface';
 import { PropertyUrlBuilder } from '../utils/property-url.builder';
-import {
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import {
   ApiGetApprovedProperties,
   ApiGetPropertyById,

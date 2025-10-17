@@ -12,7 +12,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AppConfigService } from '../../config/config.service';
 import { HttpService } from '@nestjs/axios';
 import { IApiResponse } from '../../common/interfaces/api-response.interface';
 import { CreateEnquiryDto } from './dtos/create-enquiry.dto';
@@ -25,6 +24,16 @@ import { RequestWithUserContext } from '../../common/types/request-with-context.
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
+import {
+  ApiGetAllEnquiries,
+  ApiGetEnquiryById,
+  ApiGetEnquiriesByProperty,
+  ApiUpdateEnquiryStatus,
+  ApiCreateEnquiry,
+} from './decorators/enquiry-decorator';
+import { EnquiryUrlBuilder } from './utils/enquiry-url.builder';
+import { ApiBearerAuth, ApiCookieAuth, ApiTags } from '@nestjs/swagger';
+import { EnquirySwaggerConstant } from './constants/enquiry-swagger.constant';
 
 /**
  * EnquiryController
@@ -44,6 +53,9 @@ import { Role } from '../../common/enums/role.enum';
  * Stateless, no direct business logic here.
  */
 @Controller('enquiry')
+@ApiTags(EnquirySwaggerConstant.TAGS.ENQUIRY)
+@ApiBearerAuth(EnquirySwaggerConstant.SECURITY.BEARER_AUTH)
+@ApiCookieAuth(EnquirySwaggerConstant.COOKIES.REALSTATE_TOKEN.name)
 export class EnquiryController {
   /** Logger instance scoped to EnquiryController. */
   private readonly logger = new Logger(EnquiryController.name);
@@ -51,73 +63,13 @@ export class EnquiryController {
   /**
    * Constructs the controller with required dependencies.
    *
-   * @param {AppConfigService} configService - Service to access application configuration.
+   * @param enquiryUrlBuilder
    * @param {HttpService} httpService - Used to send HTTP requests to downstream services.
    */
   constructor(
-    private readonly configService: AppConfigService,
+    private readonly enquiryUrlBuilder: EnquiryUrlBuilder,
     private readonly httpService: HttpService,
   ) {}
-
-  /**
-   * Create enquiry URL built from the enquiry service base URL.
-   *
-   * @readonly
-   * @type {string}
-   */
-  private get createEnquiryUrl(): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry`;
-  }
-
-  /**
-   * Create enquiry URL built from the enquiry service base URL.
-   *
-   * @readonly
-   * @type {string}
-   */
-  private getEnquiryByIdUrl(id: string): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/${id}`;
-  }
-
-  /**
-   * Get all the enquiry
-   *
-   * @private
-   * @param {number} page
-   * @param {number} limit
-   * @returns {string}
-   */
-  private getAllEnquiryUrl(page?: number, limit?: number): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/all?page=${page}&limit=${limit}`;
-  }
-
-  /**
-   * Get Enquiries by propertyId
-   *
-   * @private
-   * @param {string} propertyId
-   * @param {number} page
-   * @param {number} limit
-   * @returns {string}
-   */
-  private getEnquiryByPropertyId(
-    propertyId: string,
-    page?: number,
-    limit?: number,
-  ): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/property/${propertyId}?page=${page}&limit=${limit}`;
-  }
-
-  /**
-   * Change Enquiry status by enquiryId
-   *
-   * @private
-   * @param {string} enquiryId
-   * @returns {string}
-   */
-  private changeEnquiryStatusByEnquiryId(enquiryId: string): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/${enquiryId}/status`;
-  }
 
   /**
    * Fetches all enquiries with pagination.
@@ -136,6 +88,7 @@ export class EnquiryController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtGatewayGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiGetAllEnquiries()
   async getEnquiries(
     @Req() req: Request,
     @Query() query: PaginationQueryDto,
@@ -148,7 +101,7 @@ export class EnquiryController {
 
     const response = await firstValueFrom(
       this.httpService.get<IApiResponse<IEnquiry[]>>(
-        this.getAllEnquiryUrl(page, limit),
+        this.enquiryUrlBuilder.getAllEnquiryUrl(page, limit),
         {
           headers: {
             'x-request-id': requestId,
@@ -178,6 +131,7 @@ export class EnquiryController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtGatewayGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiGetEnquiryById()
   async getEnquiryById(
     @Param('enquiryId') enquiryId: string,
     @Req() req: Request,
@@ -190,7 +144,7 @@ export class EnquiryController {
 
     const response = await firstValueFrom(
       this.httpService.get<IApiResponse<IEnquiry>>(
-        this.getEnquiryByIdUrl(enquiryId),
+        this.enquiryUrlBuilder.getEnquiryByIdUrl(enquiryId),
         {
           headers: {
             'x-request-id': requestId,
@@ -221,6 +175,7 @@ export class EnquiryController {
   @Get('/property/:propertyId')
   @UseGuards(JwtGatewayGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.SELLER)
+  @ApiGetEnquiriesByProperty()
   async getEnquiriesByProperty(
     @Param('propertyId') propertyId: string,
     @Req() req: Request,
@@ -236,7 +191,7 @@ export class EnquiryController {
 
     const response = await firstValueFrom(
       this.httpService.get<IApiResponse<IEnquiry[]>>(
-        this.getEnquiryByPropertyId(propertyId, page, limit),
+        this.enquiryUrlBuilder.getEnquiryByPropertyId(propertyId, page, limit),
         {
           headers: {
             'x-request-id': requestId,
@@ -268,6 +223,7 @@ export class EnquiryController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtGatewayGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiUpdateEnquiryStatus()
   async changeEnquiryStatus(
     @Param('enquiryId') enquiryId: string,
     @Body() dto: UpdateEnquiryStatusDto,
@@ -281,7 +237,7 @@ export class EnquiryController {
 
     const response = await firstValueFrom(
       this.httpService.patch<IApiResponse<IEnquiry>>(
-        this.changeEnquiryStatusByEnquiryId(enquiryId),
+        this.enquiryUrlBuilder.changeEnquiryStatusByEnquiryId(enquiryId),
         dto,
         {
           headers: {
@@ -313,6 +269,7 @@ export class EnquiryController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtGatewayGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.SELLER, Role.BUYER)
+  @ApiCreateEnquiry()
   async createEnquiry(
     @Req() req: RequestWithUserContext,
     @Body() requestCreateEnquiryDto: CreateEnquiryDto,
@@ -331,7 +288,7 @@ export class EnquiryController {
 
     const response = await firstValueFrom(
       this.httpService.post<IApiResponse<IEnquiry>>(
-        this.createEnquiryUrl,
+        this.enquiryUrlBuilder.createEnquiryUrl,
         payload,
         {
           headers: {

@@ -26,11 +26,7 @@ import { RequestCreatePropertyDTO } from '../dtos/request-create-property.dto';
 import { CreatePropertyDTO } from '../dtos/create-property.dto';
 import { UpdatePropertyDTO } from '../dtos/update-property.dto';
 import { ApprovalStatusEnum } from '../enums/approval-status.enum';
-import {
-  ApiBearerAuth,
-  ApiTags,
-  ApiCookieAuth,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiCookieAuth } from '@nestjs/swagger';
 import { SellerPropertySwaggerConstant } from '../constants/seller-property-swagger.constant';
 import {
   ApiCreateProperty,
