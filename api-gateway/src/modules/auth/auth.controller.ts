@@ -9,13 +9,19 @@ import {
   Res,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { IApiResponse } from '../../common/interfaces/api-response.interface';
-import { IUser } from './interfaces/user.interface';
 import { firstValueFrom } from 'rxjs';
 import { LoginUserDto } from './dtos/login.dto';
 import { Request, Response } from 'express';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { AppConfigService } from '../../config/config.service';
+import { ApiTags } from '@nestjs/swagger';
+import { IUser } from './interfaces/user.interface';
+import { IApiResponse } from '../../common/interfaces/api-response.interface';
+import { ApiResponse } from '../../common/dtos/response.dto';
+import {
+  SwaggerApiLogin,
+  SwaggerApiRegister,
+} from './decorators/auth-swagger.decorator';
 
 /**
  * AuthController
@@ -31,6 +37,7 @@ import { AppConfigService } from '../../config/config.service';
  * Stateless, no business logic implemented here.
  */
 @Controller('auth')
+@ApiTags('auth')
 export class AuthController {
   /** Logger instance scoped to AuthController. */
   private readonly logger = new Logger(AuthController.name);
@@ -76,7 +83,7 @@ export class AuthController {
    * @param {Request} req - Incoming HTTP request.
    * @param {Response} res - HTTP response (used to set cookies).
    *
-   * @returns {Promise<IApiResponse<Omit<IUser, 'password'>>>} Standardized response containing user data (without password).
+   * @returns {Promise<IApiResponse<{ accessToken: string; refreshToken: string }>>} Standardized response containing user data (without password).
    *
    * @remarks
    * - Forwards login data via HttpService.
@@ -85,6 +92,7 @@ export class AuthController {
    */
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @SwaggerApiLogin()
   async login(
     @Body() loginUserDto: LoginUserDto,
     @Req() req: Request,
@@ -97,7 +105,11 @@ export class AuthController {
     const response = await firstValueFrom(
       this.httpService.post<
         IApiResponse<{ accessToken: string; refreshToken: string }>
-      >(this.loginUrl, loginUserDto),
+      >(this.loginUrl, loginUserDto, {
+        headers: {
+          'x-request-id': requestId,
+        },
+      }),
     );
 
     const data = response.data;
@@ -107,7 +119,7 @@ export class AuthController {
     }
 
     // Set refresh token as secure HTTP-only cookie
-    res.cookie('realState_token', data.data?.refreshToken, {
+    res.cookie('realState_token', data?.data?.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -115,8 +127,7 @@ export class AuthController {
       path: '/',
     });
 
-    this.logger.log(`Login attempt for email: ${loginUserDto.email}`);
-
+    this.logger.log(`[${requestId}] Login successful for email: ${email}`);
     return data;
   }
 
@@ -136,23 +147,28 @@ export class AuthController {
    */
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @SwaggerApiRegister()
   async register(
     @Req() req: Request,
     @Body() createUserDto: CreateUserDto,
-  ): Promise<IApiResponse<Omit<IUser, 'password'>>> {
+  ): Promise<ApiResponse<Omit<IUser, 'password'>>> {
     const requestId = req.headers['x-request-id'] as string;
     const email = createUserDto.email;
     this.logger.log(`[${requestId}] Registration attempt for email: ${email}`);
 
     const response = await firstValueFrom(
-      this.httpService.post<IApiResponse<Omit<IUser, 'password'>>>(
+      this.httpService.post<ApiResponse<Omit<IUser, 'password'>>>(
         this.registerUrl,
         createUserDto,
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
       ),
     );
 
     this.logger.log(`[${requestId}] Registration successful for ${email}`);
-
     return response.data;
   }
 }

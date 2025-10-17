@@ -1,10 +1,11 @@
-/** Represents a user entity. */
+import { Role } from '../enums/roles.enum';
+
 export interface IUser {
   id: string;
   email: string;
   username: string;
   password: string;
-  IsAdmin: boolean;
+  roles: Role[];
   createdAt: Date;
   lastLoginAt: Date | null;
 }
