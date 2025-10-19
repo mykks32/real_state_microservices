@@ -278,7 +278,7 @@ export class AuthController {
   > {
     const requestId = req.headers['x-request-id'] as string;
     const userId = req.user.id;
-    let accessToken: string | null = null;
+    const accessToken = req.token?.accessToken || null;
 
     this.logger.log(`[${requestId}] Fetching user profile for ${userId}`);
 
@@ -299,13 +299,9 @@ export class AuthController {
       `[${requestId}] Successfully fetched user profile for ${userId}`,
     );
 
-    // Include new access token if guard refreshed it
-    if (req.token?.newAccessTokenIssued && req.token.accessToken) {
-      accessToken = req.token.accessToken;
-      this.logger.debug(
-        `[${requestId}] Returning new access token for user ${userId}`,
-      );
-    }
+    this.logger.debug(
+      `[${requestId}] Returning new access token for user ${userId}`,
+    );
 
     return ApiResponse.ok({
       user: response.data.data!,
