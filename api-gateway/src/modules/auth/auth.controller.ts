@@ -75,6 +75,26 @@ export class AuthController {
    * @readonly
    * @type {string}
    */
+  private get logoutUrl(): string {
+    return `${this.configService.authServiceUrl}/auth/logout`;
+  }
+
+  /**
+   * Login URL built from the auth service base URL.
+   *
+   * @readonly
+   * @type {string}
+   */
+  private meUrl(id: string): string {
+    return `${this.configService.authServiceUrl}/user/${id}`;
+  }
+
+  /**
+   * Login URL built from the auth service base URL.
+   *
+   * @readonly
+   * @type {string}
+   */
   private get loginUrl(): string {
     return `${this.configService.authServiceUrl}/auth/login`;
   }
@@ -205,7 +225,7 @@ export class AuthController {
 
     const response = await firstValueFrom(
       this.httpService.post<IApiResponse<null>>(
-        `${this.configService.authServiceUrl}/auth/logout`,
+        this.logoutUrl,
         {},
         {
           headers: {
@@ -264,7 +284,7 @@ export class AuthController {
 
     const response = await firstValueFrom(
       this.httpService.get<ApiResponse<Omit<IUser, 'password'>>>(
-        `${this.configService.authServiceUrl}/auth/me`,
+        this.meUrl(userId),
         {
           headers: {
             'x-request-id': requestId,
