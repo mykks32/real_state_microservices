@@ -62,3 +62,33 @@ export function SwaggerApiRegister() {
     ApiInternalErrorResponse(),
   );
 }
+
+/** User logout */
+export function SwaggerApiLogout() {
+  return applyDecorators(
+    ApiOperation(AuthSwaggerConstant.OPERATIONS.LOGOUT),
+    SwaggerApiResponse(AuthSwaggerConstant.RESPONSES.LOGOUT_RESPONSE),
+    ApiServiceUnavailableResponse(
+      AuthSwaggerConstant.ERRORS.AUTH_SERVICE_UNAVAILABLE.errorName,
+      AuthSwaggerConstant.ERRORS.AUTH_SERVICE_UNAVAILABLE.message,
+    ),
+    ApiInternalErrorResponse(),
+  );
+}
+
+/** Get current authenticated user */
+export function SwaggerApiMe() {
+  return applyDecorators(
+    ApiOperation(AuthSwaggerConstant.OPERATIONS.ME),
+    SwaggerApiResponse(AuthSwaggerConstant.RESPONSES.ME_RESPONSE),
+    ApiUnauthorizedResponse(
+      AuthSwaggerConstant.ERRORS.INVALID_CREDENTIALS.errorName,
+      AuthSwaggerConstant.ERRORS.INVALID_CREDENTIALS.message,
+    ),
+    ApiServiceUnavailableResponse(
+      AuthSwaggerConstant.ERRORS.AUTH_SERVICE_UNAVAILABLE.errorName,
+      AuthSwaggerConstant.ERRORS.AUTH_SERVICE_UNAVAILABLE.message,
+    ),
+    ApiInternalErrorResponse(),
+  );
+}

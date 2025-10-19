@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Logger,
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -20,8 +22,12 @@ import { IApiResponse } from '../../common/interfaces/api-response.interface';
 import { ApiResponse } from '../../common/dtos/response.dto';
 import {
   SwaggerApiLogin,
+  SwaggerApiLogout,
+  SwaggerApiMe,
   SwaggerApiRegister,
 } from './decorators/auth-swagger.decorator';
+import { JwtGatewayGuard } from '../../common/guards/jwt.guard';
+import { RequestWithUserContext } from '../../common/types/request-with-context.type';
 
 /**
  * AuthController
@@ -170,5 +176,120 @@ export class AuthController {
 
     this.logger.log(`[${requestId}] Registration successful for ${email}`);
     return response.data;
+  }
+
+  /**
+   * Logs out a user by clearing the refresh token cookie.
+   *
+   * @route POST /auth/logout
+   * @status 200 - OK
+   *
+   * @param {Request} req - Incoming HTTP request.
+   * @param {Response} res - HTTP response (used to clear cookies).
+   *
+   * @returns {Promise<IApiResponse<null>>} Standardized response confirming logout.
+   *
+   * @remarks
+   * - Clears the `realState_token` cookie.
+   * - Stateless, does not call downstream service.
+   */
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @SwaggerApiLogout()
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<IApiResponse<null>> {
+    const requestId = req.headers['x-request-id'] as string;
+    this.logger.log(`[${requestId}] Logout attempt started`);
+
+    const response = await firstValueFrom(
+      this.httpService.post<IApiResponse<null>>(
+        `${this.configService.authServiceUrl}/auth/logout`,
+        {},
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    // Always clear the cookie on gateway level too
+    res.clearCookie('realState_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/',
+    });
+
+    this.logger.log(`[${requestId}] Logout successful`);
+
+    // Return normalized downstream response OR force standard response
+    return response.data ?? ApiResponse.ok(null, 'Logged out successfully');
+  }
+
+  /**
+   * Retrieves the authenticated user's profile by calling downstream user-service.
+   *
+   * @route GET /auth/me
+   * @status 200 - OK
+   *
+   * @guard JwtGatewayGuard - Ensures request contains valid access token.
+   *
+   * @param {RequestWithUserContext} req - The incoming HTTP request containing user context from JWT.
+   *
+   * @returns {Promise<ApiResponse<Omit<IUser, 'password'>>>} - Standardized API response with user profile data.
+   *
+   * @remarks
+   * - Extracts `user.id` from validated JWT payload.
+   * - Forwards request to user-service `/user/:id`.
+   * - Includes `x-request-id` for traceability and forwards cookies if needed.
+   */
+  @Get('me')
+  @UseGuards(JwtGatewayGuard)
+  @HttpCode(HttpStatus.OK)
+  @SwaggerApiMe()
+  async getMe(@Req() req: RequestWithUserContext): Promise<
+    ApiResponse<{
+      user: Omit<IUser, 'password'>;
+      accessToken?: string | null;
+    }>
+  > {
+    const requestId = req.headers['x-request-id'] as string;
+    const userId = req.user.id;
+    let accessToken: string | null = null;
+
+    this.logger.log(`[${requestId}] Fetching user profile for ${userId}`);
+
+    const response = await firstValueFrom(
+      this.httpService.get<ApiResponse<Omit<IUser, 'password'>>>(
+        `${this.configService.authServiceUrl}/auth/me`,
+        {
+          headers: {
+            'x-request-id': requestId,
+            authorization: req.headers.authorization,
+            cookie: req.headers.cookie,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `[${requestId}] Successfully fetched user profile for ${userId}`,
+    );
+
+    // Include new access token if guard refreshed it
+    if (req.token?.newAccessTokenIssued && req.token.accessToken) {
+      accessToken = req.token.accessToken;
+      this.logger.debug(
+        `[${requestId}] Returning new access token for user ${userId}`,
+      );
+    }
+
+    return ApiResponse.ok({
+      user: response.data.data!,
+      accessToken,
+    });
   }
 }
