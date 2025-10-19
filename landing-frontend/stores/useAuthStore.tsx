@@ -1,6 +1,7 @@
 import {create} from "zustand";
 import AuthService from "@/services/auth-service";
 import {IUser} from "@/interfaces/auth/IUser";
+import {devtools} from "zustand/middleware";
 
 interface AuthState {
     user: Omit<IUser, 'password'> | null;
@@ -11,7 +12,7 @@ interface AuthState {
     logout: () => Promise<void>;
 }
 
-const useAuthStore = create<AuthState>((set) => ({
+const useAuthStore = create<AuthState>()(devtools((set) => ({
     user: null,
     accessToken: null,
     loading: true,
@@ -49,6 +50,6 @@ const useAuthStore = create<AuthState>((set) => ({
                 set({loading: false});
             }
         },
-}));
+})));
 
 export default useAuthStore;

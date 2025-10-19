@@ -3,6 +3,9 @@ import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -46,6 +49,8 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
+
+  console.log('frontend_ url', process.env.FRONTEND_URL);
 
   app.enableCors({
     origin: [process.env.FRONTEND_URL],
