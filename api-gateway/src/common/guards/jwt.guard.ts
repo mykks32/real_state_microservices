@@ -75,7 +75,14 @@ export class JwtGatewayGuard implements CanActivate {
 
     const refreshToken = cookies?.realState_token;
 
+    // Initialize tokens in request context - only store what we need
+    request.token = {
+      accessToken: accessToken || null,
+      newAccessTokenIssued: false,
+    };
+
     this.logger.debug('refreshToken', refreshToken);
+    this.logger.debug('accessToken', request.token.accessToken);
     this.logger.debug('AllCookies', request.cookies);
 
     // 1. Try verifying access token first
@@ -166,6 +173,9 @@ export class JwtGatewayGuard implements CanActivate {
 
           if (verifyNew.data.success && verifyNew.data.data) {
             request.user = verifyNew.data.data;
+
+            request.token.accessToken = newAccessToken;
+            request.token.newAccessTokenIssued = true;
 
             // Update authorization header for current request
             request.headers.authorization = `Bearer ${newAccessToken}`;

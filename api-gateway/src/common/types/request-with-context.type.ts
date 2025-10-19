@@ -23,6 +23,10 @@ export interface RequestWithUser extends Request {
 export interface RequestWithContext extends Request {
   requestId: string;
   user?: UserPayload;
+  token?: {
+    accessToken: string | null;
+    newAccessTokenIssued: boolean;
+  };
 }
 
 /**
