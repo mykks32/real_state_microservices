@@ -40,6 +40,7 @@ jobs:
           echo "AUTH_SERVICE_URL=${{ secrets.AUTH_URL }}" >> env/api-gateway.env
           echo "ENQUIRY_SERVICE_URL=${{ secrets.ENQUIRY_URL }}" >> env/api-gateway.env
           echo "PROPERTY_SERVICE_URL=${{ secrets.PROPERTY_URL }}" >> env/api-gateway.env
+          echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> env/api-gateway.env
 
       # 5. Build Docker image
       - name: Build Docker image
