@@ -2,7 +2,7 @@ import { IUser } from "./IUser";
 
 export interface ILoginResponse {
     accessToken: string;
-    user?: Omit<IUser, 'password'>;
+    refreshToken: string;
 }
 
 export interface IRegisterResponse {

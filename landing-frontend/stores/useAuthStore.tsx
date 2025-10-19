@@ -1,55 +1,74 @@
-import {create} from "zustand";
-import AuthService from "@/services/auth-service";
-import {IUser} from "@/interfaces/auth/IUser";
-import {devtools} from "zustand/middleware";
+import { create } from "zustand";
+import { IUser } from "@/interfaces/auth/IUser";
+import { devtools } from "zustand/middleware";
+import authService from "@/services/auth-service";
+import { ILoginResponse } from "@/interfaces/auth/IAuthResponse";
 
-interface AuthState {
-    user: Omit<IUser, 'password'> | null;
-    accessToken: string | null;
+interface AuthStore {
+    user: Omit<IUser, "password"> | null;
     loading: boolean;
-    initialize: () => Promise<void>;
+    accessToken: string | null;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
+    initialize: () => Promise<void>;
 }
 
-const useAuthStore = create<AuthState>()(devtools((set) => ({
-    user: null,
-    accessToken: null,
-    loading: true,
+const useAuthStore = create<AuthStore>()(
+    devtools(
+        (set) => ({
+            user: null,
+            loading: true,
+            accessToken: "",
 
-    initialize: async () => {
-        set({loading: true});
-        try {
-            const data = await AuthService.me(); // fetch current user using cookie
-            set({user: data.user, accessToken: data.accessToken});
-        } catch {
-            set({user: null, accessToken: null});
-        } finally {
-            set({loading: false});
-        }
-    }
-    ,
+            login: async (email: string, password: string) => {
+                set({ loading: true });
+                try {
+                    const response: ILoginResponse = await authService.login({ email, password });
+                    set({
+                        accessToken: response.accessToken,
+                        loading: false
+                    });
+                } catch (error) {
+                    set({ loading: false });
+                    throw error;
+                }
+            },
 
-    login: async (email, password) => {
-        set({loading: true});
-        try {
-            const data = await AuthService.login({email, password});
-            set({accessToken: data.accessToken, user: data.user ?? null});
-        } finally {
-            set({loading: false});
-        }
-    },
+            logout: async () => {
+                set({ loading: true });
+                try {
+                    await authService.logout();
+                } catch (error) {
+                    console.error("Logout error:", error);
+                } finally {
+                    set({
+                        user: null,
+                        accessToken: "",
+                        loading: false
+                    });
+                }
+            },
 
-    logout:
-        async () => {
-            set({loading: true});
-            try {
-                await AuthService.logout();
-                set({user: null, accessToken: null});
-            } finally {
-                set({loading: false});
+            initialize: async () => {
+                set({ loading: true });
+                try {
+                    const response = await authService.me();
+                    set({
+                        user: response.user,
+                        accessToken: response.accessToken,
+                        loading: false
+                    });
+                } catch (error) {
+                    console.error("Auth initialization error:", error);
+                    set({
+                        user: null,
+                        accessToken: "",
+                        loading: false
+                    });
+                }
             }
-        },
-})));
+        })
+    )
+);
 
 export default useAuthStore;

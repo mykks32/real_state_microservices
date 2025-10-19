@@ -1,20 +1,18 @@
 "use client";
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "react-query";
-import { toast } from "sonner";
-import { Mail, Lock } from "lucide-react";
-import { useRouter } from "next/navigation";
+import React, {useState} from "react";
+import {useForm} from "react-hook-form";
+import {z} from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {useMutation} from "react-query";
+import {toast} from "sonner";
+import {Mail, Lock} from "lucide-react";
+import {useRouter} from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import AuthService from "@/services/auth-service";
-import type { ILoginRequest } from "@/interfaces/auth/IAuthRequest";
-import type { ILoginResponse } from "@/interfaces/auth/IAuthResponse";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import useAuthStore from "@/stores/useAuthStore";
 
 
 // ✅ Schema using Zod
@@ -28,35 +26,43 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
     const router = useRouter();
+    const [error, setError] = useState<string | null>(null);
+    const { login } = useAuthStore();
 
-    // ✅ React Hook Form setup
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: { email: "", password: "" },
     });
 
     // ✅ React Query mutation
-    const loginMutation = useMutation<ILoginResponse, Error, ILoginRequest>({
-        mutationFn: (data) => AuthService.login(data),
-        onSuccess: (res) => {
-            toast.success("Login successful!");
-            localStorage.setItem("accessToken", res.accessToken ?? "");
-            router.push("/dashboard");
+    const loginMutation = useMutation({
+        mutationFn: async (data: LoginFormValues) => {
+            await login(data.email, data.password);
         },
-        onError: (error: any) => {
-            const message =
-                error?.response?.data?.message || "Invalid credentials. Try again.";
-            toast.error(message);
+        onSuccess: () => {
+            toast.success("Login successful!");
+            // Redirect to dashboard
+            setTimeout(() => {
+                router.push("/dashboard");
+            }, 500);
+        },
+        onError: (err: any) => {
+            const msg = err?.message || err?.response?.data?.message || "Invalid credentials";
+            setError(msg);
+            toast.error(msg);
         },
     });
 
-    const onSubmit = (values: LoginFormValues) => {
-        loginMutation.mutate(values);
+    const onSubmit = (data: LoginFormValues) => {
+        setError(null);
+        loginMutation.mutate(data);
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-            <div className="w-full max-w-md space-y-6 bg-slate-900/80 backdrop-blur-xl p-8 rounded-2xl border border-white/10 shadow-2xl">
+        <div
+            className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4">
+            <div
+                className="w-full max-w-md space-y-6 bg-slate-900/80 backdrop-blur-xl p-8 rounded-2xl border border-white/10 shadow-2xl">
 
                 {/* Header */}
                 <div className="text-center space-y-2">
@@ -78,7 +84,7 @@ export default function LoginPage() {
                     <div className="space-y-2">
                         <Label className="text-white/80">Email</Label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-3 h-5 w-5 text-blue-400/50 pointer-events-none" />
+                            <Mail className="absolute left-3 top-3 h-5 w-5 text-blue-400/50 pointer-events-none"/>
                             <Input
                                 type="email"
                                 placeholder="name@example.com"
@@ -98,7 +104,7 @@ export default function LoginPage() {
                     <div className="space-y-2">
                         <Label className="text-white/80">Password</Label>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-3 h-5 w-5 text-blue-400/50 pointer-events-none" />
+                            <Lock className="absolute left-3 top-3 h-5 w-5 text-blue-400/50 pointer-events-none"/>
                             <Input
                                 type="password"
                                 placeholder="••••••••"
@@ -114,10 +120,19 @@ export default function LoginPage() {
                         )}
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                        <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3">
+                            <p className="text-xs text-red-400 text-center">
+                                {error}
+                            </p>
+                        </div>
+                    )}
+
                     {/* Remember & Forgot */}
                     <div className="flex justify-between text-sm">
                         <label className="flex items-center gap-2 text-white/60 cursor-pointer">
-                            <input type="checkbox" className="w-4 h-4 rounded accent-blue-500" />
+                            <input type="checkbox" className="w-4 h-4 rounded accent-blue-500"/>
                             Remember me
                         </label>
                         <a href="/forgot" className="text-blue-400 hover:text-blue-300">
@@ -133,7 +148,8 @@ export default function LoginPage() {
                     >
                         {loginMutation.isLoading ? (
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <div
+                                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>
                                 Signing in...
                             </div>
                         ) : (
