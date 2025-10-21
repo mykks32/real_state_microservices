@@ -180,6 +180,31 @@ services:
       retries: 5
       start_period: 60s
 
+  # ---------------- Next.js Landing Frontend ----------------
+  landing-frontend:
+    #    build: ./landing-frontend
+    image: mykks32/realstate-landing-frontend:latest
+    container_name: landing-frontend
+    env_file:
+      - ./env/landing-frontend.env
+    volumes:
+      - landing_frontend_data:/app
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - realState_net
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://landing-frontend:3001"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
 
 # ---------------- Volumes ----------------
 volumes:
@@ -191,6 +216,7 @@ volumes:
   api_gateway_data:
   mysql_property_data:
   property_service_data:
+  landing_frontend_data:
 
 
 # ---------------- Networks ----------------

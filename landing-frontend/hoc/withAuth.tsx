@@ -1,7 +1,7 @@
 import {ComponentType, useEffect} from "react";
 import {useRouter} from "next/navigation";
 import useAuthStore from "@/stores/useAuthStore";
-import Loading from "@/components/common/loading";
+import {Spinner} from "@/components/ui/spinner";
 
 const withAuth = (WrappedComponent: ComponentType<any>) => {
     return (props: any) => {
@@ -16,11 +16,11 @@ const withAuth = (WrappedComponent: ComponentType<any>) => {
         }, [loading, user, router]);
 
         if (loading) {
-            return <Loading message="Loading Login"/>;
+            return <Spinner />;
         }
 
         if (!user) {
-            return <Loading message="Loading Login"/>;
+            return <Spinner />;
         }
 
         return <WrappedComponent {...props} />;
