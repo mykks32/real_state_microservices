@@ -57,12 +57,8 @@ export default function LoginPage() {
     return (
         <div className="relative min-h-screen w-screen flex items-center justify-center overflow-hidden">
 
-
-            {/* Optional: Decorative Blob or Overlay */}
-            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-none"></div>
-
             {/* Login Form */}
-            <div className="relative z-10 w-full max-w-md space-y-6 bg-blue-900/10 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-2xl">
+            <div className="w-full max-w-xs md:max-w-md space-y-6 bg-blue-900/10 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-2xl">
                 {/* Header */}
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold text-white">Sign In</h1>

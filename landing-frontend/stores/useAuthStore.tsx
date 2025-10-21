@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { IUser } from "@/interfaces/auth/IUser";
-import { devtools } from "zustand/middleware";
+import {create} from "zustand";
+import {IUser} from "@/interfaces/auth/IUser";
+import {devtools} from "zustand/middleware";
 import authService from "@/services/auth-service";
-import { ILoginResponse } from "@/interfaces/auth/IAuthResponse";
+import {ILoginResponse} from "@/interfaces/auth/IAuthResponse";
 
 interface AuthStore {
     user: Omit<IUser, "password"> | null;
@@ -21,21 +21,22 @@ const useAuthStore = create<AuthStore>()(
             accessToken: "",
 
             login: async (email: string, password: string) => {
-                set({ loading: true });
+                set({loading: true});
                 try {
-                    const response: ILoginResponse = await authService.login({ email, password });
+                    const response: ILoginResponse = await authService.login({email, password});
                     set({
+                        user: response.user,
                         accessToken: response.accessToken,
                         loading: false
                     });
                 } catch (error) {
-                    set({ loading: false });
+                    set({loading: false});
                     throw error;
                 }
             },
 
             logout: async () => {
-                set({ loading: true });
+                set({loading: true});
                 try {
                     await authService.logout();
                 } catch (error) {
@@ -50,14 +51,22 @@ const useAuthStore = create<AuthStore>()(
             },
 
             initialize: async () => {
-                set({ loading: true });
+                set({loading: true});
                 try {
                     const response = await authService.me();
-                    set({
-                        user: response.user,
-                        accessToken: response.accessToken,
-                        loading: false
-                    });
+                    if (response && response.statusCode === 200 && response.data) {
+                        set({
+                            user: response.data.user as IUser,
+                            accessToken: response.data.accessToken as string,
+                            loading: false
+                        });
+                    } else {
+                        set({
+                            user: null,
+                            accessToken: null,
+                            loading: false
+                        });
+                    }
                 } catch (error) {
                     console.error("Auth initialization error:", error);
                     set({

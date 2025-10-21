@@ -5,8 +5,6 @@ import {IProperty} from "@/interfaces/property/property.interface";
 import FeedFilters from "@/components/feed/FeedFilters";
 import FeedResults from "@/components/feed/FeedResults";
 import {ApprovalStatusEnum, StateEnum, StatusEnum, TypeEnum} from "@/enums";
-import {useForm} from "react-hook-form";
-import {zodResolver} from "@hookform/resolvers/zod";
 import {z} from "zod";
 import {IFilter} from "@/interfaces/common/IFilter";
 import {useQuery} from "react-query";
@@ -61,18 +59,6 @@ const Feed = () => {
     const [size, setSize] = useState<number>(10);
     const [filter, setFilter] = useState<IFilter>(defaultFilters);
 
-    const {
-        control,
-        watch,
-        handleSubmit,
-        formState: {errors},
-    } = useForm<FilterFormValues>({
-        resolver: zodResolver(filterSchema),
-        defaultValues: defaultFilters,
-    });
-
-    const filterValues = watch();
-
     // React Query hook
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ["approvedProperties", page, size],
@@ -81,7 +67,7 @@ const Feed = () => {
         retry: 2,
     });
 
-    const properties = data?.data || [];
+    const properties = data?.data || defaultProperties;
     const meta = data?.meta || {
         totalItems: 0,
         totalPages: 0,

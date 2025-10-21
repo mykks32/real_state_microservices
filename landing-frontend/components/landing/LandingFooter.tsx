@@ -5,12 +5,6 @@ import {ArrowRight} from "lucide-react";
 const LandingFooter = () => {
     return (
         <div className="py-32 md:py-20 flex justify-around items-center relative overflow-hidden z-10 md:flex md:flex-col md:gap-4">
-            <img
-                src={Blob1}
-                alt="Blob image"
-                className="absolute opacity-25 z-[-1] w-[800px] h-[800px] max-w-none sm:w-[450px] sm:h-[450px]"
-            />
-
             <div className="relative md:hidden">
                 <div className="bg-theme-1 w-20 h-20 rounded-full drop-shadow-2xl"></div>
                 <div className="bg-theme-1 w-16 h-16 rounded-full drop-shadow-2xl absolute -bottom-3 -right-2"></div>

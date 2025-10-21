@@ -5,7 +5,7 @@ import {IProperty} from "@/interfaces/property/property.interface";
 class PropertyService {
     async approvedProperty(
         page: number = 1,
-        pageSize: number = 10,) {
+        pageSize: number = 10,): Promise<IApiResponse<IProperty[]> | null> {
         try {
             const params = new URLSearchParams({
                 page: page.toString(),
@@ -19,6 +19,7 @@ class PropertyService {
             console.error(
                 error instanceof Error ? error.message : "Login failed. Please check your credentials."
             );
+            return null
         }
     }
 }

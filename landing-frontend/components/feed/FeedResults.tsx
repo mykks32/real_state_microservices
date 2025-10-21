@@ -1,19 +1,10 @@
 "use client";
 
-import React, {useState, useEffect} from "react";
+import React from "react";
 import PropertyCard from "./PropertyCard";
 import {IProperty} from "@/interfaces/property/property.interface";
-import Loading from "@/components/common/loading";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-    PaginationEllipsis,
-} from "@/components/ui/pagination";
 import PaginationImpl from "@/components/common/Pagination";
+import {Spinner} from "@/components/ui/spinner";
 
 interface IFeedResults {
     loading: boolean;
@@ -40,7 +31,7 @@ const FeedResults: React.FC<IFeedResults> = ({loading, data, meta, onPageChange}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                     {loading && data.length === 0 ? (
                         <div className="col-span-full flex justify-center items-center h-[200px] rounded-xl">
-                            <Loading message="Loading properties..."/>
+                            <Spinner />
                         </div>
                     ) : data.length > 0 ? (
                         data.map((property) => (
@@ -49,7 +40,7 @@ const FeedResults: React.FC<IFeedResults> = ({loading, data, meta, onPageChange}
                     ) : (
                         <div className="col-span-full text-center text-muted-foreground text-lg py-10">
                             {loading ? (
-                                <Loading message="Applying filters..."/>
+                                <Spinner />
                             ) : (
                                 <p>No properties found matching your criteria</p>
                             )}
@@ -63,7 +54,7 @@ const FeedResults: React.FC<IFeedResults> = ({loading, data, meta, onPageChange}
                 {/* Loading indicator for pagination */}
                 {loading && data.length > 0 && (
                     <div className="flex justify-center mt-4">
-                        <Loading message="Loading more properties..."/>
+                        <Spinner />
                     </div>
                 )}
             </div>
