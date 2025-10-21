@@ -9,6 +9,8 @@ import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {z} from "zod";
 import {IFilter} from "@/interfaces/common/IFilter";
+import {useQuery} from "react-query";
+import PropertyService from "@/services/property-service";
 
 const defaultProperties: IProperty[] = [
     {
@@ -55,9 +57,9 @@ const filterSchema = z.object({
 export type FilterFormValues = z.infer<typeof filterSchema>;
 
 const Feed = () => {
+    const [page, setPage] = useState<number>(1);
+    const [size, setSize] = useState<number>(10);
     const [filter, setFilter] = useState<IFilter>(defaultFilters);
-    const [data, setData] = useState<IProperty[]>(defaultProperties);
-    const [loading, setLoading] = useState<boolean>(false);
 
     const {
         control,
@@ -71,6 +73,22 @@ const Feed = () => {
 
     const filterValues = watch();
 
+    // React Query hook
+    const { data, isLoading, isError, error } = useQuery({
+        queryKey: ["approvedProperties", page, size],
+        queryFn: () => PropertyService.approvedProperty(page, size),
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        retry: 2,
+    });
+
+    const properties = data?.data || [];
+    const meta = data?.meta || {
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: 0,
+        pageSize: 10,
+    };
+
     const clearFilter = () => {
         setFilter(defaultFilters);
     }
@@ -79,9 +97,11 @@ const Feed = () => {
         console.log(filter);
     };
 
-    const onPageChange = (page: number) => {
-        console.log(page);
-    }
+    const onPageChange = (newPage: number) => {
+        setPage(newPage);
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
     return (
         <main className="bg-gradient-to-br from-blue-900/30 via-red-800/10 to-violet-900/30 backdrop-blur-lg">
@@ -102,14 +122,9 @@ const Feed = () => {
 
                     {/* results */}
                     <FeedResults
-                        data={data}
-                        loading={loading}
-                        meta={{
-                            totalItems: 10,
-                            totalPages: 2,
-                            currentPage: 1,
-                            pageSize: 5
-                        }}
+                        data={properties}
+                        loading={isLoading}
+                        meta={meta}
                         onPageChange={onPageChange}
                     />
                 </div>

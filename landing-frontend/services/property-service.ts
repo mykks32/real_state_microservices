@@ -3,10 +3,16 @@ import {IApiResponse} from "@/interfaces/common/IApiResponse";
 import {IProperty} from "@/interfaces/property/property.interface";
 
 class PropertyService {
-    async approvedProperty() {
+    async approvedProperty(
+        page: number = 1,
+        pageSize: number = 10,) {
         try {
+            const params = new URLSearchParams({
+                page: page.toString(),
+                size: pageSize.toString(),
+            });
             const response = await api.get<IApiResponse<IProperty[]>>(
-                "/property/approved"
+                `/property/approved?${params.toString()}`
             );
             return response.data;
         } catch (error) {
