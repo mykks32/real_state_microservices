@@ -1,8 +1,6 @@
 import type {Metadata} from "next";
-import {Inter} from "next/font/google";
 import "./globals.css";
 import {Toaster} from "sonner";
-import RootSkeletonServer from "@/components/common/root-skeleton";
 import AppProvider from "@/components/providers/AppProvider";
 import React from "react";
 
@@ -22,9 +20,7 @@ export default function RootLayout({
         <body>
         <AppProvider
         >
-            {/*<RootSkeletonServer/>*/}
-            {children}
-            {/* Replace with actual content on client */}
+            <div className="relative">{children}</div>
             <Toaster/>
         </AppProvider>
         </body>
