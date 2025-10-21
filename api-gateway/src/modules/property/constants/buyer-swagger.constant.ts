@@ -50,6 +50,26 @@ export const BuyerPropertySwaggerConstant = {
     },
   },
 
+  /** Query parameter definitions */
+  QUERY: {
+    PAGINATION: {
+      page: {
+        name: 'page',
+        type: Number,
+        description: 'Page number for pagination',
+        example: 1,
+        required: false,
+      },
+      limit: {
+        name: 'size',
+        type: Number,
+        description: 'Number of items per page',
+        example: 10,
+        required: false,
+      },
+    },
+  },
+
   /** Response examples for public endpoints */
   RESPONSES: {
     PROPERTY_RESPONSE: {

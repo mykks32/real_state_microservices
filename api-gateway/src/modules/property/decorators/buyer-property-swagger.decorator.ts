@@ -3,6 +3,7 @@ import {
   ApiOperation,
   ApiResponse as SwaggerApiResponse,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import {
   ApiBadRequestResponse,
@@ -47,6 +48,8 @@ export function ApiGetApprovedProperties() {
     ApiOperation(
       BuyerPropertySwaggerConstant.OPERATIONS.GET_APPROVED_PROPERTIES,
     ),
+    ApiQuery(BuyerPropertySwaggerConstant.QUERY.PAGINATION.page),
+    ApiQuery(BuyerPropertySwaggerConstant.QUERY.PAGINATION.limit),
     SwaggerApiResponse(
       BuyerPropertySwaggerConstant.RESPONSES.APPROVED_PROPERTIES_RESPONSE,
     ),

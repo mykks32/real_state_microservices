@@ -18,7 +18,7 @@ class AuthService {
         }
     }
 
-    async register(userData: IRegisterRequest): Promise<IRegisterResponse> {
+    async register(userData: IRegisterRequest) {
         try {
             const response = await api.post<IApiResponse<IRegisterResponse>>(
                 "/auth/register",
@@ -26,20 +26,20 @@ class AuthService {
             );
             return response.data.data!;
         } catch (error) {
-            throw new Error(
+            console.error(
                 error instanceof Error ? error.message : "Registration failed. Please try again."
             );
         }
     }
 
-    async me(): Promise<IMeResponse> {
+    async me() {
         try {
             const response = await api.get<IApiResponse<IMeResponse>>(
                 "/auth/me"
             );
             return response.data.data!;
         } catch (error) {
-            throw new Error(
+            console.log(
                 error instanceof Error ? error.message : "Failed to fetch user data."
             );
         }
