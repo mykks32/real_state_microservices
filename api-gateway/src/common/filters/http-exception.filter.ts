@@ -46,7 +46,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let message = 'An unexpected error occurred';
 
     if (this.isAxiosError(exception)) {
-      this.logger.error('Is Axios Error running', exception);
+      this.logger.error(
+        `AxiosError: [${exception.config?.method?.toUpperCase()} ${exception.config?.url}] Status: ${exception.response?.status || 'N/A'} Message: ${exception.message} RequestId: ${requestId}`,
+      );
       const axiosError = exception as AxiosError<IApiResponse<null>>;
       if (
         axiosError.code === 'ECONNREFUSED' ||

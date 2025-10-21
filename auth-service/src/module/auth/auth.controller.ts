@@ -77,17 +77,23 @@ export class AuthController {
   async login(
     @Body() loginUserDto: LoginUserDto,
     @Req() req: Request,
-  ): Promise<IApiResponse<{ accessToken: string; refreshToken: string }>> {
+  ): Promise<
+    IApiResponse<{
+      user: Omit<IUser, 'password'>;
+      accessToken: string;
+      refreshToken: string;
+    }>
+  > {
     const requestId = req.headers['x-request-id'] as string;
     this.logger.log(`[${requestId}] Login attempt for: ${loginUserDto.email}`);
 
-    const { accessToken, refreshToken } =
+    const { user, accessToken, refreshToken } =
       await this.authService.login(loginUserDto);
 
     this.logger.log(`[${requestId}] Login successful, tokens issued`);
 
     return ApiResponse.ok(
-      { accessToken, refreshToken },
+      { user, accessToken, refreshToken },
       'Login successful',
       HttpStatus.OK,
       req.headers['x-request-id'] as string,

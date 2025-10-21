@@ -37,7 +37,7 @@ class AuthService {
             const response = await api.get<IApiResponse<IMeResponse>>(
                 "/auth/me"
             );
-            return response.data.data!;
+            return response.data;
         } catch (error) {
             console.log(
                 error instanceof Error ? error.message : "Failed to fetch user data."
@@ -50,7 +50,6 @@ class AuthService {
             await api.post("/auth/logout");
         } catch (error) {
             console.error("Logout error:", error);
-            // Don't throw on logout failure - still clear local state
         }
     }
 }

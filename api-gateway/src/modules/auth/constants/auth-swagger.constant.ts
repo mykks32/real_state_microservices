@@ -64,6 +64,14 @@ export const AuthSwaggerConstant = {
         message: 'Successfully logged in',
         statusCode: 200,
         data: {
+          user: {
+            id: 'c5c06dc8-344d-4e55-9fed-2bf739549390',
+            email: 'user@example.com',
+            username: 'john_doe',
+            roles: ['SELLER', 'BUYER'],
+            createdAt: '2024-01-15T10:30:00.000Z',
+            lastLoginAt: null,
+          },
           accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
           refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         },

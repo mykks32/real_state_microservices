@@ -88,9 +88,11 @@ export class AuthService {
    * @throws EmailNotFoundException if user not found
    * @throws WrongPasswordException if password is invalid
    */
-  async login(
-    data: LoginUserDto,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async login(data: LoginUserDto): Promise<{
+    user: Omit<IUser, 'password'>;
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const { email, password } = data;
     const user = await this.userService.findByEmail({ email });
     if (!user) throw new EmailNotFoundException();
@@ -102,10 +104,12 @@ export class AuthService {
     user.lastLoginAt = new Date();
     await user.save();
 
+    const safeUser = this.mapEntityToSafeUser(user);
+
     const { accessToken, refreshToken } =
       await this.refreshTokenService.generateRefreshToken(user.id);
     this.logger.log(`Login successful: ${user.id}`);
-    return { accessToken, refreshToken };
+    return { user: safeUser, accessToken, refreshToken };
   }
 
   /**
@@ -143,6 +147,7 @@ export class AuthService {
    * @throws InvalidJwtRefreshException if token is invalid
    */
   async logout(userId: string, token: string): Promise<void> {
+    this.logger.log(`[${token}] Logging out user ${userId}`);
     const valid = await this.refreshTokenService.validateRefreshToken(
       userId,
       token,

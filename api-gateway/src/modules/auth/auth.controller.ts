@@ -123,14 +123,24 @@ export class AuthController {
     @Body() loginUserDto: LoginUserDto,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<IApiResponse<{ accessToken: string; refreshToken: string }>> {
+  ): Promise<
+    IApiResponse<{
+      user: Omit<IUser, 'password'>;
+      accessToken: string;
+      refreshToken: string;
+    }>
+  > {
     const requestId = req.headers['x-request-id'] as string;
     const email = loginUserDto.email;
     this.logger.log(`[${requestId}] Login attempt started for email: ${email}`);
 
     const response = await firstValueFrom(
       this.httpService.post<
-        IApiResponse<{ accessToken: string; refreshToken: string }>
+        IApiResponse<{
+          user: Omit<IUser, 'password'>;
+          accessToken: string;
+          refreshToken: string;
+        }>
       >(this.loginUrl, loginUserDto, {
         headers: {
           'x-request-id': requestId,
@@ -215,22 +225,28 @@ export class AuthController {
    */
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtGatewayGuard)
   @SwaggerApiLogout()
   async logout(
-    @Req() req: Request,
+    @Req() req: RequestWithUserContext,
     @Res({ passthrough: true }) res: Response,
   ): Promise<IApiResponse<null>> {
     const requestId = req.headers['x-request-id'] as string;
+    const refreshToken = req.cookies['realState_token'] as string;
+    const userId = req.user.id;
+
     this.logger.log(`[${requestId}] Logout attempt started`);
 
     const response = await firstValueFrom(
       this.httpService.post<IApiResponse<null>>(
         this.logoutUrl,
-        {},
+        { userId: userId },
         {
           headers: {
             'x-request-id': requestId,
+            Cookie: `realState_token=${refreshToken}`,
           },
+          withCredentials: true,
         },
       ),
     );
