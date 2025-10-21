@@ -3,6 +3,8 @@ package com.realState.property_service.database.repository;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,5 +21,6 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
     // Find by approval status
     List<Property> findByApprovalStatus(ApprovalStatusEnum approvalStatus);
 
-
+    // Find All Approved properties
+    Page<Property> findByApprovalStatus(ApprovalStatusEnum status, Pageable pageable);
 }

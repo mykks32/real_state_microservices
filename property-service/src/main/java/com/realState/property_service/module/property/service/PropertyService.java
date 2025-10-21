@@ -3,6 +3,7 @@ package com.realState.property_service.module.property.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.realState.property_service.common.utils.ApiResponse;
 import org.springframework.stereotype.Service;
 
 import com.realState.property_service.module.property.dto.CreatePropertyDTO;
@@ -101,7 +102,7 @@ public interface PropertyService {
      * 
      * @return list of approved PropertyDTOs
      */
-    List<PropertyDTO> getApprovedProperty();
+    ApiResponse<List<PropertyDTO>> getApprovedProperty(int page, int size);
 
     /**
      * Get a property by its ID.

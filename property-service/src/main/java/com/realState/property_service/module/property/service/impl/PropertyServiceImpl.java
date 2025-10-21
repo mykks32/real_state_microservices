@@ -4,8 +4,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.realState.property_service.common.utils.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.realState.property_service.common.exceptions.location.LocationCreationException;
@@ -323,15 +328,35 @@ public class PropertyServiceImpl implements PropertyService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<PropertyDTO> getApprovedProperty() {
+    public ApiResponse<List<PropertyDTO>> getApprovedProperty(int page, int size) {
         try {
-            List<Property> approvedProperties = propertyRepository.findByApprovalStatus(ApprovalStatusEnum.approved);
-            List<PropertyDTO> propertyDTOs = approvedProperties.stream()
+            // Create pageable object
+            Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
+
+            // Fetch paginated approved properties
+            Page<Property> approvedPropertiesPage = propertyRepository.findByApprovalStatus(
+                    ApprovalStatusEnum.approved,
+                    pageable
+            );
+
+            // Map to DTOs
+            List<PropertyDTO> propertyDTOs = approvedPropertiesPage.getContent().stream()
                     .map(propertyMapperUtil::mapToDto)
                     .collect(Collectors.toList());
 
-            logger.info("Fetched {} approved properties", propertyDTOs.size());
-            return propertyDTOs;
+            // Build meta information
+            ApiResponse.MetaData meta = new ApiResponse.MetaData(
+                    approvedPropertiesPage.getTotalElements(),
+                    approvedPropertiesPage.getTotalPages(),
+                    approvedPropertiesPage.getNumber(),
+                    approvedPropertiesPage.getSize()
+            );
+
+            logger.info("Fetched {} approved properties (page {}/{})",
+                    propertyDTOs.size(), page + 1, approvedPropertiesPage.getTotalPages());
+
+            // Return success response with data and meta
+            return ApiResponse.success(propertyDTOs, meta, "Fetched approved properties successfully");
         } catch (Exception ex) {
             logger.error("Failed to fetch approved properties", ex);
             throw new PropertyFetchException("Failed to fetch approved properties", ex);

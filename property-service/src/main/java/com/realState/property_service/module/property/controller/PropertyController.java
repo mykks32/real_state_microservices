@@ -50,12 +50,31 @@ public class PropertyController {
             )
     })
     @GetMapping("/approved")
-    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getApprovedProperty() {
-        return ResponseEntity.ok(ApiResponse.success(propertyService.getApprovedProperty()));
+    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getApprovedProperty(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        // Validate page number
+        if (page < 1) {
+            page = 1;
+        }
+
+        // Validate and cap size to prevent abuse
+        if (size < 1) {
+            size = 10;
+        }
+        if (size > 100) {
+            size = 100;
+        }
+
+        // Convert 1-indexed to 0-indexed for Spring Data
+        int pageNumber = page - 1;
+
+        return ResponseEntity.ok(propertyService.getApprovedProperty(pageNumber, size));
     }
 
     /**
-     * Get property details by ID.
+     * Get property details by IxD.
      */
     @Operation(
             summary = "Get property details by ID",
