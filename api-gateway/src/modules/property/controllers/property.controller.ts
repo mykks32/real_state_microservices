@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Logger,
   Param,
+  Query,
   Req,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
@@ -18,6 +19,7 @@ import {
   ApiGetPropertyById,
 } from '../decorators/buyer-property-swagger.decorator';
 import { BuyerPropertySwaggerConstant } from '../constants/buyer-swagger.constant';
+import { PaginationQueryDto } from '../../enquiry/dtos/pagination-query.dto';
 
 /**
  * PropertyController
@@ -102,6 +104,7 @@ export class PropertyController {
    * @status 200 - OK
    *
    * @param {Request} req - Incoming HTTP request
+   * @param query
    * @returns {Promise<IApiResponse<IProperty[]>>} Standardized response containing array of approved properties
    *
    * @remarks
@@ -114,14 +117,17 @@ export class PropertyController {
   @ApiGetApprovedProperties()
   async getApprovedProperty(
     @Req() req: Request,
+    @Query() query: PaginationQueryDto,
   ): Promise<IApiResponse<IProperty[]>> {
     const requestId = req.headers['x-request-id'] as string;
 
     this.logger.log(`[${requestId}] Fetching Approved Properties`);
 
+    const { page, size } = query;
+
     const response = await firstValueFrom(
       this.httpService.get<IApiResponse<IProperty[]>>(
-        this.propertyUrlBuilder.approvedPropertyUrl,
+        this.propertyUrlBuilder.approvedPropertyUrl(page, size),
         {
           headers: {
             'x-request-id': requestId,

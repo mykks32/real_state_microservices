@@ -28,12 +28,12 @@ export class EnquiryUrlBuilder {
    * Get all the enquiry
    *
    * @param {number} page
-   * @param {number} limit
+   * @param {number} size
    *
    * @returns {string}
    */
-  getAllEnquiryUrl(page?: number, limit?: number): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/all?page=${page}&limit=${limit}`;
+  getAllEnquiryUrl(page?: number, size?: number): string {
+    return `${this.configService.enquiryServiceUrl}/enquiry/all?page=${page}&size=${size}`;
   }
 
   /**
@@ -41,15 +41,15 @@ export class EnquiryUrlBuilder {
    *
    * @param {string} propertyId
    * @param {number} page
-   * @param {number} limit
+   * @param {number} size
    * @returns {string}
    */
   getEnquiryByPropertyId(
     propertyId: string,
     page?: number,
-    limit?: number,
+    size?: number,
   ): string {
-    return `${this.configService.enquiryServiceUrl}/enquiry/property/${propertyId}?page=${page}&limit=${limit}`;
+    return `${this.configService.enquiryServiceUrl}/enquiry/property/${propertyId}?page=${page}&size=${size}`;
   }
 
   /**

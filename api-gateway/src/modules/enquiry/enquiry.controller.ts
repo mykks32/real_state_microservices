@@ -97,11 +97,11 @@ export class EnquiryController {
 
     this.logger.log(`Fetching Enquiries | request_id=${requestId}`);
 
-    const { page, limit } = query;
+    const { page, size } = query;
 
     const response = await firstValueFrom(
       this.httpService.get<IApiResponse<IEnquiry[]>>(
-        this.enquiryUrlBuilder.getAllEnquiryUrl(page, limit),
+        this.enquiryUrlBuilder.getAllEnquiryUrl(page, size),
         {
           headers: {
             'x-request-id': requestId,
@@ -187,11 +187,11 @@ export class EnquiryController {
       `Fetching Enquiry | property_id= ${propertyId} | request_id = ${requestId}`,
     );
 
-    const { page, limit } = query;
+    const { page, size } = query;
 
     const response = await firstValueFrom(
       this.httpService.get<IApiResponse<IEnquiry[]>>(
-        this.enquiryUrlBuilder.getEnquiryByPropertyId(propertyId, page, limit),
+        this.enquiryUrlBuilder.getEnquiryByPropertyId(propertyId, page, size),
         {
           headers: {
             'x-request-id': requestId,
