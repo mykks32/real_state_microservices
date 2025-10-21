@@ -182,7 +182,7 @@ services:
 
   # ---------------- Next.js Landing Frontend ----------------
   landing-frontend:
-    #    build: ./landing-frontend
+#    build: ./landing-frontend
     image: mykks32/realstate-landing-frontend:latest
     container_name: landing-frontend
     env_file:
