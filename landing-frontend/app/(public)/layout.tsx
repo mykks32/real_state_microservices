@@ -12,10 +12,10 @@ interface AuthLayoutProps {
 
 const AuthLayout: FC<AuthLayoutProps> = ({children}) => {
 
-    return <main className="bg-gradient-to-br flex flex-col from-blue-900/30 via-red-800/10 to-violet-900/30 backdrop-blur-lg">
+    return <main className="bg-gradient-to-br flex flex-col min-h-screen from-blue-900/30 via-red-800/10 to-violet-900/30 backdrop-blur-lg">
         <Header />
         {/* Content */}
-        <div className="z-10">{children}</div>
+        <div className="z-10 flex-1">{children}</div>
         <Footer />
     </main>
 };

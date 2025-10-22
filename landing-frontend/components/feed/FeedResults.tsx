@@ -19,7 +19,14 @@ interface IFeedResults {
 }
 
 const FeedResults: React.FC<IFeedResults> = ({loading, data, meta, onPageChange}) => {
-
+        {/* Loading indicator for pagination */
+        }
+        if (loading && data.length > 0) {
+            return (<div className="flex flex-col justify-center items-center h-96 w-full gap-4">
+                <Spinner className="w-12 h-12 text-blue-500"/>
+                <p className="text-lg font-medium text-gray-700">Loading, please wait...</p>
+            </div>)
+        }
         return (
             <div className="w-full flex flex-col gap-8 pb-20">
                 {!loading && data.length > 0 && (
@@ -31,7 +38,7 @@ const FeedResults: React.FC<IFeedResults> = ({loading, data, meta, onPageChange}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                     {loading && data.length === 0 ? (
                         <div className="col-span-full flex justify-center items-center h-[200px] rounded-xl">
-                            <Spinner />
+                            <Spinner/>
                         </div>
                     ) : data.length > 0 ? (
                         data.map((property) => (
@@ -40,7 +47,7 @@ const FeedResults: React.FC<IFeedResults> = ({loading, data, meta, onPageChange}
                     ) : (
                         <div className="col-span-full text-center text-muted-foreground text-lg py-10">
                             {loading ? (
-                                <Spinner />
+                                <Spinner/>
                             ) : (
                                 <p>No properties found matching your criteria</p>
                             )}
@@ -48,15 +55,11 @@ const FeedResults: React.FC<IFeedResults> = ({loading, data, meta, onPageChange}
                     )}
                 </div>
 
-                {/* Pagination */}
-                <PaginationImpl meta={meta} onPageChange={onPageChange}/>
 
-                {/* Loading indicator for pagination */}
-                {loading && data.length > 0 && (
-                    <div className="flex justify-center mt-4">
-                        <Spinner />
-                    </div>
-                )}
+                {/* Pagination */}
+                {meta.totalItems > 0 && <PaginationImpl meta={meta} onPageChange={onPageChange}/>}
+
+
             </div>
         );
     }

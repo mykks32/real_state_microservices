@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function AboutPage() {
     return (
-        <div className="min-h-screen p-8 flex flex-col gap-8 items-center">
+        <div className="min-h-full p-8 flex flex-col gap-8 items-center">
 
             {/* Header */}
             <h1 className="text-4xl font-bold text-gray-900 text-center">

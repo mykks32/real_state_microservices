@@ -11,31 +11,31 @@ import {useQuery} from "react-query";
 import PropertyService from "@/services/property-service";
 import Header from "@/components/common/Header";
 
-const defaultProperties: IProperty[] = [
-    {
-        "id": "1a2b3c4d-0001",
-        "title": "Luxury Villa in Bagmati",
-        "description": "Spacious villa with modern amenities",
-        "type": TypeEnum.House,
-        "status": StatusEnum.Available,
-        "approvalStatus": ApprovalStatusEnum.Approved,
-        "ownerId": "owner-uuid-001",
-        "createdAt": "2025-10-21T07:00:00Z",
-        "updatedAt": "2025-10-21T07:00:00Z",
-        "location": {
-            "id": 1,
-            "address": "Pulchowk, Lalitpur",
-            "city": "Kathmandu",
-            "state": StateEnum.Bagmati,
-            "country": "Nepal",
-            "zipcode": 44700,
-            "latitude": 27.6828,
-            "longitude": 85.3136,
-            "createdAt": "2025-10-21T07:00:00Z",
-            "updatedAt": "2025-10-21T07:00:00Z"
-        }
-    },
-]
+// const defaultProperties: IProperty[] = [
+//     {
+//         "id": "1a2b3c4d-0001",
+//         "title": "Luxury Villa in Bagmati",
+//         "description": "Spacious villa with modern amenities",
+//         "type": TypeEnum.House,
+//         "status": StatusEnum.Available,
+//         "approvalStatus": ApprovalStatusEnum.Approved,
+//         "ownerId": "owner-uuid-001",
+//         "createdAt": "2025-10-21T07:00:00Z",
+//         "updatedAt": "2025-10-21T07:00:00Z",
+//         "location": {
+//             "id": 1,
+//             "address": "Pulchowk, Lalitpur",
+//             "city": "Kathmandu",
+//             "state": StateEnum.Bagmati,
+//             "country": "Nepal",
+//             "zipcode": 44700,
+//             "latitude": 27.6828,
+//             "longitude": 85.3136,
+//             "createdAt": "2025-10-21T07:00:00Z",
+//             "updatedAt": "2025-10-21T07:00:00Z"
+//         }
+//     },
+// ]
 
 const defaultFilters: IFilter = {
     status: StatusEnum.Available,
@@ -68,7 +68,7 @@ const Feed = () => {
         retry: 2,
     });
 
-    const properties = data?.data || defaultProperties;
+    const properties = data?.data || [];
     const meta = data?.meta || {
         totalItems: 0,
         totalPages: 0,

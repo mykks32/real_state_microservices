@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function ContactPage() {
     return (
-        <div className="min-h-screen p-8 flex flex-col gap-12 items-center">
+        <div className="min-h-full p-8 flex flex-col gap-12 items-center">
 
             {/* Header */}
             <h1 className="text-4xl font-bold text-gray-900 text-center">

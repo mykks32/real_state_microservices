@@ -54,7 +54,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="relative min-h-screen w-screen flex items-center justify-center overflow-hidden">
+        <div className="h-full w-screen flex items-center justify-center overflow-hidden">
 
             {/* Registration Form */}
             <div className="w-full max-w-max md:max-w-md space-y-6 bg-slate-900/20 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-2xl">

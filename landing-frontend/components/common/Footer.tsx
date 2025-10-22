@@ -12,10 +12,6 @@ const Footer = ({ className, ...props }: React.ComponentProps<"footer">) => {
             <Link href="/contact" className="transition hover:opacity-70">
                 Contact
             </Link>
-            <span className="w-1 h-1 bg-black block rounded-full"></span>
-            <Link href="/privacy-policy" className="transition hover:opacity-70">
-                Privacy Policy
-            </Link>
         </footer>
     );
 };
