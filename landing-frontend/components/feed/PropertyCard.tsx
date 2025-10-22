@@ -96,7 +96,7 @@ const PropertyCard = ({property}: IPropertyCardProps) => {
             </CardContent>
 
             <CardFooter>
-                <Link href={`/landing-frontend/app/(public)/property/${property.id}`} passHref>
+                <Link href={`/property/${property.id}`} passHref>
                     <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                         View Details
                     </Button>
