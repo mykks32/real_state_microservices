@@ -1,4 +1,3 @@
-// app/properties/[propertyId]/components/PropertyMainContent.tsx
 import { IProperty } from "@/interfaces/property/property.interface";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusEnum, ApprovalStatusEnum, TypeEnum } from "@/enums";

@@ -1,4 +1,3 @@
-// app/properties/[propertyId]/components/PropertySidebar.tsx
 import { IProperty } from "@/interfaces/property/property.interface";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

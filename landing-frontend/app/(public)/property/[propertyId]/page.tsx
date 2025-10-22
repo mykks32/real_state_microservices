@@ -1,4 +1,3 @@
-// app/properties/[propertyId]/page.tsx
 import {notFound} from 'next/navigation';
 import {IProperty} from "@/interfaces/property/property.interface";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
