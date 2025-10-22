@@ -1,5 +1,6 @@
 package com.realState.property_service.module.property.dto;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import com.realState.property_service.database.enums.ApprovalStatusEnum;
 import com.realState.property_service.database.enums.StatusEnum;
@@ -19,6 +20,8 @@ public class PropertyDTO {
     private ApprovalStatusEnum approvalStatus;
     private LocationDTO location;
     private UUID ownerId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // Getters and Setters
     public UUID getId() {
@@ -84,4 +87,21 @@ public class PropertyDTO {
     public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
 }

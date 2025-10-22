@@ -75,6 +75,8 @@ public class PropertyMapperUtil {
             dto.setApprovalStatus(property.getApprovalStatus());
             dto.setStatus(property.getStatus());
             dto.setOwnerId(property.getOwnerId());
+            dto.setCreatedAt(property.getCreatedAt());
+            dto.setUpdatedAt(property.getUpdatedAt());
 
             Location location = property.getLocation();
             if (location != null) {

@@ -12,23 +12,11 @@ interface AuthLayoutProps {
 
 const AuthLayout: FC<AuthLayoutProps> = ({children}) => {
 
-    return <main className="relative z-10 min-h-screen h-full">
-        <Header className="z-10" />
-        {/* Background image */}
-        <Image
-            src="/images/city-bg.png"
-            alt="City background"
-            fill
-            className="object-cover object-center opacity-50"
-            priority
-        />
-
-        {/* Blur overlay */}
-        <div className="absolute inset-0 bg-amber-700/20 backdrop-blur-lg" />
-
+    return <main className="bg-gradient-to-br flex flex-col from-blue-900/30 via-red-800/10 to-violet-900/30 backdrop-blur-lg">
+        <Header />
         {/* Content */}
         <div className="z-10">{children}</div>
-        <Footer className="relative z-10" />
+        <Footer />
     </main>
 };
 

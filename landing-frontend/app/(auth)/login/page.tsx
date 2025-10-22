@@ -58,7 +58,7 @@ export default function LoginPage() {
         <div className="relative min-h-screen w-screen flex items-center justify-center overflow-hidden">
 
             {/* Login Form */}
-            <div className="w-full max-w-xs md:max-w-md space-y-6 bg-blue-900/10 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-2xl">
+            <div className="w-full max-w-max md:max-w-md space-y-6 bg-slate-900/20 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-2xl">
                 {/* Header */}
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold text-white">Sign In</h1>

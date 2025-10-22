@@ -1,8 +1,10 @@
 import Link from "next/link";
+import * as React from "react";
+import {cn} from "@/lib/utils";
 
-const Footer = () => {
+const Footer = ({ className, ...props }: React.ComponentProps<"footer">) => {
     return (
-        <footer className="flex py-8 justify-center items-center gap-4 text-sm">
+        <footer className={cn("flex py-8 justify-center items-center gap-4 text-sm", className)} {...props} >
             <Link href="/about" className="transition hover:opacity-70">
                 About
             </Link>

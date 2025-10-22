@@ -1,204 +1,156 @@
 "use client";
 
 import React, { useState } from "react";
-import { Mail, Lock, User, CheckCircle } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "react-query";
+import { toast } from "sonner";
+import { Mail, User, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import useAuthStore from "@/stores/useAuthStore";
+import AuthService from "@/services/auth-service";
+
+// Schema using Zod for registration
+const registerSchema = z.object({
+    email: z.string().email("Enter a valid email"),
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
-    const [email, setEmail] = useState("");
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
+    const router = useRouter();
+    const [error, setError] = useState<string | null>(null);
 
-    const validateForm = () => {
-        if (!email || !username || !password) {
-            toast.error("Please fill in all fields");
-            return false;
-        }
+    const form = useForm<RegisterFormValues>({
+        resolver: zodResolver(registerSchema),
+        defaultValues: { email: "", username: "", password: "" },
+    });
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            toast.error("Email must be valid");
-            return false;
-        }
-
-        if (password.length < 6) {
-            toast.error("Password must be at least 6 characters");
-            return false;
-        }
-
-        if (username.length < 3) {
-            toast.error("Username must be at least 3 characters");
-            return false;
-        }
-
-        return true;
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            // API call to register user
-            const response = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email,
-                    username,
-                    password,
-                }),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                toast.error(error.message || "Registration failed");
-                setLoading(false);
-                return;
-            }
-
-            const data = await response.json();
-            setSubmitted(true);
-            setLoading(false);
+    const registerMutation = useMutation({
+        mutationFn: async (data: RegisterFormValues) => {
+            await AuthService.register(data);
+        },
+        onSuccess: () => {
             toast.success("Account created successfully!");
+            setTimeout(() => router.push("/login"), 500);
+        },
+        onError: (err: any) => {
+            const msg = err?.message || err?.response?.data?.message || "Registration failed";
+            setError(msg);
+            toast.error(msg);
+        },
+    });
 
-            // Reset form
-            setTimeout(() => {
-                setEmail("");
-                setUsername("");
-                setPassword("");
-                setSubmitted(false);
-                // Redirect to login or dashboard
-                // window.location.href = "/login";
-            }, 2000);
-        } catch (error) {
-            toast.error("Something went wrong. Please try again.");
-            setLoading(false);
-        }
+    const onSubmit = (data: RegisterFormValues) => {
+        setError(null);
+        registerMutation.mutate(data);
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-            <div className="w-full max-w-md space-y-6 bg-slate-900/80 backdrop-blur-xl p-8 rounded-2xl border border-white/10 shadow-2xl">
+        <div className="relative min-h-screen w-screen flex items-center justify-center overflow-hidden">
 
+            {/* Registration Form */}
+            <div className="w-full max-w-max md:max-w-md space-y-6 bg-slate-900/20 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-2xl">
                 {/* Header */}
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold text-white">Create Account</h1>
                     <p className="text-sm text-blue-200/70">
                         Already have an account?{" "}
-                        <a href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
+                        <a href="/login" className="text-brown-400 hover:text-blue-300 font-medium">
                             Sign In
                         </a>
                     </p>
                 </div>
 
-                {/* Success Message */}
-                {submitted && (
-                    <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3 text-center">
-                        <p className="text-green-300 text-sm font-medium flex items-center justify-center gap-2">
-                            <CheckCircle className="h-4 w-4" /> Account created successfully!
-                        </p>
-                    </div>
-                )}
-
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     {/* Email */}
                     <div className="space-y-2">
                         <Label className="text-white/80">Email</Label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-3 h-5 w-5 text-blue-400/50 pointer-events-none" />
+                            <Mail className="absolute left-3 top-3 h-5 w-5 text-violet-500/50 pointer-events-none"/>
                             <Input
                                 type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="user@example.com"
-                                disabled={loading}
+                                placeholder="name@example.com"
+                                disabled={registerMutation.isLoading}
                                 className="pl-10 bg-white/5 border-white/20 text-white placeholder-white/40"
+                                {...form.register("email")}
                             />
                         </div>
+                        {form.formState.errors.email && (
+                            <p className="text-xs text-red-400">{form.formState.errors.email.message}</p>
+                        )}
                     </div>
 
                     {/* Username */}
                     <div className="space-y-2">
                         <Label className="text-white/80">Username</Label>
                         <div className="relative">
-                            <User className="absolute left-3 top-3 h-5 w-5 text-blue-400/50 pointer-events-none" />
+                            <User className="absolute left-3 top-3 h-5 w-5 text-violet-500/50 pointer-events-none"/>
                             <Input
                                 type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                placeholder="srikriydv"
-                                disabled={loading}
+                                placeholder="Username"
+                                disabled={registerMutation.isLoading}
                                 className="pl-10 bg-white/5 border-white/20 text-white placeholder-white/40"
+                                {...form.register("username")}
                             />
                         </div>
+                        {form.formState.errors.username && (
+                            <p className="text-xs text-red-400">{form.formState.errors.username.message}</p>
+                        )}
                     </div>
 
                     {/* Password */}
                     <div className="space-y-2">
                         <Label className="text-white/80">Password</Label>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-3 h-5 w-5 text-blue-400/50 pointer-events-none" />
+                            <Lock className="absolute left-3 top-3 h-5 w-5 text-violet-500/50 pointer-events-none"/>
                             <Input
                                 type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
-                                disabled={loading}
+                                disabled={registerMutation.isLoading}
                                 className="pl-10 bg-white/5 border-white/20 text-white placeholder-white/40"
+                                {...form.register("password")}
                             />
                         </div>
+                        {form.formState.errors.password && (
+                            <p className="text-xs text-red-400">{form.formState.errors.password.message}</p>
+                        )}
                     </div>
 
-                    {/* Terms */}
-                    <div className="flex items-start gap-2 text-sm">
-                        <input type="checkbox" className="w-4 h-4 rounded accent-blue-500 mt-1" required />
-                        <label className="text-white/60">
-                            I agree to the{" "}
-                            <a href="#" className="text-blue-400 hover:text-blue-300">
-                                Terms & Conditions
-                            </a>
-                        </label>
-                    </div>
+                    {/* Error Message */}
+                    {error && (
+                        <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3">
+                            <p className="text-xs text-red-400 text-center">{error}</p>
+                        </div>
+                    )}
 
-                    {/* Submit Button */}
+                    {/* Submit */}
                     <Button
                         type="submit"
-                        disabled={loading || submitted}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold py-3"
+                        disabled={registerMutation.isLoading}
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-green-500 hover:to-green-400 text-white font-semibold py-3"
                     >
-                        {loading ? (
+                        {registerMutation.isLoading ? (
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Creating Account...
-                            </div>
-                        ) : submitted ? (
-                            <div className="flex items-center gap-2">
-                                <CheckCircle className="h-5 w-5" />
-                                Account Created
+                                <div className="w-4 h-4 border-2 border-white/80 border-t-white rounded-full animate-spin"/>
+                                Creating account...
                             </div>
                         ) : (
-                            "Create Account"
+                            "Sign Up"
                         )}
                     </Button>
                 </form>
 
-                {/* Footer */}
-                <p className="text-xs text-center text-white/40">
-                    Your data is secure and encrypted
+                <p className="text-xs text-center text-white/80">
+                    By creating an account, you agree to our Terms & Conditions
                 </p>
             </div>
         </div>

@@ -71,7 +71,7 @@ export class PropertyUrlBuilder {
    * @readonly
    * @type {string}
    */
-  approvedPropertyUrl(page?: number, size?: number): string {
+  approvedPropertyUrl(page: number = 1, size: number = 10): string {
     return `${this.configService.propertyServiceUrl}/properties/approved?page=${page}&size=${size}`;
   }
 
