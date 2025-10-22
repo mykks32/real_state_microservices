@@ -49,7 +49,7 @@ export default function Dashboard() {
             {/* Dashboard Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* User Info */}
-                <Card>
+                <Card className="bg-transparent shadow-lg border-slate-500/20">
                     <CardHeader className="flex items-center gap-2">
                         <User className="text-blue-500"/>
                         <CardTitle>User Info</CardTitle>
@@ -62,7 +62,7 @@ export default function Dashboard() {
                 </Card>
 
                 {/* Roles */}
-                <Card>
+                <Card className="bg-transparent shadow-lg border-slate-500/20">
                     <CardHeader className="flex items-center gap-2">
                         <Key className="text-green-500"/>
                         <CardTitle>Roles</CardTitle>
@@ -77,7 +77,7 @@ export default function Dashboard() {
                 </Card>
 
                 {/* Activity */}
-                <Card>
+                <Card className="bg-transparent shadow-lg border-slate-500/20">
                     <CardHeader className="flex items-center gap-2">
                         <Calendar className="text-purple-500"/>
                         <CardTitle>Activity</CardTitle>
@@ -140,7 +140,7 @@ export default function Dashboard() {
                     </Card>
                 </TabsContent>
                 <TabsContent value="raw">
-                    <Card>
+                    <Card className="bg-transparent shadow-lg border-slate-500/20">
                         <CardContent>
                             <pre className="text-xs">{JSON.stringify(user, null, 2)}</pre>
                         </CardContent>
