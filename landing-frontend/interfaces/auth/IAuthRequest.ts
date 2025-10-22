@@ -6,5 +6,5 @@ export interface ILoginRequest {
 export interface IRegisterRequest {
   email: string;
   password: string;
-  name: string;
+  username: string;
 }

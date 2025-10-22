@@ -22,6 +22,22 @@ class PropertyService {
             return null
         }
     }
+
+    async getPropertyById(propertyId: string): Promise<IApiResponse<IProperty> | null> {
+        try {
+            const response = await api.get<IApiResponse<IProperty>>(`/property/id/${propertyId}`);
+
+            if (!response.data.success) {
+                return null;
+            }
+            return response.data;
+        } catch (error) {
+            console.error(
+                error instanceof Error ? error.message : "No property found for the given id"
+            )
+            return null
+        }
+    }
 }
 
 export default new PropertyService();
