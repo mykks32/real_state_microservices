@@ -10,7 +10,6 @@ import {Button} from "@/components/ui/button";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
 import {User, Key, Calendar} from "lucide-react";
-import Header from "@/components/common/Header";
 
 export default function Dashboard() {
     const user = useAuthStore((state) => state.user);
@@ -38,7 +37,7 @@ export default function Dashboard() {
     }
 
     return (<section>
-        <div className="min-h-screen p-8 bg-gray-50 flex flex-col gap-6">
+        <div className="min-h-screen p-8 flex flex-col gap-6">
             {/* Top bar */}
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold">Welcome, {user.username}</h1>
