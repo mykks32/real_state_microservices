@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { IProperty } from "@/interfaces/property/property.interface";
+import {IProperty} from "@/interfaces/property/property.interface";
 import {
     Card,
     CardContent,
@@ -10,15 +10,16 @@ import {
     CardDescription,
     CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { StatusEnum, ApprovalStatusEnum } from "@/enums";
+import {Button} from "@/components/ui/button";
+import {Badge} from "@/components/ui/badge";
+import {StatusEnum, ApprovalStatusEnum} from "@/enums";
+import Link from "next/link";
 
 interface IPropertyCardProps {
     property: IProperty;
 }
 
-const PropertyCard = ({ property }: IPropertyCardProps) => {
+const PropertyCard = ({property}: IPropertyCardProps) => {
     // Color styles for Status
     const getStatusColor = (status: StatusEnum) => {
         switch (status) {
@@ -48,7 +49,8 @@ const PropertyCard = ({ property }: IPropertyCardProps) => {
     };
 
     return (
-        <Card className="w-full shadow-lg border bg-slate-900/10 border-slate-900/10 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
+        <Card
+            className="w-full shadow-lg border bg-slate-900/10 border-slate-900/10 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
             <CardHeader className="pb-3">
                 <div className="flex justify-between items-start gap-2">
                     <CardTitle className="text-lg font-semibold line-clamp-2 flex-1 text-gray-900">
@@ -94,9 +96,11 @@ const PropertyCard = ({ property }: IPropertyCardProps) => {
             </CardContent>
 
             <CardFooter>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                    View Details
-                </Button>
+                <Link href={`/landing-frontend/app/(public)/property/${property.id}`} passHref>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                        View Details
+                    </Button>
+                </Link>
             </CardFooter>
         </Card>
     );

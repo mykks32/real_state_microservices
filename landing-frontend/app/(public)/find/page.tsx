@@ -9,6 +9,7 @@ import {z} from "zod";
 import {IFilter} from "@/interfaces/common/IFilter";
 import {useQuery} from "react-query";
 import PropertyService from "@/services/property-service";
+import Header from "@/components/common/Header";
 
 const defaultProperties: IProperty[] = [
     {
@@ -60,7 +61,7 @@ const Feed = () => {
     const [filter, setFilter] = useState<IFilter>(defaultFilters);
 
     // React Query hook
-    const { data, isLoading, isError, error } = useQuery({
+    const {data, isLoading, isError, error} = useQuery({
         queryKey: ["approvedProperties", page, size],
         queryFn: () => PropertyService.approvedProperty(page, size),
         staleTime: 1000 * 60 * 5, // 5 minutes
@@ -86,14 +87,14 @@ const Feed = () => {
     const onPageChange = (newPage: number) => {
         setPage(newPage);
         // Scroll to top
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({top: 0, behavior: "smooth"});
     };
 
     return (
-        <main className="bg-gradient-to-br from-blue-900/30 via-red-800/10 to-violet-900/30 backdrop-blur-lg">
+        <>
             {/* content */}
             <div className="w-[80%] xl:w-[90%] m-auto relative sm:w-[95%]">
-                <h2 className="pt-10 font-bold text-3xl tracking-wide leading-[60px]">
+                <h2 className="font-bold text-3xl tracking-wide leading-[60px]">
                     What are you looking for?
                 </h2>
 
@@ -115,8 +116,9 @@ const Feed = () => {
                     />
                 </div>
             </div>
-        </main>
-    );
+        </>
+    )
+        ;
 };
 
 export default Feed;
