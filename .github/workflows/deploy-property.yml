@@ -39,6 +39,8 @@ jobs:
           echo "SPRING_APPLICATION_NAME=property-service" >> env/property-service.env
           echo "SERVER_PORT=${{ secrets.PROPERTY_PORT }}" >> env/property-service.env
           echo "SPRING_DATASOURCE_URL=${{ secrets.PROPERTY_DB_URL }}" >> env/property-service.env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.PROPERTY_DB_USERNAME }}" >> env/property-service.env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.PROPERTY_DB_PASSWORD }}" >> env/property-service.env
           echo "SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver" >> env/property-service.env
           echo "SPRING_FLYWAY_ENABLED=true" >> env/property-service.env
           echo "SPRING_FLYWAY_BASELINE_ON_MIGRATE=true" >> env/property-service.env
