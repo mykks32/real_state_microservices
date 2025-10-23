@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 
 @Entity()
 @Table(name = "locations")
-public class Location {
+public class Location extends Base {
 
     @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)

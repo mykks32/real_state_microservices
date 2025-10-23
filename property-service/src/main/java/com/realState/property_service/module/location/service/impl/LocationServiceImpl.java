@@ -15,6 +15,9 @@ import com.realState.property_service.module.location.dto.UpdateLocationDTO;
 import com.realState.property_service.module.location.mapper.LocationMapperUtil;
 import com.realState.property_service.module.location.service.LocationService;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 /**
  * Implementation of LocationService for creating and updating locations.
  */
