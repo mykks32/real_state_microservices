@@ -1,5 +1,5 @@
 ALTER TABLE properties
-ADD COLUMN approval_status ENUM(
+ADD COLUMN IF NOT EXISTS approval_status ENUM(
     'draft',
     'pending_approval',
     'approved',
