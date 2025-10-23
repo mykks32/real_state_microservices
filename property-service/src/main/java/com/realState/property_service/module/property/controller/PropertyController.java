@@ -242,8 +242,26 @@ public class PropertyController {
             )
     })
     @GetMapping("/pending")
-    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getPropertyPendingApproval() {
-        return ResponseEntity.ok(ApiResponse.success(propertyService.getPropertyPendingApproval()));
+    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getPropertyPendingApproval(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        // Validate page number
+        if (page < 1) {
+            page = 1;
+        }
+
+        // Validate and cap size to prevent abuse
+        if (size < 1) {
+            size = 10;
+        }
+        if (size > 100) {
+            size = 100;
+        }
+
+        // Convert 1-indexed to 0-indexed for Spring Data
+        int pageNumber = page - 1;
+        return ResponseEntity.ok(propertyService.getPropertyPendingApproval(pageNumber, size));
     }
 
     /**
@@ -403,7 +421,26 @@ public class PropertyController {
             )
     })
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getAllProperty() {
-        return ResponseEntity.ok(ApiResponse.success(propertyService.getAllProperty()));
+    public ResponseEntity<ApiResponse<List<PropertyDTO>>> getAllProperty(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        // Validate page number
+        if (page < 1) {
+            page = 1;
+        }
+
+        // Validate and cap size to prevent abuse
+        if (size < 1) {
+            size = 10;
+        }
+        if (size > 100) {
+            size = 100;
+        }
+
+        // Convert 1-indexed to 0-indexed for Spring Data
+        int pageNumber = page - 1;
+
+        return ResponseEntity.ok(propertyService.getAllProperty(pageNumber, size));
     }
 }

@@ -23,4 +23,7 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
 
     // Find All Approved properties
     Page<Property> findByApprovalStatus(ApprovalStatusEnum status, Pageable pageable);
+
+    // Find All Properties
+    Page<Property> findAll(Pageable pageable);
 }

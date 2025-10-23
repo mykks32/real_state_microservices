@@ -171,21 +171,38 @@ public class PropertyServiceImpl implements PropertyService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<PropertyDTO> getPropertyPendingApproval() {
+    public ApiResponse<List<PropertyDTO>> getPropertyPendingApproval(int page, int size) {
         try {
-            List<Property> pendingProperties = propertyRepository
-                    .findByApprovalStatus(ApprovalStatusEnum.pending_approval);
+            // Create pageable object
+            Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
 
-            List<PropertyDTO> propertyDTOs = pendingProperties.stream()
+            // Fetch paginated pending properties
+            Page<Property> pendingPropertiesPage = propertyRepository.findByApprovalStatus(
+                    ApprovalStatusEnum.pending_approval,
+                    pageable
+            );
+
+            // Map to DTOs
+            List<PropertyDTO> propertyDTOs = pendingPropertiesPage.getContent().stream()
                     .map(propertyMapperUtil::mapToDto)
                     .collect(Collectors.toList());
 
-            logger.info("Fetched {} properties pending approval", propertyDTOs.size());
-            return propertyDTOs;
+            // Build meta information
+            ApiResponse.MetaData meta = new ApiResponse.MetaData(
+                    pendingPropertiesPage.getTotalElements(),
+                    pendingPropertiesPage.getTotalPages(),
+                    pendingPropertiesPage.getNumber(),
+                    pendingPropertiesPage.getSize()
+            );
 
+            logger.info("Fetched {} pending properties (page {}/{})",
+                    propertyDTOs.size(), page + 1, pendingPropertiesPage.getTotalPages());
+
+            // Return success response with data and meta
+            return ApiResponse.success(propertyDTOs, meta, "Fetched pending properties successfully");
         } catch (Exception ex) {
-            logger.error("Unexpected error fetching pending approval properties", ex);
-            throw new PropertyFetchException("Failed to fetch pending approval properties", ex);
+            logger.error("Failed to fetch approved properties", ex);
+            throw new PropertyFetchException("Failed to fetch approved properties", ex);
         }
     }
 
@@ -303,15 +320,31 @@ public class PropertyServiceImpl implements PropertyService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<PropertyDTO> getAllProperty() {
+    public ApiResponse<List<PropertyDTO>> getAllProperty(int page, int size) {
         try {
-            List<Property> properties = propertyRepository.findAll();
-            List<PropertyDTO> propertyDTOs = properties.stream()
+            // Create pageable object
+            Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
+
+            Page<Property> properties = propertyRepository.findAll(pageable);
+
+            // Map to DTOs
+            List<PropertyDTO> propertyDTOs = properties.getContent().stream()
                     .map(propertyMapperUtil::mapToDto)
                     .collect(Collectors.toList());
 
-            logger.info("Fetched {} properties from the database", propertyDTOs.size());
-            return propertyDTOs;
+            // Build meta information
+            ApiResponse.MetaData meta = new ApiResponse.MetaData(
+                    properties.getTotalElements(),
+                    properties.getTotalPages(),
+                    properties.getNumber(),
+                    properties.getSize()
+            );
+
+            logger.info("Fetched {} all properties (page {}/{})",
+                    propertyDTOs.size(), page + 1, properties.getTotalPages());
+
+            // Return success response with data and meta
+            return ApiResponse.success(propertyDTOs, meta, "Fetched all properties successfully");
         } catch (Exception ex) {
             logger.error("Failed to fetch all properties", ex);
             throw new PropertySaveException("Failed to fetch all properties", ex);
@@ -352,8 +385,7 @@ public class PropertyServiceImpl implements PropertyService {
                     approvedPropertiesPage.getSize()
             );
 
-            logger.info("Fetched {} approved properties (page {}/{})",
-                    propertyDTOs.size(), page + 1, approvedPropertiesPage.getTotalPages());
+            logger.info("Fetched pending properties", propertyDTOs.size(), page + 1, approvedPropertiesPage.getTotalPages());
 
             // Return success response with data and meta
             return ApiResponse.success(propertyDTOs, meta, "Fetched approved properties successfully");

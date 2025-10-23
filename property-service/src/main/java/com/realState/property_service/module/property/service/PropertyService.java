@@ -58,7 +58,7 @@ public interface PropertyService {
      * 
      * @return list of PropertyDTOs pending approval
      */
-    List<PropertyDTO> getPropertyPendingApproval();
+    ApiResponse<List<PropertyDTO>> getPropertyPendingApproval(int page, int size);
 
     /**
      * Approve a property.
@@ -93,7 +93,7 @@ public interface PropertyService {
      * 
      * @return list of all PropertyDTOs
      */
-    List<PropertyDTO> getAllProperty();
+    ApiResponse<List<PropertyDTO>> getAllProperty(int page, int size);
 
     // ================== BUYER ==================
 
