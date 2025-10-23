@@ -3,6 +3,7 @@ import {
   ApiOperation,
   ApiResponse as SwaggerApiResponse,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import {
   ApiBadRequestResponse,
@@ -13,6 +14,7 @@ import {
   ApiUnauthorizedResponse,
 } from '../../../common/decorators/swagger-error.decorator';
 import { AdminPropertySwaggerConstant } from '../constants/admin-property-swagger.constant';
+import { BuyerPropertySwaggerConstant } from '../constants/buyer-swagger.constant';
 
 /**
  * Admin Property Swagger Decorators
@@ -23,6 +25,8 @@ import { AdminPropertySwaggerConstant } from '../constants/admin-property-swagge
 export function ApiGetAllProperties() {
   return applyDecorators(
     ApiOperation(AdminPropertySwaggerConstant.OPERATIONS.GET_ALL_PROPERTIES),
+    ApiQuery(AdminPropertySwaggerConstant.QUERY.PAGINATION.page),
+    ApiQuery(AdminPropertySwaggerConstant.QUERY.PAGINATION.limit),
     SwaggerApiResponse(
       AdminPropertySwaggerConstant.RESPONSES.ALL_PROPERTIES_RESPONSE,
     ),
@@ -49,6 +53,8 @@ export function ApiGetPendingProperties() {
     ApiOperation(
       AdminPropertySwaggerConstant.OPERATIONS.GET_PENDING_PROPERTIES,
     ),
+    ApiQuery(AdminPropertySwaggerConstant.QUERY.PAGINATION.page),
+    ApiQuery(AdminPropertySwaggerConstant.QUERY.PAGINATION.limit),
     SwaggerApiResponse(
       AdminPropertySwaggerConstant.RESPONSES.PENDING_PROPERTIES_RESPONSE,
     ),
