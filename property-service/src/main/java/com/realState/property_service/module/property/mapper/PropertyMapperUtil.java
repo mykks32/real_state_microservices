@@ -89,6 +89,8 @@ public class PropertyMapperUtil {
                 locationDTO.setZipcode(location.getZipcode());
                 locationDTO.setLatitude(location.getLatitude());
                 locationDTO.setLongitude(location.getLongitude());
+                locationDTO.setCreatedAt(location.getCreatedAt());
+                locationDTO.setUpdatedAt(location.getUpdatedAt());
                 dto.setLocation(locationDTO);
             }
 
