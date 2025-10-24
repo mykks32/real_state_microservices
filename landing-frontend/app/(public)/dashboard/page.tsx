@@ -1,22 +1,27 @@
 "use client";
 
-import {useEffect} from "react";
-import {useRouter} from "next/navigation";
+import { useEffect, useState, Suspense, lazy } from "react";
+import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/useAuthStore";
-import {Spinner} from "@/components/ui/spinner";
-import {Card, CardHeader, CardTitle, CardContent} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
-import {User, Key, Calendar} from "lucide-react";
-import PropertyTab from "@/app/(public)/dashboard/property-tab";
+import { Spinner } from "@/components/ui/spinner";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { User, Key, Calendar } from "lucide-react";
+
+// Lazy-load PropertyTab
+const PropertyTab = lazy(() => import("@/app/(public)/dashboard/property-tab"));
 
 export default function Dashboard() {
     const user = useAuthStore((state) => state.user);
     const loading = useAuthStore((state) => state.loading);
     const logout = useAuthStore((state) => state.logout);
     const router = useRouter();
+
+    // Track active tab
+    const [activeTab, setActiveTab] = useState("details");
 
     useEffect(() => {
         if (!loading && !user) {
@@ -32,7 +37,7 @@ export default function Dashboard() {
     if (loading || !user) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <Spinner/>
+                <Spinner />
             </div>
         );
     }
@@ -52,7 +57,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Card className="bg-transparent shadow-lg border-slate-500/20">
                         <CardHeader className="flex items-center gap-2">
-                            <User className="text-blue-500"/>
+                            <User className="text-blue-500" />
                             <CardTitle>User Info</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-1">
@@ -64,7 +69,7 @@ export default function Dashboard() {
 
                     <Card className="bg-transparent shadow-lg border-slate-500/20">
                         <CardHeader className="flex items-center gap-2">
-                            <Key className="text-green-500"/>
+                            <Key className="text-green-500" />
                             <CardTitle>Roles</CardTitle>
                         </CardHeader>
                         <CardContent className="flex flex-wrap gap-2">
@@ -78,7 +83,7 @@ export default function Dashboard() {
 
                     <Card className="bg-transparent shadow-lg border-slate-500/20">
                         <CardHeader className="flex items-center gap-2">
-                            <Calendar className="text-purple-500"/>
+                            <Calendar className="text-purple-500" />
                             <CardTitle>Activity</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-1">
@@ -97,13 +102,14 @@ export default function Dashboard() {
                 </div>
 
                 {/* Tabs */}
-                <Tabs defaultValue="details" className="mt-6">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
                     <TabsList>
                         <TabsTrigger value="details">Details</TabsTrigger>
                         <TabsTrigger value="raw">Raw JSON</TabsTrigger>
                         <TabsTrigger value="property">Properties</TabsTrigger>
                     </TabsList>
 
+                    {/* Details Tab */}
                     <TabsContent value="details">
                         <Card>
                             <CardHeader>
@@ -146,6 +152,7 @@ export default function Dashboard() {
                         </Card>
                     </TabsContent>
 
+                    {/* Raw JSON Tab */}
                     <TabsContent value="raw">
                         <Card className="bg-transparent shadow-lg border-slate-500/20">
                             <CardContent>
@@ -153,8 +160,21 @@ export default function Dashboard() {
                             </CardContent>
                         </Card>
                     </TabsContent>
-                    <PropertyTab />
 
+                    {/* Property Tab (Lazy Loaded) */}
+                    <TabsContent value="property">
+                        {activeTab === "property" && (
+                            <Suspense
+                                fallback={
+                                    <div className="h-20 w-full items-center justify-center flex">
+                                        <Spinner />
+                                    </div>
+                                }
+                            >
+                                <PropertyTab />
+                            </Suspense>
+                        )}
+                    </TabsContent>
                 </Tabs>
             </div>
         </section>
