@@ -31,7 +31,7 @@ export default function PropertyTab() {
     // React Query hook
     const {data, isLoading, isError, error} = useQuery({
         queryKey,
-        queryFn: () => PropertyService.getAllProperty(pagination.pageIndex, pagination.pageSize),
+        queryFn: () => PropertyService.getAllProperties(pagination.pageIndex, pagination.pageSize),
         staleTime: STALE_TIME, // 5 minutes
         retry: 2,
         keepPreviousData: true,
