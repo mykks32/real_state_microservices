@@ -116,6 +116,7 @@ export class AdminPropertyController {
    *
    * @route GET /pending
    * @param {Request} req
+   * @param query
    * @returns {Promise<IApiResponse<IProperty[]>>}
    *
    * @remarks

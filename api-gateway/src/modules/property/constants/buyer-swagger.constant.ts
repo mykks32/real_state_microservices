@@ -21,6 +21,11 @@ export const BuyerPropertySwaggerConstant = {
       description:
         'Retrieves all properties that have been approved for listing',
     },
+    FILTER_PROPERTIES: {
+      summary: 'Filter properties',
+      description:
+        'Retrieves properties filtered by status, type, state, and supports pagination',
+    },
   },
 
   /** API parameter definitions for public endpoints */
@@ -65,6 +70,29 @@ export const BuyerPropertySwaggerConstant = {
         type: Number,
         description: 'Number of items per page',
         example: 10,
+        required: false,
+      },
+    },
+    FILTERS: {
+      status: {
+        name: 'status',
+        type: String,
+        description: 'Filter by property status (Available, Sold, Rented)',
+        example: 'Available',
+        required: false,
+      },
+      type: {
+        name: 'type',
+        type: String,
+        description: 'Filter by property type (House, Land)',
+        example: 'House',
+        required: false,
+      },
+      state: {
+        name: 'state',
+        type: String,
+        description: 'Filter by state name',
+        example: 'Bagmati',
         required: false,
       },
     },
@@ -166,6 +194,41 @@ export const BuyerPropertySwaggerConstant = {
         ],
         timestamp: '2024-01-15T10:35:00.000Z',
         requestId: '9fa9c06c-c082-4b6c-9ca7-3f3551700f2f',
+      },
+    },
+
+    FILTERED_PROPERTIES_RESPONSE: {
+      status: 200,
+      description: 'Filtered properties fetched successfully',
+      type: ApiResponse,
+      example: {
+        success: true,
+        message: 'Filtered properties fetched successfully',
+        statusCode: 200,
+        data: [
+          {
+            id: 'a5f6dc9e-55aa-41d1-96ce-7e5a44e88a76',
+            title: 'Modern Apartment in Lalitpur',
+            description: '2BHK apartment with rooftop access',
+            type: 'House',
+            status: 'Available',
+            approvalStatus: 'approved',
+            location: {
+              city: 'Lalitpur',
+              state: 'Bagmati',
+              country: 'Nepal',
+            },
+            createdAt: '2024-01-20T09:00:00.000Z',
+          },
+        ],
+        meta: {
+          totalItems: 7,
+          totalPages: 1,
+          currentPage: 1,
+          pageSize: 10,
+        },
+        timestamp: '2024-01-20T09:30:00.000Z',
+        requestId: 'f4b9c00c-1111-2222-3333-abcdef123456',
       },
     },
   },

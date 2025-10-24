@@ -39,8 +39,6 @@ const PaginationImpl = ({ meta, onPageChange, pageSizeOptions = [10, 15, 20, 25]
     const handleSizeChange = (newSize: number) => {
         if (newSize === currentSize) return;
 
-        // When page size changes, reset to first page to avoid invalid page numbers
-        const newTotalPages = Math.ceil(meta.totalItems / newSize);
         const newPage = 1; // Reset to first page
 
         setCurrentPage(newPage);

@@ -61,3 +61,32 @@ export function ApiGetApprovedProperties() {
     ApiInternalErrorResponse(),
   );
 }
+
+/** Filter properties (public) */
+export function ApiFilterProperties() {
+  return applyDecorators(
+    ApiOperation(BuyerPropertySwaggerConstant.OPERATIONS.FILTER_PROPERTIES),
+
+    ApiQuery(BuyerPropertySwaggerConstant.QUERY.FILTERS.status),
+    ApiQuery(BuyerPropertySwaggerConstant.QUERY.FILTERS.type),
+    ApiQuery(BuyerPropertySwaggerConstant.QUERY.FILTERS.state),
+    ApiQuery(BuyerPropertySwaggerConstant.QUERY.PAGINATION.page),
+    ApiQuery(BuyerPropertySwaggerConstant.QUERY.PAGINATION.limit),
+
+    SwaggerApiResponse(
+      BuyerPropertySwaggerConstant.RESPONSES.FILTERED_PROPERTIES_RESPONSE,
+    ),
+
+    ApiBadRequestResponse(
+      BuyerPropertySwaggerConstant.ERRORS.INVALID_PROPERTY_ID.errorName,
+      BuyerPropertySwaggerConstant.ERRORS.INVALID_PROPERTY_ID.message,
+    ),
+
+    ApiServiceUnavailableResponse(
+      BuyerPropertySwaggerConstant.ERRORS.PROPERTY_SERVICE_UNAVAILABLE.errorName,
+      BuyerPropertySwaggerConstant.ERRORS.PROPERTY_SERVICE_UNAVAILABLE.message,
+    ),
+
+    ApiInternalErrorResponse(),
+  );
+}
