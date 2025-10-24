@@ -83,7 +83,8 @@ export function ApiFilterProperties() {
     ),
 
     ApiServiceUnavailableResponse(
-      BuyerPropertySwaggerConstant.ERRORS.PROPERTY_SERVICE_UNAVAILABLE.errorName,
+      BuyerPropertySwaggerConstant.ERRORS.PROPERTY_SERVICE_UNAVAILABLE
+        .errorName,
       BuyerPropertySwaggerConstant.ERRORS.PROPERTY_SERVICE_UNAVAILABLE.message,
     ),
 
