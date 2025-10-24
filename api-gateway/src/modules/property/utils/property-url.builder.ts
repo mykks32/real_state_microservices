@@ -40,8 +40,12 @@ export class PropertyUrlBuilder {
    * @readonly
    * @type {string}
    */
-  getAllPropertyUrl(): string {
-    return `${this.configService.propertyServiceUrl}/properties`;
+  getAllPropertyUrl(page: number = 1, size: number = 10): string {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+
+    return `${this.configService.propertyServiceUrl}/properties?${params.toString()}`;
   }
 
   /**
@@ -61,8 +65,12 @@ export class PropertyUrlBuilder {
    * @readonly
    * @type {string}
    */
-  get pendingPropertyUrl(): string {
-    return `${this.configService.propertyServiceUrl}/properties/pending`;
+  pendingPropertyUrl(page: number = 1, size: number = 10): string {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+
+    return `${this.configService.propertyServiceUrl}/properties/pending?${params.toString()}`;
   }
 
   /**
@@ -72,7 +80,11 @@ export class PropertyUrlBuilder {
    * @type {string}
    */
   approvedPropertyUrl(page: number = 1, size: number = 10): string {
-    return `${this.configService.propertyServiceUrl}/properties/approved?page=${page}&size=${size}`;
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+
+    return `${this.configService.propertyServiceUrl}/properties/approved?${params.toString()}`;
   }
 
   /**
@@ -128,5 +140,34 @@ export class PropertyUrlBuilder {
    */
   deletePropertyUrl(propertyId: string): string {
     return `${this.configService.propertyServiceUrl}/properties/delete/${propertyId}`;
+  }
+
+  /**
+   * Delete property URL
+   *
+   * @private
+   * @returns {string}
+   * @param status
+   * @param type
+   * @param state
+   * @param page
+   * @param size
+   */
+  filterPropertiesUrl(
+    status?: string,
+    type?: string,
+    state?: string,
+    page: number = 1,
+    size: number = 10,
+  ): string {
+    const params = new URLSearchParams();
+
+    if (status) params.append('status', status);
+    if (type) params.append('type', type);
+    if (state) params.append('state', state);
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+
+    return `${this.configService.propertyServiceUrl}/properties/filter?${params.toString()}`;
   }
 }

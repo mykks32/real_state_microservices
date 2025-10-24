@@ -9,6 +9,7 @@ import {
   Logger,
   Param,
   Patch,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -30,6 +31,7 @@ import {
   ApiGetPendingProperties,
   ApiRejectProperty,
 } from '../decorators/admin-property-swagger.decorator';
+import { PaginationQueryDto } from '../../enquiry/dtos/pagination-query.dto';
 
 /**
  * AdminPropertyController
@@ -74,6 +76,7 @@ export class AdminPropertyController {
    *
    * @route GET /property
    * @param {RequestWithUserContext} req
+   * @param query
    * @returns {Promise<IApiResponse<IProperty[]>>} Paginated enquiries for the property.
    *
    * @remarks
@@ -84,15 +87,17 @@ export class AdminPropertyController {
   @ApiGetAllProperties()
   async getAllProperty(
     @Req() req: RequestWithUserContext,
-    // @Query() query: PaginationQueryDto,
+    @Query() query: PaginationQueryDto,
   ): Promise<IApiResponse<IProperty[]>> {
     const requestId = req.headers['x-request-id'] as string;
+
+    const { page, size } = query;
 
     this.logger.log(`Fetching All Properties | request_id = ${requestId}`);
 
     const response = await firstValueFrom(
       this.httpService.get<IApiResponse<IProperty[]>>(
-        this.propertyUrlBuilder.getAllPropertyUrl(),
+        this.propertyUrlBuilder.getAllPropertyUrl(page, size),
         {
           headers: {
             'x-request-id': requestId,
@@ -121,15 +126,17 @@ export class AdminPropertyController {
   @ApiGetPendingProperties()
   async getPendingProperty(
     @Req() req: Request,
-    // @Query() query: PaginationQueryDto,
+    @Query() query: PaginationQueryDto,
   ): Promise<IApiResponse<IProperty[]>> {
     const requestId = req.headers['x-request-id'] as string;
 
     this.logger.log(`Fetching Pending Property | request_id = ${requestId}`);
 
+    const { page, size } = query;
+
     const response = await firstValueFrom(
       this.httpService.get<IApiResponse<IProperty[]>>(
-        this.propertyUrlBuilder.pendingPropertyUrl,
+        this.propertyUrlBuilder.pendingPropertyUrl(page, size),
         {
           headers: {
             'x-request-id': requestId,

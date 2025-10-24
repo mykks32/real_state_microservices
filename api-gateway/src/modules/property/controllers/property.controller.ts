@@ -15,11 +15,13 @@ import { IProperty } from '../interfaces/property.interface';
 import { PropertyUrlBuilder } from '../utils/property-url.builder';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  ApiFilterProperties,
   ApiGetApprovedProperties,
   ApiGetPropertyById,
 } from '../decorators/buyer-property-swagger.decorator';
 import { BuyerPropertySwaggerConstant } from '../constants/buyer-swagger.constant';
 import { PaginationQueryDto } from '../../enquiry/dtos/pagination-query.dto';
+import { PropertyFilterQueryDto } from '../dtos/property-query-filter.dto';
 
 /**
  * PropertyController
@@ -128,6 +130,59 @@ export class PropertyController {
     const response = await firstValueFrom(
       this.httpService.get<IApiResponse<IProperty[]>>(
         this.propertyUrlBuilder.approvedPropertyUrl(page, size),
+        {
+          headers: {
+            'x-request-id': requestId,
+          },
+        },
+      ),
+    );
+
+    this.logger.log(`[${requestId}] Approved Properties fetched successfully`);
+
+    return response.data;
+  }
+
+  /**
+   * Filters properties by status, type, and state.
+   *
+   * @route GET /property/filter
+   * @status 200 - OK
+   *
+   * @param {Request} req - Incoming HTTP request
+   * @param query - Filter and pagination parameters
+   * @returns {Promise<IApiResponse<IProperty[]>>} Standardized response containing filtered properties
+   *
+   * @remarks
+   * - Filters can be combined
+   * - All filter parameters are optional
+   * - Includes pagination support
+   * - Can optionally fetch only approved properties
+   */
+  @Get('/filter')
+  @HttpCode(HttpStatus.OK)
+  @ApiFilterProperties()
+  async filterProperties(
+    @Req() req: Request,
+    @Query() query: PropertyFilterQueryDto,
+  ): Promise<IApiResponse<IProperty[]>> {
+    const requestId = req.headers['x-request-id'] as string;
+
+    this.logger.log(
+      `[${requestId}] Filtering Properties - status: ${query.status}, type: ${query.type}, state: ${query.state}, page: ${query.page}, size: ${query.size}`,
+    );
+
+    const { status, type, state, page, size } = query;
+
+    const response = await firstValueFrom(
+      this.httpService.get<IApiResponse<IProperty[]>>(
+        this.propertyUrlBuilder.filterPropertiesUrl(
+          status,
+          type,
+          state,
+          page,
+          size,
+        ),
         {
           headers: {
             'x-request-id': requestId,
