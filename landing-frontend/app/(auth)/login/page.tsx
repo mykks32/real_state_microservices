@@ -5,16 +5,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "react-query";
-import { toast } from "sonner";
 import { Mail, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import useAuthStore from "@/stores/useAuthStore";
-import Footer from "@/components/common/Footer";
 
 // Schema using Zod
 const loginSchema = z.object({
@@ -39,13 +36,11 @@ export default function LoginPage() {
             await login(data.email, data.password);
         },
         onSuccess: () => {
-            toast.success("Login successful!");
             setTimeout(() => router.push("/dashboard"), 500);
         },
         onError: (err: any) => {
             const msg = err?.message || err?.response?.data?.message || "Invalid credentials";
             setError(msg);
-            toast.error(msg);
         },
     });
 

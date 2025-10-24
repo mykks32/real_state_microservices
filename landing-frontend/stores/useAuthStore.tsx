@@ -1,8 +1,8 @@
-import {create} from "zustand";
-import {IUser} from "@/interfaces/auth/IUser";
-import {devtools} from "zustand/middleware";
+import { create } from "zustand";
+import { IUser } from "@/interfaces/auth/IUser";
+import { devtools } from "zustand/middleware";
 import authService from "@/services/auth-service";
-import {ILoginResponse} from "@/interfaces/auth/IAuthResponse";
+import { ILoginResponse, IMeResponse } from "@/interfaces/auth/IAuthResponse";
 
 interface AuthStore {
     user: Omit<IUser, "password"> | null;
@@ -18,25 +18,35 @@ const useAuthStore = create<AuthStore>()(
         (set) => ({
             user: null,
             loading: true,
-            accessToken: "",
+            accessToken: null,
 
             login: async (email: string, password: string) => {
-                set({loading: true});
+                set({ loading: true });
                 try {
-                    const response: ILoginResponse = await authService.login({email, password});
-                    set({
-                        user: response.user,
-                        accessToken: response.accessToken,
-                        loading: false
-                    });
+                    const response = await authService.login({ email, password });
+
+                    if (!response) {
+                        throw new Error("No response received");
+                    }
+
+                    if (response.statusCode === 200 && response.data) {
+                        const loginData = response.data as ILoginResponse;
+                        set({
+                            user: loginData.user,
+                            accessToken: loginData.accessToken,
+                            loading: false
+                        });
+                    } else {
+                        throw new Error(response.message || "Login failed");
+                    }
                 } catch (error) {
-                    set({loading: false});
+                    set({ loading: false });
                     throw error;
                 }
             },
 
             logout: async () => {
-                set({loading: true});
+                set({ loading: true });
                 try {
                     await authService.logout();
                 } catch (error) {
@@ -44,20 +54,22 @@ const useAuthStore = create<AuthStore>()(
                 } finally {
                     set({
                         user: null,
-                        accessToken: "",
+                        accessToken: null,
                         loading: false
                     });
                 }
             },
 
             initialize: async () => {
-                set({loading: true});
+                set({ loading: true });
                 try {
                     const response = await authService.me();
+
                     if (response && response.statusCode === 200 && response.data) {
+                        const meData = response.data as IMeResponse;
                         set({
-                            user: response.data.user as IUser,
-                            accessToken: response.data.accessToken as string,
+                            user: meData.user,
+                            accessToken: meData.accessToken,
                             loading: false
                         });
                     } else {
@@ -71,12 +83,15 @@ const useAuthStore = create<AuthStore>()(
                     console.error("Auth initialization error:", error);
                     set({
                         user: null,
-                        accessToken: "",
+                        accessToken: null,
                         loading: false
                     });
                 }
             }
-        })
+        }),
+        {
+            name: "auth-storage"
+        }
     )
 );
 
