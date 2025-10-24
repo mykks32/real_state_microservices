@@ -16,25 +16,41 @@ interface PaginationProps {
         currentPage: number;
         pageSize: number;
     };
-    onPageChange: (page: number) => void;
+    onPageChange: (page: number, size: number) => void;
+    pageSizeOptions?: number[];
 }
 
-const PaginationImpl = ({ meta, onPageChange }: PaginationProps) => {
+const PaginationImpl = ({ meta, onPageChange, pageSizeOptions = [10, 15, 20, 25] }: PaginationProps) => {
     const [currentPage, setCurrentPage] = useState(meta.currentPage);
+    const [currentSize, setCurrentSize] = useState(meta.pageSize);
 
     useEffect(() => {
         setCurrentPage(meta.currentPage);
-    }, [meta.currentPage]);
+        setCurrentSize(meta.pageSize);
+    }, [meta.currentPage, meta.pageSize]);
 
-    const handlePageChange = (page: number) => {
-        if (page < 1 || page > meta.totalPages) return;
+    const handlePageChange = (page: number, size: number = currentSize) => {
+        if (page < 1 || page > meta.totalPages || page === currentPage) return;
         setCurrentPage(page);
-        onPageChange(page);
+        setCurrentSize(size);
+        onPageChange(page, size);
+    };
+
+    const handleSizeChange = (newSize: number) => {
+        if (newSize === currentSize) return;
+
+        // When page size changes, reset to first page to avoid invalid page numbers
+        const newTotalPages = Math.ceil(meta.totalItems / newSize);
+        const newPage = 1; // Reset to first page
+
+        setCurrentPage(newPage);
+        setCurrentSize(newSize);
+        onPageChange(newPage, newSize);
     };
 
     const renderPages = () => {
         const pages: (number | string)[] = [];
-        const { totalPages } = meta;
+        const { totalPages, currentPage } = meta;
 
         if (totalPages <= 7) {
             for (let i = 1; i <= totalPages; i++) pages.push(i);
@@ -67,36 +83,65 @@ const PaginationImpl = ({ meta, onPageChange }: PaginationProps) => {
         return pages.map((page, idx) =>
             typeof page === "number" ? (
                 <PaginationLink
-                    key={idx}
+                    key={`${page}-${idx}`}
                     isActive={currentPage === page}
                     onClick={() => handlePageChange(page)}
                 >
                     {page}
                 </PaginationLink>
             ) : (
-                <PaginationEllipsis key={idx} />
+                <PaginationEllipsis key={`ellipsis-${idx}`} />
             )
         );
     };
 
     return (
-        <Pagination className="flex items-center justify-center gap-2 mt-6">
-            <PaginationPrevious
-                onClick={() => handlePageChange(currentPage - 1)}
-                isActive={currentPage !== 1}
-            >
-                Previous
-            </PaginationPrevious>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-2">
+                <label htmlFor="page-size" className="text-sm text-gray-600">
+                    Rows per page:
+                </label>
+                <select
+                    id="page-size"
+                    value={currentSize}
+                    onChange={(e) => handleSizeChange(Number(e.target.value))}
+                    className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                    {pageSizeOptions.map((size) => (
+                        <option key={size} value={size}>
+                            {size}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-            {renderPages()}
+            {/* Pagination Controls */}
+            <Pagination className="flex items-center justify-center gap-2">
+                <PaginationPrevious
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    isActive={currentPage === 1}
+                >
+                    Previous
+                </PaginationPrevious>
 
-            <PaginationNext
-                onClick={() => handlePageChange(currentPage + 1)}
-                isActive={currentPage !== meta.totalPages}
-            >
-                Next
-            </PaginationNext>
-        </Pagination>
+                {renderPages()}
+
+                <PaginationNext
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    isActive={currentPage === meta.totalPages}
+                >
+                    Next
+                </PaginationNext>
+            </Pagination>
+
+            {/* Page Info */}
+            <div className="text-sm text-gray-600">
+                Showing {((currentPage-1) * currentSize)} to{" "}
+                {Math.min((currentPage) * currentSize, meta.totalItems)} of{" "}
+                {meta.totalItems} entries
+            </div>
+        </div>
     );
 };
 
