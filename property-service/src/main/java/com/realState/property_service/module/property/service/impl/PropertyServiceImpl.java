@@ -5,12 +5,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.realState.property_service.common.utils.ApiResponse;
+import com.realState.property_service.database.enums.StateEnum;
+import com.realState.property_service.module.property.dto.PropertyFilterDTO;
+import com.realState.property_service.module.property.service.specification.PropertySpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.realState.property_service.common.exceptions.location.LocationCreationException;
@@ -39,6 +43,18 @@ public class PropertyServiceImpl implements PropertyService {
     private final LocationService locationService;
     private final PropertyMapperUtil propertyMapperUtil;
     private static final Logger logger = LoggerFactory.getLogger(PropertyServiceImpl.class);
+
+    private void validateFilterDTO(PropertyFilterDTO filterDTO) {
+        if (filterDTO == null) {
+            throw new IllegalArgumentException("PropertyFilterDTO cannot be null");
+        }
+        if (filterDTO.getPage() < 0) {
+            throw new IllegalArgumentException("Page number cannot be negative");
+        }
+        if (filterDTO.getSize() <= 0 || filterDTO.getSize() > 100) {
+            throw new IllegalArgumentException("Size must be between 1 and 100");
+        }
+    }
 
     public PropertyServiceImpl(PropertyRepository propertyRepository, LocationService locationService,
             PropertyMapperUtil propertyMapperUtil) {
@@ -191,7 +207,7 @@ public class PropertyServiceImpl implements PropertyService {
             ApiResponse.MetaData meta = new ApiResponse.MetaData(
                     pendingPropertiesPage.getTotalElements(),
                     pendingPropertiesPage.getTotalPages(),
-                    pendingPropertiesPage.getNumber(),
+                    pendingPropertiesPage.getNumber() + 1,
                     pendingPropertiesPage.getSize()
             );
 
@@ -336,7 +352,7 @@ public class PropertyServiceImpl implements PropertyService {
             ApiResponse.MetaData meta = new ApiResponse.MetaData(
                     properties.getTotalElements(),
                     properties.getTotalPages(),
-                    properties.getNumber(),
+                    properties.getNumber() + 1,
                     properties.getSize()
             );
 
@@ -351,7 +367,7 @@ public class PropertyServiceImpl implements PropertyService {
         }
     }
 
-    // ================== ADMIN ==================
+    // ================== BUYER ==================
 
     /**
      * 1. Retrieves all approved properties for buyers.
@@ -381,11 +397,11 @@ public class PropertyServiceImpl implements PropertyService {
             ApiResponse.MetaData meta = new ApiResponse.MetaData(
                     approvedPropertiesPage.getTotalElements(),
                     approvedPropertiesPage.getTotalPages(),
-                    approvedPropertiesPage.getNumber(),
+                    approvedPropertiesPage.getNumber() + 1,
                     approvedPropertiesPage.getSize()
             );
 
-            logger.info("Fetched pending properties", propertyDTOs.size(), page + 1, approvedPropertiesPage.getTotalPages());
+            logger.info("Fetched pending properties of size:{} page:{} totalPage:{}", propertyDTOs.size(), page + 1, approvedPropertiesPage.getTotalPages());
 
             // Return success response with data and meta
             return ApiResponse.success(propertyDTOs, meta, "Fetched approved properties successfully");
@@ -420,4 +436,53 @@ public class PropertyServiceImpl implements PropertyService {
         }
     }
 
+
+    /**
+     * 3. Retrieves all filtered approved properties for buyers.
+     *
+     * @return list of approved PropertyDTOs
+     * @throws PropertySaveException if fetching approved properties fails
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public ApiResponse<List<PropertyDTO>> filterProperties(PropertyFilterDTO filterDTO) {
+        try {
+            validateFilterDTO(filterDTO);
+
+            Pageable pageable = PageRequest.of(
+                    filterDTO.getPage(),
+                    filterDTO.getSize(),
+                    Sort.by("updatedAt").descending()
+            );
+
+            Specification<Property> spec = PropertySpecification.combine(
+                    filterDTO.getStatus(),
+                    filterDTO.getType(),
+                    filterDTO.getState()
+            ).and(PropertySpecification.isApproved());
+
+            Page<Property> propertiesPage = propertyRepository.findAll(spec, pageable);
+
+            List<PropertyDTO> propertyDTOs = propertiesPage.getContent().stream()
+                    .map(propertyMapperUtil::mapToDto)
+                    .collect(Collectors.toList());
+
+            ApiResponse.MetaData meta = new ApiResponse.MetaData(
+                    propertiesPage.getTotalElements(),
+                    propertiesPage.getTotalPages(),
+                    propertiesPage.getNumber() + 1,
+                    propertiesPage.getSize()
+            );
+
+            logger.info("Filtered properties - status: {}, type: {}, state: {}, found: {}, page: {}",
+                    filterDTO.getStatus(), filterDTO.getType(), filterDTO.getState(),
+                    propertyDTOs.size(), filterDTO.getPage() + 1);
+
+            return ApiResponse.success(propertyDTOs, meta, "Filtered properties fetched successfully");
+
+        } catch (Exception ex) {
+            logger.error("Failed to fetch approved properties");
+            throw new PropertyFetchException("Failed to Fetch Properties");
+        }
+    }
 }

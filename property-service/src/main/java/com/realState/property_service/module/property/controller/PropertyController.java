@@ -2,10 +2,15 @@ package com.realState.property_service.module.property.controller;
 
 import com.realState.property_service.common.exceptions.property.PropertyNotFoundException;
 import com.realState.property_service.common.utils.ApiResponse;
+import com.realState.property_service.database.enums.StateEnum;
+import com.realState.property_service.database.enums.StatusEnum;
+import com.realState.property_service.database.enums.TypeEnum;
 import com.realState.property_service.module.property.dto.CreatePropertyDTO;
 import com.realState.property_service.module.property.dto.PropertyDTO;
+import com.realState.property_service.module.property.dto.PropertyFilterDTO;
 import com.realState.property_service.module.property.dto.UpdatePropertyDTO;
 import com.realState.property_service.module.property.service.PropertyService;
+import com.realState.property_service.module.property.service.impl.PropertyServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,11 +18,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+
+import static ch.qos.logback.core.util.StringUtil.capitalizeFirstLetter;
 
 /**
  * REST controller for managing property-related operations.
@@ -27,6 +36,7 @@ import java.util.*;
 public class PropertyController {
 
     private final PropertyService propertyService;
+    private static final Logger logger = LoggerFactory.getLogger(PropertyController.class);
 
     public PropertyController(PropertyService propertyService) {
         this.propertyService = propertyService;
@@ -34,6 +44,47 @@ public class PropertyController {
 
 
     // ================= Buyer APIs =================
+    /** Get Filtered Properties */
+    @GetMapping("/filter")
+    public ResponseEntity<ApiResponse<List<PropertyDTO>>> filterPropertiesWithParams(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String state,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PropertyFilterDTO filterDTO = new PropertyFilterDTO();
+
+        try {
+            // Convert PascalCase: capitalize first letter, lowercase rest
+            filterDTO.setStatus(status != null ? StatusEnum.valueOf(capitalizeFirstLetter(status)) : null);
+            filterDTO.setType(type != null ? TypeEnum.valueOf(capitalizeFirstLetter(type)) : null);
+            filterDTO.setState(state != null ? StateEnum.valueOf(capitalizeFirstLetter(state)) : null);
+        } catch (IllegalArgumentException ex) {
+            logger.error("Invalid enum value - status: {}, type: {}, state: {}", status, type, state, ex);
+            throw new IllegalArgumentException("Invalid filter value: " + ex.getMessage());
+        }
+        // Validate page number
+        if (page < 1) {
+            page = 1;
+        }
+
+        // Validate and cap size to prevent abuse
+        if (size < 1) {
+            size = 10;
+        }
+        if (size > 100) {
+            size = 100;
+        }
+
+        // Convert 1-indexed to 0-indexed for Spring Data
+        int pageNumber = page - 1;
+
+        filterDTO.setPage(pageNumber);
+        filterDTO.setSize(size);
+
+        return ResponseEntity.ok(propertyService.filterProperties(filterDTO));
+    }
+
 
     /**
      * Get all approved properties.

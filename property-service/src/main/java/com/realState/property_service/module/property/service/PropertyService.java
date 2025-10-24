@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.realState.property_service.common.utils.ApiResponse;
+import com.realState.property_service.module.property.dto.PropertyFilterDTO;
 import org.springframework.stereotype.Service;
 
 import com.realState.property_service.module.property.dto.CreatePropertyDTO;
@@ -96,6 +97,13 @@ public interface PropertyService {
     ApiResponse<List<PropertyDTO>> getAllProperty(int page, int size);
 
     // ================== BUYER ==================
+    /**
+     * Get all filtered properties.
+     *
+     * @return list of approved PropertyDTOs
+     */
+    ApiResponse<List<PropertyDTO>> filterProperties(PropertyFilterDTO filterDTO);
+
 
     /**
      * Get all approved properties.
