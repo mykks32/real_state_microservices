@@ -9,11 +9,9 @@ import {
     getFacetedRowModel,
     getFacetedUniqueValues,
     getFilteredRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
     SortingState,
     useReactTable,
-    VisibilityState,
 } from "@tanstack/react-table"
 
 import {
@@ -25,7 +23,6 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
-import { DataTablePagination } from "./data-table-pagination"
 import {DataTableToolbar} from "@/components/table/data-table-toolbar";
 
 interface DataTableProps<TData, TValue> {
@@ -38,11 +35,7 @@ export function DataTable<TData, TValue>({
                                              data,
                                          }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
-    const [columnVisibility, setColumnVisibility] =
-        React.useState<VisibilityState>({})
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-        []
-    )
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [sorting, setSorting] = React.useState<SortingState>([])
 
     const table = useReactTable({
@@ -50,23 +43,12 @@ export function DataTable<TData, TValue>({
         columns,
         state: {
             sorting,
-            columnVisibility,
-            rowSelection,
             columnFilters,
         },
-        initialState: {
-            pagination: {
-                pageSize: 25,
-            },
-        },
-        enableRowSelection: true,
-        onRowSelectionChange: setRowSelection,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
-        onColumnVisibilityChange: setColumnVisibility,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -125,7 +107,6 @@ export function DataTable<TData, TValue>({
                     </TableBody>
                 </Table>
             </div>
-            <DataTablePagination table={table} />
         </div>
     )
 }

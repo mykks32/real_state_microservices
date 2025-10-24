@@ -1,8 +1,39 @@
 import api from "@/lib/api";
 import {IApiResponse} from "@/interfaces/common/IApiResponse";
 import {IProperty} from "@/interfaces/property/property.interface";
+import {IFilter} from "@/interfaces/common/IFilter";
 
 class PropertyService {
+    async filterProperties(filters: IFilter): Promise<IApiResponse<IProperty[]> | null> {
+        try {
+            const params = new URLSearchParams();
+
+            // Add optional filters only if they have values
+            if (filters.status) {
+                params.append("status", filters.status);
+            }
+            if (filters.type) {
+                params.append("type", filters.type);
+            }
+            if (filters.state) {
+                params.append("state", filters.state);
+            }
+
+            params.append("page", filters.page.toString());
+            params.append("size", filters.size.toString());
+
+            const response = await api.get<IApiResponse<IProperty[]>>(
+                `/property/filter?${params.toString()}`
+            );
+            return response.data;
+        } catch (error) {
+            console.error(
+                error instanceof Error ? error.message : "Login failed. Please check your credentials."
+            );
+            return null
+        }
+    }
+
     async approvedProperty(
         page: number = 1,
         pageSize: number = 10,): Promise<IApiResponse<IProperty[]> | null> {
@@ -40,6 +71,26 @@ class PropertyService {
     }
 
     // Admin
+    // Pending a property
+    async getPendingProperty(
+        page: number = 1,
+        pageSize: number = 10,): Promise<IApiResponse<IProperty[]> | null> {
+        try {
+            const params = new URLSearchParams({
+                page: page.toString(),
+                size: pageSize.toString(),
+            });
+            const response = await api.get<IApiResponse<IProperty[]>>(
+                `/property/pending?${params.toString()}`
+            );
+            return response.data;
+        } catch (error) {
+            console.error(
+                error instanceof Error ? error.message : "Login failed. Please check your credentials."
+            );
+            return null
+        }
+    }
     // Approve a property
     async getAllProperty(
         page: number = 1,
