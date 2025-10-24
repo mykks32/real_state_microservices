@@ -1,10 +1,7 @@
-import {notFound} from 'next/navigation';
-import {IProperty} from "@/interfaces/property/property.interface";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
-import {StatusEnum, ApprovalStatusEnum, TypeEnum} from "@/enums";
-import PropertyService from "@/services/property-service";
-import Header from "@/components/common/Header";
+import { notFound } from 'next/navigation';
+import axios, { AxiosError } from 'axios';
+import { IProperty } from "@/interfaces/property/property.interface";
+import { StatusEnum, ApprovalStatusEnum, TypeEnum } from "@/enums";
 import PropertyMainContent from "@/components/property/PropertyDetailCard";
 import PropertySidebar from "@/components/property/PropertySideBar";
 import PropertyHeaderCard from "@/components/property/PropertyHeaderCard";
@@ -14,17 +11,42 @@ export default async function PropertyDetailPage({
                                                  }: {
     params: Promise<{ propertyId: string }>;
 }) {
-    const {propertyId} = await params;
+    const { propertyId } = await params;
 
     let property: IProperty | null = null;
 
     try {
-        const response = await PropertyService.getPropertyById(propertyId);
-        if (response?.data) {
-            property = response.data
-        }
+        const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/property/id/${propertyId}`,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        property = response.data.data || response.data;
     } catch (error) {
-        console.error('Error fetching property:', error);
+        // Handle 404 - Property not found
+        if (error instanceof AxiosError && error.response?.status === 404) {
+            console.error(`Property not found: ${propertyId}`);
+            notFound();
+        }
+
+        // Handle other axios errors
+        if (error instanceof AxiosError) {
+            console.error(`API Error: ${error.message}`, {
+                status: error.response?.status,
+                data: error.response?.data,
+            });
+        }
+
+        // Handle generic errors
+        if (error instanceof Error) {
+            console.error(`Error: ${error.name} - ${error.message}`);
+        }
+
+        // For any error, show not found page
         notFound();
     }
 
@@ -70,12 +92,16 @@ export default async function PropertyDetailPage({
             <div className="container mx-auto px-4 py-8">
                 <div className="max-w-4xl mx-auto space-y-6">
                     {/* Header Card */}
-                    <PropertyHeaderCard property={property} formatType={formatType} getStatusColor={getStatusColor}
-                                        getApprovalStatusColor={getApprovalStatusColor}/>
+                    <PropertyHeaderCard
+                        property={property}
+                        formatType={formatType}
+                        getStatusColor={getStatusColor}
+                        getApprovalStatusColor={getApprovalStatusColor}
+                    />
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <PropertyMainContent property={property}/>
-                        <PropertySidebar property={property}/>
+                        <PropertyMainContent property={property} />
+                        <PropertySidebar property={property} />
                     </div>
                 </div>
             </div>

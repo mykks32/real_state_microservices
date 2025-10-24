@@ -26,8 +26,8 @@ const Feed = () => {
         pageIndex: DEFAULT_PAGE,
         pageSize: DEFAULT_PAGE_SIZE,
     })
-    const [appliedFilters, setAppliedFilters] = useState<IFilter>(defaultFilters); // Filters that are actually applied to the query
-    const [currentFilters, setCurrentFilters] = useState<IFilter>(defaultFilters); // Current filter selections (not yet applied)
+    const [appliedFilters, setAppliedFilters] = useState<IFilter>(defaultFilters);
+    const [currentFilters, setCurrentFilters] = useState<IFilter>(defaultFilters);
 
     // Build query key
     const queryKey = useMemo(() => [
@@ -41,7 +41,7 @@ const Feed = () => {
         }
     ], [appliedFilters.status, appliedFilters.type, appliedFilters.state, pagination.pageIndex, pagination.pageSize]);
 
-    // React Query hook - only uses appliedFilters
+    // React Query hook
     const {
         data,
         isLoading,
@@ -90,23 +90,18 @@ const Feed = () => {
         });
     }, []);
 
-    // Called when user clicks Search button - apply the filters
     const onSearch = useCallback((newFilter: IFilter) => {
-        console.log("Search filters applied:", newFilter);
-        setAppliedFilters(newFilter); // This triggers the query
+        setAppliedFilters(newFilter);
         setPagination({
             pageIndex: DEFAULT_PAGE,
             pageSize: DEFAULT_PAGE_SIZE,
-        }); // Reset to page 1 when filter changes
+        });
     }, []);
 
-    // Called when filter selections change (but not applied yet)
     const onFilterChange = useCallback((newFilter: IFilter) => {
         setCurrentFilters(newFilter);
-        // Don't setAppliedFilters here - wait for search button click
     }, []);
 
-    // Called when user changes page
     const onPageChange = useCallback((newPage: number, newPageSize: number) => {
         setPagination({
             pageIndex: newPage,
@@ -148,16 +143,14 @@ const Feed = () => {
             </h2>
 
             <div>
-                {/* Filters - pass currentFilters and onFilterChange */}
                 <FeedFilters
-                    filter={currentFilters} // Use currentFilters instead of appliedFilters
-                    setFilter={onFilterChange} // This only updates current selections
+                    filter={currentFilters}
+                    setFilter={onFilterChange}
                     clearFilter={clearFilter}
                     onSearch={onSearch}
                     isLoading={isFetching}
                 />
 
-                {/* Results */}
                 <FeedResults
                     data={properties}
                     loading={isLoading}
