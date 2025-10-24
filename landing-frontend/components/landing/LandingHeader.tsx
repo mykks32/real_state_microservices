@@ -20,7 +20,7 @@ const LandingHeader = ({scrolled}: ILandingHeaderProps) => {
                 ["Login", "/login"],
                 ["Sign up", "/signup"],
             ]
-            : []),
+            : [["Dashboard", "/dashboard"]]),
     ];
 
     return (

@@ -1,124 +1,173 @@
 "use client"
 
-import React, {useState} from "react";
-import {IProperty} from "@/interfaces/property/property.interface";
+import React, { useState, useCallback, useMemo } from "react";
 import FeedFilters from "@/components/feed/FeedFilters";
 import FeedResults from "@/components/feed/FeedResults";
-import {ApprovalStatusEnum, StateEnum, StatusEnum, TypeEnum} from "@/enums";
-import {z} from "zod";
-import {IFilter} from "@/interfaces/common/IFilter";
-import {useQuery} from "react-query";
+import { IFilter } from "@/interfaces/common/IFilter";
+import { useQuery } from "react-query";
 import PropertyService from "@/services/property-service";
-import Header from "@/components/common/Header";
+import { Button } from "@/components/ui/button";
 
-// const defaultProperties: IProperty[] = [
-//     {
-//         "id": "1a2b3c4d-0001",
-//         "title": "Luxury Villa in Bagmati",
-//         "description": "Spacious villa with modern amenities",
-//         "type": TypeEnum.House,
-//         "status": StatusEnum.Available,
-//         "approvalStatus": ApprovalStatusEnum.Approved,
-//         "ownerId": "owner-uuid-001",
-//         "createdAt": "2025-10-21T07:00:00Z",
-//         "updatedAt": "2025-10-21T07:00:00Z",
-//         "location": {
-//             "id": 1,
-//             "address": "Pulchowk, Lalitpur",
-//             "city": "Kathmandu",
-//             "state": StateEnum.Bagmati,
-//             "country": "Nepal",
-//             "zipcode": 44700,
-//             "latitude": 27.6828,
-//             "longitude": 85.3136,
-//             "createdAt": "2025-10-21T07:00:00Z",
-//             "updatedAt": "2025-10-21T07:00:00Z"
-//         }
-//     },
-// ]
+// Constants
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 10;
+const STALE_TIME = 1000 * 60 * 5; // 5 minutes
 
 const defaultFilters: IFilter = {
-    status: StatusEnum.Available,
-    type: TypeEnum.House,
-    state: StateEnum.Bagmati,
-    minPrice: 1,
-    maxPrice: 100000,
-}
-
-const filterSchema = z.object({
-    status: z.object(Object.values(StateEnum)),
-    type: z.object(Object.values(TypeEnum)),
-    state: z.object(Object.values(StateEnum)), // etc.
-    minPrice: z.number().min(0),
-    maxPrice: z.number().min(0),
-});
-
-export type FilterFormValues = z.infer<typeof filterSchema>;
+    status: undefined,
+    type: undefined,
+    state: undefined,
+    page: DEFAULT_PAGE,
+    size: DEFAULT_PAGE_SIZE,
+};
 
 const Feed = () => {
-    const [page, setPage] = useState<number>(1);
-    const [size, setSize] = useState<number>(10);
-    const [filter, setFilter] = useState<IFilter>(defaultFilters);
+    const [pagination, setPagination] = useState({
+        pageIndex: DEFAULT_PAGE,
+        pageSize: DEFAULT_PAGE_SIZE,
+    })
+    const [appliedFilters, setAppliedFilters] = useState<IFilter>(defaultFilters); // Filters that are actually applied to the query
+    const [currentFilters, setCurrentFilters] = useState<IFilter>(defaultFilters); // Current filter selections (not yet applied)
 
-    // React Query hook
-    const {data, isLoading, isError, error} = useQuery({
-        queryKey: ["approvedProperties", page, size],
-        queryFn: () => PropertyService.approvedProperty(page, size),
-        staleTime: 1000 * 60 * 5, // 5 minutes
+    // Build query key
+    const queryKey = useMemo(() => [
+        "properties",
+        {
+            status: appliedFilters.status,
+            type: appliedFilters.type,
+            state: appliedFilters.state,
+            page: pagination.pageIndex,
+            size: pagination.pageSize,
+        }
+    ], [appliedFilters.status, appliedFilters.type, appliedFilters.state, pagination.pageIndex, pagination.pageSize]);
+
+    // React Query hook - only uses appliedFilters
+    const {
+        data,
+        isLoading,
+        isError,
+        error,
+        isFetching
+    } = useQuery({
+        queryKey,
+        queryFn: () =>
+            PropertyService.filterProperties({
+                status: appliedFilters.status,
+                type: appliedFilters.type,
+                state: appliedFilters.state,
+                page: pagination.pageIndex,
+                size: pagination.pageSize,
+            }),
+        staleTime: STALE_TIME,
         retry: 2,
+        keepPreviousData: true,
+        refetchOnWindowFocus: false,
     });
 
-    const properties = data?.data || [];
-    const meta = data?.meta || {
-        totalItems: 0,
-        totalPages: 0,
-        currentPage: 0,
-        pageSize: 10,
-    };
+    // Memoized data extraction
+    const { properties, meta } = useMemo(() => {
+        const propertiesData = data?.data || [];
+        const metaData = data?.meta || {
+            totalItems: 0,
+            totalPages: 0,
+            currentPage: pagination.pageIndex,
+            pageSize: pagination.pageSize,
+        };
 
-    const clearFilter = () => {
-        setFilter(defaultFilters);
-    }
+        return {
+            properties: propertiesData,
+            meta: metaData
+        };
+    }, [data, pagination.pageIndex, pagination.pageSize]);
 
-    const onSearch = (filter: IFilter) => {
-        console.log(filter);
-    };
+    const clearFilter = useCallback(() => {
+        const clearedFilters = defaultFilters;
+        setCurrentFilters(clearedFilters);
+        setAppliedFilters(clearedFilters);
+        setPagination({
+            pageIndex: DEFAULT_PAGE,
+            pageSize: DEFAULT_PAGE_SIZE,
+        });
+    }, []);
 
-    const onPageChange = (newPage: number) => {
-        setPage(newPage);
-        // Scroll to top
-        window.scrollTo({top: 0, behavior: "smooth"});
-    };
+    // Called when user clicks Search button - apply the filters
+    const onSearch = useCallback((newFilter: IFilter) => {
+        console.log("Search filters applied:", newFilter);
+        setAppliedFilters(newFilter); // This triggers the query
+        setPagination({
+            pageIndex: DEFAULT_PAGE,
+            pageSize: DEFAULT_PAGE_SIZE,
+        }); // Reset to page 1 when filter changes
+    }, []);
 
-    return (
-        <>
-            {/* content */}
+    // Called when filter selections change (but not applied yet)
+    const onFilterChange = useCallback((newFilter: IFilter) => {
+        setCurrentFilters(newFilter);
+        // Don't setAppliedFilters here - wait for search button click
+    }, []);
+
+    // Called when user changes page
+    const onPageChange = useCallback((newPage: number, newPageSize: number) => {
+        setPagination({
+            pageIndex: newPage,
+            pageSize: newPageSize
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
+    // Handle loading and error states
+    if (isError) {
+        const errorMessage =
+            error instanceof Error
+                ? error.message
+                : "An unexpected error occurred while loading properties.";
+        return (
             <div className="w-[80%] xl:w-[90%] m-auto relative sm:w-[95%]">
-                <h2 className="font-bold text-3xl tracking-wide leading-[60px]">
-                    What are you looking for?
-                </h2>
-
-                <div>
-                    {/* filters */}
-                    <FeedFilters
-                        filter={filter}
-                        setFilter={setFilter}
-                        clearFilter={clearFilter}
-                        onSearch={onSearch}
-                    />
-
-                    {/* results */}
-                    <FeedResults
-                        data={properties}
-                        loading={isLoading}
-                        meta={meta}
-                        onPageChange={onPageChange}
-                    />
+                <div className="text-center py-8">
+                    <h3 className="text-lg font-semibold text-red-600">
+                        Error loading properties
+                    </h3>
+                    <p className="text-muted-foreground mt-2">
+                        {errorMessage || "Please try again later"}
+                    </p>
+                    <Button
+                        onClick={() => window.location.reload()}
+                        className="mt-4"
+                    >
+                        Retry
+                    </Button>
                 </div>
             </div>
-        </>
-    )
-        ;
+        );
+    }
+
+    return (
+        <div className="w-[80%] xl:w-[90%] m-auto relative sm:w-[95%]">
+            <h2 className="font-bold text-3xl tracking-wide leading-[60px] mb-6">
+                What are you looking for?
+            </h2>
+
+            <div>
+                {/* Filters - pass currentFilters and onFilterChange */}
+                <FeedFilters
+                    filter={currentFilters} // Use currentFilters instead of appliedFilters
+                    setFilter={onFilterChange} // This only updates current selections
+                    clearFilter={clearFilter}
+                    onSearch={onSearch}
+                    isLoading={isFetching}
+                />
+
+                {/* Results */}
+                <FeedResults
+                    data={properties}
+                    loading={isLoading}
+                    meta={meta}
+                    onPageChange={onPageChange}
+                    isFetching={isFetching}
+                />
+            </div>
+        </div>
+    );
 };
 
 export default Feed;
