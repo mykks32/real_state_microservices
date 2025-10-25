@@ -9,8 +9,12 @@ import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
-import {Calendar, Key, User} from "lucide-react";
+import {Calendar, Key, Plus, User} from "lucide-react";
 import {Role} from "@/enums";
+import PropertyDialog from "@/components/Dashboard/Seller/Dialog/property-dialog";
+import {CreatePropertyDTO} from "@/schemas/property/property-schema";
+import {useMutation} from "react-query";
+import SellerPropertyService from "@/services/property/seller-property-serive"
 
 // Lazy-load PropertyTab
 const AdminPropertyTab = lazy(() => import("@/components/Dashboard/Admin/Tabs/property-tab"));
@@ -19,13 +23,13 @@ const SellerPropertyTab = lazy(() => import("@/components/Dashboard/Seller/Tabs/
 type IActiveTab = "details" | "admin-property" | "seller-property";
 
 export default function Dashboard() {
+    const [activeTab, setActiveTab] = useState<IActiveTab>("details");
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
     const user = useAuthStore((state) => state.user);
     const loading = useAuthStore((state) => state.loading);
     const logout = useAuthStore((state) => state.logout);
     const router = useRouter();
-
-    // Track active tab
-    const [activeTab, setActiveTab] = useState<IActiveTab>("details");
 
     useEffect(() => {
         if (!loading && !user) {
@@ -46,15 +50,44 @@ export default function Dashboard() {
         );
     }
 
+    const draftPropertyMutation = useMutation({
+        mutationFn: async (data: CreatePropertyDTO) => {
+            await SellerPropertyService.createProperty(data);
+        },
+    });
+
+    const handleDraftProperty = (data: CreatePropertyDTO) => {
+        draftPropertyMutation.mutate(data)
+    };
+
     return (
         <section>
             <div className="min-h-screen p-8 flex flex-col gap-6">
                 {/* Top bar */}
                 <div className="flex justify-between items-center">
                     <h1 className="text-3xl font-bold">Welcome, {user.username}</h1>
-                    <Button variant="destructive" onClick={handleLogout}>
-                        Logout
-                    </Button>
+                    <div className="flex flex-col md:flex-row gap-2">
+                        {/* Post Property Button */}
+                        {user.roles.includes(Role.SELLER) && (
+                            <PropertyDialog
+                                isOpen={isDialogOpen}
+                                onClose={() => setIsDialogOpen(false)}
+                                onDraft={handleDraftProperty}
+                                trigger={
+                                    <Button
+                                        className="bg-blue-500 text-white px-4 py-2"
+                                        onClick={() => setIsDialogOpen(true)}
+                                    >
+                                        <Plus size={16}/> Draft Property
+                                    </Button>
+                                }
+                            />
+                        )}
+
+                        <Button variant="destructive" onClick={handleLogout}>
+                            Logout
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Dashboard Cards */}
@@ -110,9 +143,8 @@ export default function Dashboard() {
                       className="mt-6">
                     <TabsList>
                         <TabsTrigger value="details">Details</TabsTrigger>
-                        {/*<TabsTrigger value="admin-property">Properties</TabsTrigger>*/}
-                        {/*<TabsTrigger value="seller-property">Properties</TabsTrigger>*/}
-                        {user.roles.includes(Role.SELLER) && <TabsTrigger value="seller-property">Properties</TabsTrigger>}
+                        {user.roles.includes(Role.SELLER) &&
+                            <TabsTrigger value="seller-property">Properties</TabsTrigger>}
                         {user.roles.includes(Role.ADMIN) &&
                             <TabsTrigger value="admin-property">Properties</TabsTrigger>}
                     </TabsList>
@@ -162,18 +194,18 @@ export default function Dashboard() {
 
                     {/* Seller Property Tab (Lazy Loaded) */}
                     {user.roles.includes(Role.SELLER) && (<TabsContent value="seller-property">
-                        {activeTab === "seller-property" && (
-                            <Suspense
-                                fallback={
-                                    <div className="h-20 w-full items-center justify-center flex">
-                                        <Spinner/>
-                                    </div>
-                                }
-                            >
-                                <SellerPropertyTab/>
-                            </Suspense>
-                        )}
-                    </TabsContent>
+                            {activeTab === "seller-property" && (
+                                <Suspense
+                                    fallback={
+                                        <div className="h-20 w-full items-center justify-center flex">
+                                            <Spinner/>
+                                        </div>
+                                    }
+                                >
+                                    <SellerPropertyTab/>
+                                </Suspense>
+                            )}
+                        </TabsContent>
                     )}
 
                     {/* Admin Property Tab (Lazy Loaded) */}

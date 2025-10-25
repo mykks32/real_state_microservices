@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AuthService from "@/services/auth/auth-service";
-import {RegisterFormSchema, RegisterFormType, RegisterUserSchema, RegisterUserType} from "@/schemas/auth/register-user";
+import {RegisterFormSchema, RegisterFormType, RegisterUserType} from "@/schemas/auth/register-user";
 import { Role } from "@/enums";
 
 const defaultFormValues: RegisterFormType = {
