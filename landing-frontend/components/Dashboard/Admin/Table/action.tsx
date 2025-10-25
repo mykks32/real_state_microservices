@@ -12,16 +12,16 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {PropertySchema} from "@/schemas/property-schema";
+import {PropertySchema} from "@/schemas/property/property-schema";
 import {useMutation, useQueryClient} from "react-query";
-import PropertyService from "@/services/property-service";
+import AdminPropertyService from "@/services/property/admin-property-service";
 import {toast} from "sonner";
 
 interface DataTableRowActionsProps<TData> {
     row: Row<TData>
 }
 
-export function DataTableRowActions<TData>({
+export function Action<TData>({
                                                row,
                                            }: DataTableRowActionsProps<TData>) {
     const property = PropertySchema.parse(row.original)
@@ -32,13 +32,13 @@ export function DataTableRowActions<TData>({
         mutationFn: async (action: "approve" | "reject" | "archive" | "delete") => {
             switch (action) {
                 case "approve":
-                    return await PropertyService.approveProperty(property.id)
+                    return await AdminPropertyService.approveProperty(property.id)
                 case "reject":
-                    return await PropertyService.rejectProperty(property.id)
+                    return await AdminPropertyService.rejectProperty(property.id)
                 case "archive":
-                    return await PropertyService.archiveProperty(property.id)
+                    return await AdminPropertyService.archiveProperty(property.id)
                 case "delete":
-                    return await PropertyService.deleteProperty(property.id)
+                    return await AdminPropertyService.deleteProperty(property.id)
                 default:
                     throw new Error("Invalid action")
             }
@@ -46,8 +46,8 @@ export function DataTableRowActions<TData>({
         onSuccess: (response, action) => {
             if (response?.success) {
                 toast.success(`Property ${action}d successfully.`)
-                // ✅ Invalidate and refetch approved property list
-                queryClient.invalidateQueries({queryKey: ["approvedProperties"]})
+                // Invalidate and refetch approved property list
+                queryClient.invalidateQueries({queryKey: ["approvedProperties"]}).then(() => console.error("invalidation failed"))
             } else {
                 toast.error(`Failed to ${action} property.`)
             }

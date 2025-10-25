@@ -1,12 +1,12 @@
 "use client"
 
 import {DataTable} from "@/components/table/data-table";
-import {columns} from "@/app/(public)/dashboard/columns";
+import {columns} from "@/components/Dashboard/Admin/Table/columns";
 import {TabsContent} from "@/components/ui/tabs";
 import {Spinner} from "@/components/ui/spinner";
 import {useCallback, useMemo, useState} from "react";
 import {useQuery} from "react-query";
-import PropertyService from "@/services/property-service";
+import PropertyService from "@/services/property/admin-property-service";
 import PaginationImpl from "@/components/common/Pagination";
 
 // Constants
@@ -85,7 +85,7 @@ export default function PropertyTab() {
     }
 
     return (
-        <TabsContent value="property">
+        <TabsContent value="admin-property">
             <DataTable columns={columns} data={properties}/>
             <PaginationImpl meta={meta} onPageChange={onPageChange} />
         </TabsContent>

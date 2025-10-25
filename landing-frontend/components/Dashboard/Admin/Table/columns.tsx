@@ -5,7 +5,7 @@ import {Badge} from "@/components/ui/badge"
 import {Checkbox} from "@/components/ui/checkbox"
 
 import {DataTableColumnHeader} from "@/components/table/data-table-column-header"
-import {DataTableRowActions} from "./data-table-row-actions"
+import {Action} from "./action"
 import {IProperty} from "@/interfaces/property/property.interface"
 import {StatusEnum, TypeEnum, ApprovalStatusEnum, StateEnum} from "@/enums"
 
@@ -102,6 +102,6 @@ export const columns: ColumnDef<IProperty>[] = [
     },
     {
         id: "actions",
-        cell: ({row}) => <DataTableRowActions row={row}/>,
+        cell: ({row}) => <Action row={row}/>,
     },
 ]

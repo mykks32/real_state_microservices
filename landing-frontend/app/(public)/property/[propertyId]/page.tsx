@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
-import axios, { AxiosError } from 'axios';
 import { IProperty } from "@/interfaces/property/property.interface";
 import { StatusEnum, ApprovalStatusEnum, TypeEnum } from "@/enums";
 import PropertyMainContent from "@/components/property/PropertyDetailCard";
 import PropertySidebar from "@/components/property/PropertySideBar";
 import PropertyHeaderCard from "@/components/property/PropertyHeaderCard";
+import PublicPropertyService from "@/services/property/public-property-service";
 
 export default async function PropertyDetailPage({
                                                      params,
@@ -13,46 +13,13 @@ export default async function PropertyDetailPage({
 }) {
     const { propertyId } = await params;
 
-    let property: IProperty | null = null;
+    const response = await PublicPropertyService.getPropertyById(propertyId);
 
-    try {
-        const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_API_URL}/property/id/${propertyId}`,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
-
-        property = response.data.data || response.data;
-    } catch (error) {
-        // Handle 404 - Property not found
-        if (error instanceof AxiosError && error.response?.status === 404) {
-            console.error(`Property not found: ${propertyId}`);
-            notFound();
-        }
-
-        // Handle other axios errors
-        if (error instanceof AxiosError) {
-            console.error(`API Error: ${error.message}`, {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
-        }
-
-        // Handle generic errors
-        if (error instanceof Error) {
-            console.error(`Error: ${error.name} - ${error.message}`);
-        }
-
-        // For any error, show not found page
+    if (!response?.success || !response.data) {
         notFound();
     }
 
-    if (!property) {
-        notFound();
-    }
+    const property: IProperty = response.data;
 
     // Color styles for Status
     const getStatusColor = (status: StatusEnum) => {

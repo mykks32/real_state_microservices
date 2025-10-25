@@ -5,7 +5,7 @@ import FeedFilters from "@/components/feed/FeedFilters";
 import FeedResults from "@/components/feed/FeedResults";
 import { IFilter } from "@/interfaces/common/IFilter";
 import { useQuery } from "react-query";
-import PropertyService from "@/services/property-service";
+import PublicPropertyService from "@/services/property/public-property-service";
 import { Button } from "@/components/ui/button";
 
 // Constants
@@ -51,7 +51,7 @@ const Feed = () => {
     } = useQuery({
         queryKey,
         queryFn: () =>
-            PropertyService.filterProperties({
+            PublicPropertyService.filterProperties({
                 status: appliedFilters.status,
                 type: appliedFilters.type,
                 state: appliedFilters.state,

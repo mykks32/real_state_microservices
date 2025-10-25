@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { IUser } from "@/interfaces/auth/IUser";
 import { devtools } from "zustand/middleware";
-import authService from "@/services/auth-service";
+import authService from "@/services/auth/auth-service";
 import { ILoginResponse, IMeResponse } from "@/interfaces/auth/IAuthResponse";
 
 interface AuthStore {

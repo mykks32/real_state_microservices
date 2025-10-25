@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import useAuthStore from "@/stores/useAuthStore";
-import AuthService from "@/services/auth-service";
+import AuthService from "@/services/auth/auth-service";
 
 // Schema using Zod for registration
 const registerSchema = z.object({
