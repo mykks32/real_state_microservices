@@ -37,11 +37,11 @@ const useAuthStore = create<AuthStore>()(
                             loading: false
                         });
                     } else {
-                        throw new Error(response.message || "Login failed");
+                        console.error(response.message || "Login failed");
                     }
                 } catch (error) {
                     set({ loading: false });
-                    throw error;
+                    console.error(error);
                 }
             },
 

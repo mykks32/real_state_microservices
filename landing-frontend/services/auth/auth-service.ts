@@ -4,6 +4,7 @@ import { ILoginRequest, IRegisterRequest } from "@/interfaces/auth/IAuthRequest"
 import { ILoginResponse, IMeResponse, IRegisterResponse } from "@/interfaces/auth/IAuthResponse";
 import { IApiResponse } from "@/interfaces/common/IApiResponse";
 import { BaseService } from "@/services/common/base-service";
+import {RegisterUserType} from "@/schemas/auth/register-user";
 
 export class AuthService extends BaseService {
 
@@ -15,7 +16,7 @@ export class AuthService extends BaseService {
         );
     }
 
-    async register(userData: IRegisterRequest): Promise<IApiResponse<IRegisterResponse> | null> {
+    async register(userData: RegisterUserType): Promise<IApiResponse<IRegisterResponse> | null> {
         return this.handleRequest(
             api.post<IApiResponse<IRegisterResponse>>("/auth/register", userData),
             "Registration successful",
