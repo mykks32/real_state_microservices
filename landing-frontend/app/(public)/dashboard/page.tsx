@@ -31,6 +31,12 @@ export default function Dashboard() {
     const logout = useAuthStore((state) => state.logout);
     const router = useRouter();
 
+    const draftPropertyMutation = useMutation({
+        mutationFn: async (data: CreatePropertyDTO) => {
+            await SellerPropertyService.createProperty(data);
+        },
+    });
+
     useEffect(() => {
         if (!loading && !user) {
             router.replace("/login");
@@ -42,6 +48,10 @@ export default function Dashboard() {
         router.replace("/login");
     };
 
+    const handleDraftProperty = (data: CreatePropertyDTO) => {
+        draftPropertyMutation.mutate(data)
+    };
+
     if (loading || !user) {
         return (
             <div className="h-20 w-full items-center justify-center flex">
@@ -49,16 +59,6 @@ export default function Dashboard() {
             </div>
         );
     }
-
-    const draftPropertyMutation = useMutation({
-        mutationFn: async (data: CreatePropertyDTO) => {
-            await SellerPropertyService.createProperty(data);
-        },
-    });
-
-    const handleDraftProperty = (data: CreatePropertyDTO) => {
-        draftPropertyMutation.mutate(data)
-    };
 
     return (
         <section>
