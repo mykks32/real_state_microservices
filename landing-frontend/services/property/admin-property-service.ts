@@ -1,36 +1,10 @@
 import api from "@/lib/api";
-import { IApiResponse } from "@/interfaces/common/IApiResponse";
-import { IProperty } from "@/interfaces/property/property.interface";
-import { IFilter } from "@/interfaces/common/IFilter";
-import { BaseService } from "./common/base-service";
-import { buildUrl } from "@/lib/url-builder";
+import {IApiResponse} from "@/interfaces/common/IApiResponse";
+import {IProperty} from "@/interfaces/property/property.interface";
+import {BaseService} from "../common/base-service";
+import {buildUrl} from "@/lib/url-builder";
 
-export class PropertyService extends BaseService {
-
-    async filterProperties(filters: IFilter): Promise<IApiResponse<IProperty[]> | null> {
-        const url = buildUrl("/property/filter", {
-            status: filters.status,
-            type: filters.type,
-            state: filters.state,
-            page: filters.page,
-            size: filters.size,
-        });
-
-        return this.handleRequest(
-            api.get<IApiResponse<IProperty[]>>(url),
-            undefined,
-            "Failed to filter properties"
-        );
-    }
-
-    async getPropertyById(propertyId: string): Promise<IApiResponse<IProperty> | null> {
-        const url = buildUrl(`/property/id/${propertyId}`);
-        return this.handleRequest(
-            api.get<IApiResponse<IProperty>>(url),
-            undefined,
-            `Failed to fetch property ${propertyId}`
-        );
-    }
+export class AdminPropertyService extends BaseService {
 
     async approveProperty(propertyId: string): Promise<IApiResponse<IProperty> | null> {
         const url = buildUrl(`/property/${propertyId}/approve`);
@@ -68,15 +42,6 @@ export class PropertyService extends BaseService {
         );
     }
 
-    async getApprovedProperties(page = 1, pageSize = 10): Promise<IApiResponse<IProperty[]> | null> {
-        const url = buildUrl("/property/approved", { page, size: pageSize });
-        return this.handleRequest(
-            api.get<IApiResponse<IProperty[]>>(url),
-            undefined,
-            "Failed to fetch approved properties"
-        );
-    }
-
     async getPendingProperties(page = 1, pageSize = 10): Promise<IApiResponse<IProperty[]> | null> {
         const url = buildUrl("/property/pending", { page, size: pageSize });
         return this.handleRequest(
@@ -96,4 +61,4 @@ export class PropertyService extends BaseService {
     }
 }
 
-export default new PropertyService();
+export default new AdminPropertyService();
