@@ -1,12 +1,12 @@
 "use client"
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, {useState, useCallback, useMemo} from "react";
 import FeedFilters from "@/components/feed/FeedFilters";
 import FeedResults from "@/components/feed/FeedResults";
-import { IFilter } from "@/interfaces/common/IFilter";
-import { useQuery } from "react-query";
+import {IFilter} from "@/interfaces/common/IFilter";
+import {useQuery} from "react-query";
 import PublicPropertyService from "@/services/property/public-property-service";
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 
 // Constants
 const DEFAULT_PAGE = 1;
@@ -65,7 +65,7 @@ const Feed = () => {
     });
 
     // Memoized data extraction
-    const { properties, meta } = useMemo(() => {
+    const {properties, meta} = useMemo(() => {
         const propertiesData = data?.data || [];
         const metaData = data?.meta || {
             totalItems: 0,
@@ -107,7 +107,7 @@ const Feed = () => {
             pageIndex: newPage,
             pageSize: newPageSize
         });
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({top: 0, behavior: "smooth"});
     }, []);
 
     // Handle loading and error states
@@ -138,7 +138,7 @@ const Feed = () => {
 
     return (
         <div className="w-[80%] xl:w-[90%] m-auto relative sm:w-[95%]">
-            <h2 className="font-bold text-3xl tracking-wide leading-[60px] mb-6">
+            <h2 className="font-bold text-2xl tracking-wide leading-[60px] mb-6">
                 What are you looking for?
             </h2>
 

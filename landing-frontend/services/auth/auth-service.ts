@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 import { toast } from "sonner";
-import { ILoginRequest, IRegisterRequest } from "@/interfaces/auth/IAuthRequest";
+import { ILoginRequest } from "@/interfaces/auth/IAuthRequest";
 import { ILoginResponse, IMeResponse, IRegisterResponse } from "@/interfaces/auth/IAuthResponse";
 import { IApiResponse } from "@/interfaces/common/IApiResponse";
 import { BaseService } from "@/services/common/base-service";
