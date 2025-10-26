@@ -4,18 +4,33 @@ import {DataTable} from "@/components/table/data-table";
 import {columns} from "@/components/Dashboard/Seller/Table/columns";
 import {TabsContent} from "@/components/ui/tabs";
 import {Spinner} from "@/components/ui/spinner";
-import {useMemo} from "react";
+import {useCallback, useMemo, useState} from "react";
 import {useQuery} from "react-query";
 import SellerPropertyService from "@/services/property/seller-property-serive";
+import PaginationImpl from "@/components/common/Pagination";
 
 // Constants
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 10;
 const STALE_TIME = 1000 * 60 * 5;
 
 export default function PropertyTab() {
+    const [pagination, setPagination] = useState({
+        pageIndex: DEFAULT_PAGE,
+        pageSize: DEFAULT_PAGE_SIZE,
+    })
+
+    const queryKey = useMemo(() => [
+        "seller-properties",
+        {
+            page: pagination.pageIndex,
+            size: pagination.pageSize,
+        }
+    ], [pagination.pageIndex, pagination.pageSize]);
 
     // React Query hook
     const {data, isLoading, isError, error} = useQuery({
-        queryKey: ["seller-property"],
+        queryKey,
         queryFn: () => SellerPropertyService.getMyProperties(),
         staleTime: STALE_TIME, // 5 minutes
         retry: 2,
@@ -24,18 +39,33 @@ export default function PropertyTab() {
     });
 
     // Memoized data extraction
-    const {properties} = useMemo(() => {
+    const {properties, meta} = useMemo(() => {
         const propertiesData = data?.data || [];
+        const metaData = data?.meta || {
+            totalItems: 0,
+            totalPages: 0,
+            currentPage: pagination.pageIndex,
+            pageSize: pagination.pageSize,
+        };
 
         return {
             properties: propertiesData,
+            meta: metaData
         };
-    }, [data]);
+    }, [data, pagination.pageIndex, pagination.pageSize]);
 
+    // Called when user changes page
+    const onPageChange = useCallback((newPage: number, newPageSize: number) => {
+        setPagination({
+            pageIndex: newPage,
+            pageSize: newPageSize
+        });
+        window.scrollTo({top: 0, behavior: "smooth"});
+    }, []);
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center h-screen">
+            <div className="flex justify-center items-center h-20">
                 <Spinner/>
             </div>
         );
@@ -56,7 +86,8 @@ export default function PropertyTab() {
 
     return (
         <TabsContent value="seller-property">
-            <DataTable columns={columns} data={properties}/>
+            <DataTable columns={columns} data={properties} />
+            <PaginationImpl meta={meta} onPageChange={onPageChange} />
         </TabsContent>
     )
 }

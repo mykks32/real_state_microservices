@@ -11,36 +11,33 @@ import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {CreatePropertyDTO, CreatePropertySchema} from "@/schemas/property/property-schema";
-import React, {useState} from "react";
+import React from "react";
 import {StateEnum, StatusEnum, TypeEnum} from "@/enums";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {useMutation} from "react-query";
-import SellerPropertyService from "@/services/property/seller-property-serive";
 
 interface PropertyDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onDraft: (data: CreatePropertyDTO) => void;
-    initialData?: Partial<CreatePropertyDTO>;
+    onSubmit: (data: CreatePropertyDTO) => void;
     trigger?: React.ReactNode;
 }
 
-export default function PropertyDialog({isOpen, onClose, onDraft, initialData, trigger,}: PropertyDialogProps) {
+export default function CreatePropertyDialog({isOpen, onClose, onSubmit, trigger,}: PropertyDialogProps) {
     const defaultPropertyValues: CreatePropertyDTO = {
-        title: initialData?.title || "",
-        description: initialData?.description || "",
-        type: initialData?.type || TypeEnum.House,
-        status: initialData?.status || StatusEnum.Available,
+        title: "",
+        description: "",
+        type: TypeEnum.House,
+        status: StatusEnum.Available,
         location: {
-            address: initialData?.location?.address || "",
-            city: initialData?.location?.city || "",
-            state: initialData?.location?.state || StateEnum.Madhesh,
-            country: initialData?.location?.country || "Nepal",
-            zipcode: initialData?.location?.zipcode || 44600,
-            latitude: initialData?.location?.latitude || 0,
-            longitude: initialData?.location?.longitude || 0,
+            address: "",
+            city: "",
+            state: StateEnum.Madhesh,
+            country: "Nepal",
+            zipcode: 44600,
+            latitude: 0,
+            longitude: 0,
         },
     }
 
@@ -50,7 +47,7 @@ export default function PropertyDialog({isOpen, onClose, onDraft, initialData, t
     })
 
     const handleSubmit = (data: CreatePropertyDTO) => {
-        onDraft(data);
+        onSubmit(data);
         setTimeout(() => {
             onClose();
             form.reset();
@@ -70,7 +67,7 @@ export default function PropertyDialog({isOpen, onClose, onDraft, initialData, t
             <DialogContent className="max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle
-                        className="flex justify-center text-2xl font-bold">{initialData ? "Update Property" : "Create Property"}</DialogTitle>
+                        className="flex justify-center text-2xl font-bold">"Create Property"</DialogTitle>
                 </DialogHeader>
 
                 <form
@@ -193,7 +190,7 @@ export default function PropertyDialog({isOpen, onClose, onDraft, initialData, t
                         <Button variant="outline" type="button" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button className="bg-blue-500" type="submit">{initialData ? "Update" : "Draft"}</Button>
+                        <Button className="bg-blue-500" type="submit">"Draft"</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

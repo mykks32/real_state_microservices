@@ -19,7 +19,12 @@ export const CreatePropertySchema = z.object({
     location: CreateLocationSchema,
 });
 
+export const UpdatePropertySchema = CreatePropertySchema.extend({
+    id: z.string()
+})
+
 export type CreatePropertyDTO = z.infer<typeof CreatePropertySchema>;
+export type UpdatePropertyDTO = z.infer<typeof UpdatePropertySchema>;
 
 // Full property schema (response/entity)
 export const PropertySchema = CreatePropertySchema.extend({

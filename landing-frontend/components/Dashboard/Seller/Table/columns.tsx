@@ -100,6 +100,7 @@ export const columns: ColumnDef<IProperty>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: "Action",
         id: "actions",
         cell: ({row}) => <SellerPropertyRowActions row={row} />,
     },
