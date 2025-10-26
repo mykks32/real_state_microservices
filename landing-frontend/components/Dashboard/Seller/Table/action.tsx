@@ -17,6 +17,7 @@ import React from "react";
 import {IProperty} from "@/interfaces/property/property.interface";
 import {useMutation, useQueryClient} from "react-query";
 import SellerPropertyService from "@/services/property/seller-property-serive";
+import {ApprovalStatusEnum} from "@/enums";
 
 interface DataTableRowActionsProps<TData> {
     row: Row<TData>
@@ -75,6 +76,12 @@ export function SellerPropertyRowActions<TData>({row}: DataTableRowActionsProps<
 
     const handleSubmit = () => {
         SubmitPropertyMutation.mutate(property.id)
+    }
+
+    const isApproved = property.approvalStatus === ApprovalStatusEnum.Approved
+
+    if (isApproved) {
+        return null
     }
 
     return (
