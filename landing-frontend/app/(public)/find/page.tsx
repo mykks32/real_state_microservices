@@ -137,7 +137,7 @@ const Feed = () => {
     }
 
     return (
-        <div className="w-[80%] xl:w-[90%] m-auto relative sm:w-[95%]">
+        <div className="w-full px-4 md:px-8 m-auto relative">
             <h2 className="font-bold text-2xl tracking-wide leading-[60px] mb-6">
                 What are you looking for?
             </h2>

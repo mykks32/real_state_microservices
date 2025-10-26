@@ -40,7 +40,7 @@ export default function Dashboard() {
         onSuccess: () => {
             setIsDialogOpen(false)
             queryClient
-                .invalidateQueries({ queryKey: ["seller-properties"] })
+                .invalidateQueries({queryKey: ["seller-properties"]})
                 .then(() => {
                     console.log("Query invalidated successfully");
                 })
@@ -60,7 +60,7 @@ export default function Dashboard() {
         onSuccess: () => {
             setIsDialogOpen(false)
             queryClient
-                .invalidateQueries({ queryKey: ["all-properties"] })
+                .invalidateQueries({queryKey: ["all-properties"]})
                 .then(() => {
                     console.log("Query invalidated successfully");
                 })
@@ -102,10 +102,10 @@ export default function Dashboard() {
 
     return (
         <section>
-            <div className="min-h-screen p-8 flex flex-col gap-6">
+            <div className="min-h-full px-4 py-8 flex flex-col gap-6">
                 {/* Top bar */}
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Welcome, {user.username}</h1>
+                    <div className="text-2xl font-bold">Hi, {user.username}</div>
                     <div className="flex flex-col md:flex-row gap-2">
                         {/* Post Seller Property Button */}
                         {user.roles.includes(Role.SELLER) && (
@@ -197,7 +197,7 @@ export default function Dashboard() {
                                         </div>
                                     }
                                 >
-                                    <SellerPropertyTab />
+                                    <SellerPropertyTab/>
                                 </Suspense>
                             )}
                         </TabsContent>
@@ -213,7 +213,7 @@ export default function Dashboard() {
                                         </div>
                                     }
                                 >
-                                    <AdminPropertyTab />
+                                    <AdminPropertyTab/>
                                 </Suspense>
                             )}
                         </TabsContent>

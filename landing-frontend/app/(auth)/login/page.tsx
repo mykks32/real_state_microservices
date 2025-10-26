@@ -52,16 +52,16 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="h-full w-screen flex items-center justify-center overflow-hidden">
+        <div className="flex-1 flex justify-center items-center px-4">
 
             {/* Login Form */}
-            <div className="w-full max-w-max md:max-w-md space-y-6 bg-slate-900/20 backdrop-blur-lg p-8 rounded-2xl border border-white/10 shadow-2xl">
+            <div className="w-full max-w-md gap-2 flex flex-col backdrop-blur-lg p-6 rounded-2xl shadow-2xl">
                 {/* Header */}
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold text-white">Sign In</h1>
-                    <p className="text-sm text-blue-200/70">
+                    <h1 className="text-3xl font-bold text-black">Sign In</h1>
+                    <p className="text-sm text-black">
                         New here?{" "}
-                        <a href="/signup" className="text-brown-400 hover:text-blue-300 font-medium">
+                        <a href="/signup" className="text-blue-500 hover:text-blue-300 font-medium">
                             Create account
                         </a>
                     </p>
@@ -71,14 +71,14 @@ export default function LoginPage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     {/* Email */}
                     <div className="space-y-2">
-                        <Label className="text-white/80">Email</Label>
+                        <Label className="text-black">Email</Label>
                         <div className="relative">
-                            <Mail className="absolute left-3 top-3 h-5 w-5 text-violet-500/50 pointer-events-none"/>
+                            <Mail className="absolute left-3 top-3 h-5 w-5 text-black pointer-events-none"/>
                             <Input
                                 type="email"
                                 placeholder="name@example.com"
                                 disabled={loginMutation.isLoading}
-                                className="pl-10 bg-white/5 border-white/20 text-white placeholder-white/40"
+                                className="pl-10 border-black text-black placeholder:text-black"
                                 {...form.register("email")}
                             />
                         </div>
@@ -89,20 +89,20 @@ export default function LoginPage() {
 
                     {/* Password */}
                     <div className="space-y-2">
-                        <Label className="text-white/80">Password</Label>
+                        <Label className="text-black">Password</Label>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-3 h-5 w-5 text-violet-500/50 pointer-events-none"/>
+                            <Lock className="absolute left-3 top-3 h-5 w-5 text-black pointer-events-none"/>
                             <Input
                                 type={showPassword ? "text" : "password"}
                                 placeholder="••••••••"
                                 disabled={loginMutation.isLoading}
-                                className="pl-10 bg-white/5 border-white/20 text-white placeholder-white/40"
+                                className="pl-10 border-black text-black placeholder:text-black"
                                 {...form.register("password")}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword((prev) => !prev)}
-                                className="absolute right-3 top-3 text-violet-400/70 hover:text-violet-300 focus:outline-none"
+                                className="absolute right-3 top-3 text-black hover:text-violet-300 focus:outline-none"
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
@@ -127,7 +127,7 @@ export default function LoginPage() {
                     >
                         {loginMutation.isLoading ? (
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 border-2 border-white/80 border-t-white rounded-full animate-spin"/>
+                                <div className="w-4 h-4 border-2 text-white rounded-full animate-spin"/>
                                 Signing in...
                             </div>
                         ) : (
@@ -135,7 +135,7 @@ export default function LoginPage() {
                         )}
                     </Button>
                 </form>
-                <p className="text-xs text-center text-white/80">
+                <p className="text-xs text-center text-black">
                     By signing in, you agree to our Terms & Conditions
                 </p>
             </div>
