@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -198,14 +199,15 @@ public class PropertyController {
                     description = "Invalid owner ID format"
             )
     })
-    @GetMapping("/owner/{owner_id}")
+    @PostMapping("/owner/")
     public ResponseEntity<ApiResponse<List<PropertyDTO>>> getAllOwnerProperty(
-            @Parameter(description = "Owner ID (UUID format)", required = true)
-            @PathVariable String owner_id,
-            @RequestParam(defaultValue = "1") int page,
+            @Valid @RequestBody Map<String, String> body,            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        UUID ownerId = UUID.fromString(owner_id);
+        String ownerIdStr = body.get("ownerId");
+
+        UUID ownerId = UUID.fromString(ownerIdStr);
+
         // Validate page number
         if (page < 1) {
             page = 1;

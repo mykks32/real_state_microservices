@@ -2,7 +2,6 @@ package com.realState.property_service.common.handler;
 
 import com.realState.property_service.common.exceptions.DuplicateResourceException;
 import com.realState.property_service.common.exceptions.location.LocationCreationException;
-import com.realState.property_service.common.exceptions.property.OwnerPropertyNotFoundException;
 import com.realState.property_service.common.exceptions.property.PropertyMappingException;
 import com.realState.property_service.common.exceptions.property.PropertyNotFoundException;
 import com.realState.property_service.common.exceptions.property.PropertySaveException;

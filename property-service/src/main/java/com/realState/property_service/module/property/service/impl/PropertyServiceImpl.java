@@ -17,7 +17,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.realState.property_service.common.exceptions.location.LocationCreationException;
-import com.realState.property_service.common.exceptions.property.OwnerPropertyNotFoundException;
 import com.realState.property_service.common.exceptions.property.PropertyFetchException;
 import com.realState.property_service.common.exceptions.property.PropertyMappingException;
 import com.realState.property_service.common.exceptions.property.PropertyNotFoundException;
@@ -101,10 +100,6 @@ public class PropertyServiceImpl implements PropertyService {
 
             Page<Property> properties = propertyRepository.findByOwnerId(ownerId, pageable);
 
-            if (properties.isEmpty()) {
-                throw new OwnerPropertyNotFoundException("No properties found for ownerId=" + ownerId);
-            }
-
             List<PropertyDTO> propertyDTOs = properties.getContent().stream()
                     .map(propertyMapperUtil::mapToDto)
                     .collect(Collectors.toList());
@@ -122,7 +117,7 @@ public class PropertyServiceImpl implements PropertyService {
 
             // Return success response with data and meta
             return ApiResponse.success(propertyDTOs, meta, "Fetched all properties successfully");
-        } catch (OwnerPropertyNotFoundException | IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             logger.warn("Property fetch warning: {}", ex.getMessage(), ex);
             throw ex;
         } catch (Exception ex) {
