@@ -25,11 +25,13 @@ export class AuthService extends BaseService {
     }
 
     async me(): Promise<IApiResponse<IMeResponse> | null> {
-        return this.handleRequest(
-            api.get<IApiResponse<IMeResponse>>("/auth/me"),
-            undefined,
-            "Failed to fetch user data."
-        );
+        try {
+            return await api.post("/auth/me");
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "User Not Found";
+            console.warn("User Detail Fetch error:", message);
+            return null;
+        }
     }
 
     async logout(): Promise<void> {
