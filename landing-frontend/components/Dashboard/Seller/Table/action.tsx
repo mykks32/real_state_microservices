@@ -4,7 +4,6 @@ import {Row} from "@tanstack/react-table"
 import {MoreHorizontal, Edit, Send} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {CreatePropertyDTO, PropertySchema, UpdatePropertyDTO} from "@/schemas/property/property-schema"
-import {toast} from "sonner"
 import {
     DropdownMenu,
     DropdownMenuContent,

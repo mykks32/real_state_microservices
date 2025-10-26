@@ -46,8 +46,14 @@ export function Action<TData>({
         onSuccess: (response, action) => {
             if (response?.success) {
                 toast.success(`Property ${action}d successfully.`)
-                // Invalidate and refetch approved property list
-                queryClient.invalidateQueries({queryKey: ["approvedProperties"]}).then(() => console.error("invalidation failed"))
+                queryClient
+                    .invalidateQueries({ queryKey: ["all-properties"] })
+                    .then(() => {
+                        console.log("Query invalidated successfully");
+                    })
+                    .catch((err) => {
+                        console.error("Invalidation failed:", err);
+                    });
             } else {
                 toast.error(`Failed to ${action} property.`)
             }

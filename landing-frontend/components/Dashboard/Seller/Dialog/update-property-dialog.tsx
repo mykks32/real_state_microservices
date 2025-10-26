@@ -7,13 +7,10 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/dialog";
-import {z} from "zod";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {
-    CreatePropertyDTO,
-    CreatePropertySchema,
     UpdatePropertyDTO,
     UpdatePropertySchema
 } from "@/schemas/property/property-schema";
