@@ -31,11 +31,6 @@ public class GlobalExceptionHandler {
         return buildResponse("PROPERTY_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(OwnerPropertyNotFoundException.class)
-    public ResponseEntity<ApiResponse<Object>> handleOwnerPropertyNotFound(OwnerPropertyNotFoundException ex) {
-        return buildResponse("OWNER_PROPERTY_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(LocationCreationException.class)
     public ResponseEntity<ApiResponse<Object>> handleLocationCreation(LocationCreationException ex) {
         return buildResponse("LOCATION_CREATION_FAILED", ex.getMessage(), HttpStatus.BAD_REQUEST);
