@@ -24,7 +24,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
  *   description: "A stunning 2-bedroom apartment with city views",
  *   type: "APARTMENT",
  *   status: "AVAILABLE",
- *   approvalStatus: "DRAFT",
  *   location: {
  *     address: "123 Main Street",
  *     city: "New York",

@@ -170,4 +170,14 @@ export class PropertyUrlBuilder {
 
     return `${this.configService.propertyServiceUrl}/properties/filter?${params.toString()}`;
   }
+
+  /**
+   * Create property URL built from the property service base URL.
+   *
+   * @readonly
+   * @type {string}
+   */
+  get createAdminApprovedPropertyUrl(): string {
+    return `${this.configService.propertyServiceUrl}/properties/admin/create`;
+  }
 }

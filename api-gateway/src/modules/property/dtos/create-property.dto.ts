@@ -42,18 +42,4 @@ export class CreatePropertyDTO extends RequestCreatePropertyDTO {
   })
   @IsUUID('4', { message: 'Owner id must be a valid UUID' })
   ownerId: string;
-
-  /**
-   * Approval workflow status
-   */
-  @ApiProperty({
-    description: 'Approval workflow status',
-    enum: ApprovalStatusEnum,
-    example: ApprovalStatusEnum.Draft,
-    default: ApprovalStatusEnum.Draft,
-  })
-  @IsEnum(ApprovalStatusEnum, {
-    message: 'Property approvalStatus is required',
-  })
-  approvalStatus: ApprovalStatusEnum = ApprovalStatusEnum.Draft;
 }

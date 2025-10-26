@@ -3,6 +3,7 @@ import {IApiResponse} from "@/interfaces/common/IApiResponse";
 import {IProperty} from "@/interfaces/property/property.interface";
 import {BaseService} from "../common/base-service";
 import {buildUrl} from "@/lib/url-builder";
+import {CreatePropertyDTO} from "@/schemas/property/property-schema";
 
 export class AdminPropertyService extends BaseService {
 
@@ -57,6 +58,15 @@ export class AdminPropertyService extends BaseService {
             api.get<IApiResponse<IProperty[]>>(url),
             undefined,
             "Failed to fetch all properties"
+        );
+    }
+    /** Create a new property */
+    async createApprovedProperty(propertyData: CreatePropertyDTO): Promise<IApiResponse<IProperty> | null> {
+        const url = buildUrl("/property/admin/create");
+        return this.handleRequest(
+            api.post<IApiResponse<IProperty>>(url, propertyData),
+            "Property created successfully",
+            "Failed to create property"
         );
     }
 }

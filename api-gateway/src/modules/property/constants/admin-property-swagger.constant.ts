@@ -12,6 +12,11 @@ export const AdminPropertySwaggerConstant = {
 
   /** API operation metadata */
   OPERATIONS: {
+    // Create Property
+    CREATE_ADMIN_APPROVED_PROPERTY: {
+      summary: 'Create Admin Approved property',
+      description: 'Creates a new property listing (Admin only)',
+    },
     // Admin Operations
     GET_ALL_PROPERTIES: {
       summary: 'Get all properties',
@@ -157,9 +162,65 @@ export const AdminPropertySwaggerConstant = {
     },
   },
 
+  /** Request examples for seller */
+  REQUESTS: {
+    REQUEST_CREATE_ADMIN_APPROVED_PROPERTY: {
+      title: 'Beautiful House in Pokhara',
+      description: '3 BHK house with mountain view',
+      type: 'House',
+      status: 'Available',
+      location: {
+        address: '789 Mountain View Road',
+        city: 'Pokhara',
+        state: 'Gandaki',
+        country: 'Nepal',
+        zipcode: 33700,
+        latitude: 28.2096,
+        longitude: 83.9856,
+      },
+    },
+  },
+
   /** API response examples */
   RESPONSES: {
     // Admin Responses
+
+    CREATE_PROPERTY_RESPONSE: {
+      status: 201,
+      description: 'Property created successfully',
+      type: ApiResponse,
+      example: {
+        success: true,
+        message: 'Property created successfully',
+        statusCode: 201,
+        data: {
+          id: 'c5c06dc8-344d-4e55-9fed-2bf739549390',
+          title: 'Beautiful House in Pokhara',
+          description: '3 BHK house with mountain view',
+          type: 'House',
+          status: 'Available',
+          approvalStatus: 'draft',
+          ownerId: 'a1b2c3d4-5678-90ef-ghij-klmnopqrstuv',
+          location: {
+            id: 1,
+            address: '789 Mountain View Road',
+            city: 'Pokhara',
+            state: 'Gandaki',
+            country: 'Nepal',
+            zipcode: 33700,
+            latitude: 28.2096,
+            longitude: 83.9856,
+            createdAt: '2024-01-15T10:30:00.000Z',
+            updatedAt: '2024-01-15T10:30:00.000Z',
+          },
+          createdAt: '2024-01-15T10:30:00.000Z',
+          updatedAt: '2024-01-15T10:30:00.000Z',
+        },
+        timestamp: '2024-01-15T10:35:00.000Z',
+        requestId: '9fa9c06c-c082-4b6c-9ca7-3f3551700f2f',
+      },
+    },
+
     ALL_PROPERTIES_RESPONSE: {
       status: 200,
       description: 'All properties retrieved successfully',

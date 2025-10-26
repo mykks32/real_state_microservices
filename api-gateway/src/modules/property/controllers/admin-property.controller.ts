@@ -1,6 +1,7 @@
 import { RequestWithUserContext } from '../../../common/types/request-with-context.type';
 import { PropertyUrlBuilder } from '../utils/property-url.builder';
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -9,6 +10,7 @@ import {
   Logger,
   Param,
   Patch,
+  Post,
   Query,
   Req,
   UseGuards,
@@ -24,6 +26,7 @@ import { Role } from '../../../common/enums/role.enum';
 import { ApiBearerAuth, ApiTags, ApiCookieAuth } from '@nestjs/swagger';
 import { AdminPropertySwaggerConstant } from '../constants/admin-property-swagger.constant';
 import {
+  ApiAdminCreateProperty,
   ApiApproveProperty,
   ApiArchiveProperty,
   ApiDeleteProperty,
@@ -32,6 +35,8 @@ import {
   ApiRejectProperty,
 } from '../decorators/admin-property-swagger.decorator';
 import { PaginationQueryDto } from '../../enquiry/dtos/pagination-query.dto';
+import { RequestCreatePropertyDTO } from '../dtos/request-create-property.dto';
+import { CreatePropertyDTO } from '../dtos/create-property.dto';
 
 /**
  * AdminPropertyController
@@ -49,6 +54,7 @@ import { PaginationQueryDto } from '../../enquiry/dtos/pagination-query.dto';
  * - PATCH  /property/:propertyId/reject   → Reject a property
  * - PATCH  /property/:propertyId/archive  → Archive a property
  * - DELETE /property/delete/:propertyId   → Delete a property
+ * - POST /property/admin/create           → Create a property
  */
 @Controller('property')
 @UseGuards(JwtGatewayGuard, RolesGuard)
@@ -325,6 +331,58 @@ export class AdminPropertyController {
 
     this.logger.log(
       `Property deleted successfully | propertyId: ${propertyId}  | request_id=${requestId}`,
+    );
+
+    return response.data;
+  }
+
+  /**
+   * Creates a new property.
+   *
+   * @route POST /properties
+   * @param {RequestWithUserContext} req
+   * @param {RequestCreatePropertyDTO} requestCreatePropertyDto
+   *
+   * @remarks
+   * Requires auth-service (JWT).
+   * Adds user ID from JWT to DTO.
+   * Forwards the request to the downstream service.
+   */
+  @Post('admin/create')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtGatewayGuard)
+  @ApiAdminCreateProperty()
+  async createProperty(
+    @Req() req: RequestWithUserContext,
+    @Body() requestCreatePropertyDto: RequestCreatePropertyDTO,
+  ): Promise<IApiResponse<IProperty>> {
+    const userId = req.user.id;
+    const requestId = req.headers['x-request-id'] as string;
+
+    const payload: CreatePropertyDTO = {
+      ...requestCreatePropertyDto,
+      ownerId: userId,
+    };
+
+    this.logger.log(
+      `Property creation started | property title=${payload.title} | user_id=${userId} | request_id=${requestId}`,
+    );
+
+    const response = await firstValueFrom(
+      this.httpService.post<IApiResponse<IProperty>>(
+        this.propertyUrlBuilder.createAdminApprovedPropertyUrl,
+        payload,
+        {
+          headers: {
+            'x-request-id': requestId,
+            'Content-Type': 'application/json',
+          },
+        },
+      ),
+    );
+
+    this.logger.log(
+      `Property created successfully | user_id=${userId} | request_id=${requestId}`,
     );
 
     return response.data;
