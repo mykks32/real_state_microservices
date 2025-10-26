@@ -91,22 +91,37 @@ public class PropertyServiceImpl implements PropertyService {
      */
     @Override
     @Transactional(readOnly = true)
-    public List<PropertyDTO> getAllOwnerProperty(UUID ownerId) {
+    public ApiResponse<List<PropertyDTO>> getAllOwnerProperty(UUID ownerId, int page, int size) {
         try {
             if (ownerId == null) {
                 throw new IllegalArgumentException("Owner ID cannot be null");
             }
 
-            List<Property> properties = propertyRepository.findByOwnerId(ownerId);
+            Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
+
+            Page<Property> properties = propertyRepository.findByOwnerId(ownerId, pageable);
+
             if (properties.isEmpty()) {
                 throw new OwnerPropertyNotFoundException("No properties found for ownerId=" + ownerId);
             }
 
-            List<PropertyDTO> propertyDTOs = properties.stream()
+            List<PropertyDTO> propertyDTOs = properties.getContent().stream()
                     .map(propertyMapperUtil::mapToDto)
                     .collect(Collectors.toList());
-            logger.info("Found {} properties for ownerId={}", propertyDTOs.size(), ownerId);
-            return propertyDTOs;
+
+            // Build meta information
+            ApiResponse.MetaData meta = new ApiResponse.MetaData(
+                    properties.getTotalElements(),
+                    properties.getTotalPages(),
+                    properties.getNumber() + 1,
+                    properties.getSize()
+            );
+
+            logger.info("Fetched {} all properties (page {}/{}) of OwnerID",
+                    propertyDTOs.size(), page + 1, properties.getTotalPages());
+
+            // Return success response with data and meta
+            return ApiResponse.success(propertyDTOs, meta, "Fetched all properties successfully");
         } catch (OwnerPropertyNotFoundException | IllegalArgumentException ex) {
             logger.warn("Property fetch warning: {}", ex.getMessage(), ex);
             throw ex;

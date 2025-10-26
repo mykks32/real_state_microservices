@@ -4,6 +4,7 @@ import {
   ApiResponse as SwaggerApiResponse,
   ApiParam,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import {
   ApiBadRequestResponse,
@@ -66,6 +67,8 @@ export function ApiGetPropertiesByOwner() {
     ApiOperation(
       SellerPropertySwaggerConstant.OPERATIONS.GET_PROPERTIES_BY_OWNER,
     ),
+    ApiQuery(SellerPropertySwaggerConstant.QUERY.PAGINATION.page),
+    ApiQuery(SellerPropertySwaggerConstant.QUERY.PAGINATION.limit),
     SwaggerApiResponse(
       SellerPropertySwaggerConstant.RESPONSES.GET_PROPERTIES_BY_OWNER_RESPONSE,
     ),

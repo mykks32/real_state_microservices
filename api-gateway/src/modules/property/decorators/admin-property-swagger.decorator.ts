@@ -14,7 +14,6 @@ import {
   ApiUnauthorizedResponse,
 } from '../../../common/decorators/swagger-error.decorator';
 import { AdminPropertySwaggerConstant } from '../constants/admin-property-swagger.constant';
-import { BuyerPropertySwaggerConstant } from '../constants/buyer-swagger.constant';
 
 /**
  * Admin Property Swagger Decorators

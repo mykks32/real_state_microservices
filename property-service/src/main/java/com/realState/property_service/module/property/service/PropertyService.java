@@ -34,7 +34,8 @@ public interface PropertyService {
      * @param ownerId the UUID of the owner
      * @return list of PropertyDTOs belonging to the owner
      */
-    List<PropertyDTO> getAllOwnerProperty(UUID ownerId);
+
+    ApiResponse<List<PropertyDTO>> getAllOwnerProperty(UUID ownerId, int page, int size);
 
     /**
      * Update an existing property.

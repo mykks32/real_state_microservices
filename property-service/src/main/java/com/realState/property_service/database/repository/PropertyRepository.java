@@ -20,7 +20,7 @@ public interface PropertyRepository extends JpaRepository<Property, UUID>, JpaSp
     // @Query("SELECT p FROM Property p WHERE p.owner_id = :owner_id")
     // List<Property> findAllByOwnerId(@Param("owner_id") UUID owner_id);
 
-    List<Property> findByOwnerId(UUID ownerId);
+    Page<Property> findByOwnerId(UUID ownerId, Pageable pageable);
 
     // Find by approval status
     List<Property> findByApprovalStatus(ApprovalStatusEnum approvalStatus);

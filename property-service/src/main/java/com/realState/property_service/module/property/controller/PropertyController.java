@@ -204,9 +204,28 @@ public class PropertyController {
     @GetMapping("/owner/{owner_id}")
     public ResponseEntity<ApiResponse<List<PropertyDTO>>> getAllOwnerProperty(
             @Parameter(description = "Owner ID (UUID format)", required = true)
-            @PathVariable String owner_id) {
+            @PathVariable String owner_id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
         UUID ownerId = UUID.fromString(owner_id);
-        return ResponseEntity.ok(ApiResponse.success(propertyService.getAllOwnerProperty(ownerId)));
+        // Validate page number
+        if (page < 1) {
+            page = 1;
+        }
+
+        // Validate and cap size to prevent abuse
+        if (size < 1) {
+            size = 10;
+        }
+        if (size > 100) {
+            size = 100;
+        }
+
+        // Convert 1-indexed to 0-indexed for Spring Data
+        int pageNumber = page - 1;
+
+        return ResponseEntity.ok(propertyService.getAllOwnerProperty(ownerId, pageNumber, size));
     }
 
     /**
