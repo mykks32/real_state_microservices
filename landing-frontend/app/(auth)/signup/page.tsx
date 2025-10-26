@@ -65,8 +65,8 @@ export default function SignUpPage() {
     };
 
     return (
-        <div className="w-screen flex items-center justify-center">
-            <div className="w-full max-w-md space-y-2 bg-slate-900/20 backdrop-blur-lg py-4 px-6 rounded-2xl border border-white/10 shadow-2xl">
+        <div className="h-full w-screen flex items-center justify-center overflow-hidden">
+            <div className="space-y-2 md:min-w-md bg-slate-900/20 backdrop-blur-lg p-6 rounded-2xl border border-white/10 shadow-2xl">
                 {/* Header */}
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-white">Create Account</h1>
@@ -116,6 +116,19 @@ export default function SignUpPage() {
                         )}
                     </div>
 
+                    {/* Role Selection */}
+                    <div className="space-y-2">
+                        <Label className="text-white/80">Role</Label>
+                        <select
+                            disabled={registerMutation.isLoading}
+                            className="w-full bg-white/5 border border-white/20 text-white p-2 rounded-md"
+                            {...form.register("roles")}
+                        >
+                            <option value={Role.BUYER}>Buyer</option>
+                            <option value={Role.SELLER}>Seller</option>
+                        </select>
+                    </div>
+
                     {/* Password */}
                     <div className="space-y-2">
                         <Label className="text-white/80">Password</Label>
@@ -160,19 +173,6 @@ export default function SignUpPage() {
                         </div>
                     </div>
 
-                    {/* Role Selection */}
-                    <div className="space-y-2">
-                        <Label className="text-white/80">Role</Label>
-                        <select
-                            disabled={registerMutation.isLoading}
-                            className="w-full bg-white/5 border border-white/20 text-white p-2 rounded-md"
-                            {...form.register("roles")}
-                        >
-                            <option value={Role.BUYER}>Buyer</option>
-                            <option value={Role.SELLER}>Seller</option>
-                        </select>
-                    </div>
-
                     {/* Error */}
                     {error && (
                         <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3">
@@ -184,7 +184,7 @@ export default function SignUpPage() {
                     <Button
                         type="submit"
                         disabled={registerMutation.isLoading}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-green-500 hover:to-green-400 text-white font-semibold py-3"
+                        className="w-full mt-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-green-500 hover:to-green-400 text-white font-semibold py-3"
                     >
                         {registerMutation.isLoading ? (
                             <div className="flex items-center gap-2">
