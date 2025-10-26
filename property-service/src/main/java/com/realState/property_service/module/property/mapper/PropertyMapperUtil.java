@@ -44,7 +44,6 @@ public class PropertyMapperUtil {
             property.setDescription(dto.getDescription());
             property.setType(dto.getType());
             property.setStatus(dto.getStatus());
-            property.setApprovalStatus(dto.getApprovalStatus());
             property.setLocation(location);
             property.setOwnerId(dto.getOwnerId());
             return property;

@@ -28,9 +28,6 @@ public class CreatePropertyDTO {
     @NotNull(message = "Property status is required")
     private StatusEnum status = StatusEnum.Available;
 
-    @NotNull(message = "Property approval_status is required")
-    private ApprovalStatusEnum approvalStatus = ApprovalStatusEnum.draft;
-
     @NotNull(message = "Location is required")
     @Valid
     private CreateLocationDTO location;
@@ -69,14 +66,6 @@ public class CreatePropertyDTO {
 
     public void setStatus(StatusEnum status) {
         this.status = status;
-    }
-
-    public ApprovalStatusEnum getApprovalStatus() {
-        return approvalStatus;
-    }
-
-    public void setApprovalStatus(ApprovalStatusEnum approvalStatus) {
-        this.approvalStatus = approvalStatus;
     }
 
     public CreateLocationDTO getLocation() {

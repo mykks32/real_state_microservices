@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.realState.property_service.common.utils.ApiResponse;
-import com.realState.property_service.database.enums.StateEnum;
 import com.realState.property_service.module.property.dto.PropertyFilterDTO;
 import com.realState.property_service.module.property.service.specification.PropertySpecification;
 import org.slf4j.Logger;
@@ -74,6 +73,7 @@ public class PropertyServiceImpl implements PropertyService {
         try {
             Location location = locationService.createLocation(dto.getLocation());
             Property property = propertyMapperUtil.mapToEntity(dto, location);
+            property.setApprovalStatus(ApprovalStatusEnum.draft);
             property = propertyRepository.save(property);
             logger.info("Property created successfully with id={}", property.getId());
             return propertyMapperUtil.mapToDto(property);
@@ -379,6 +379,28 @@ public class PropertyServiceImpl implements PropertyService {
         } catch (Exception ex) {
             logger.error("Failed to fetch all properties", ex);
             throw new PropertySaveException("Failed to fetch all properties", ex);
+        }
+    }
+
+    /**
+     * 1. Creates a new property by Admin.
+     */
+    @Override
+    @Transactional
+    public PropertyDTO createAdminApprovedProperty(CreatePropertyDTO dto) {
+        try {
+            Location location = locationService.createLocation(dto.getLocation());
+            Property property = propertyMapperUtil.mapToEntity(dto, location);
+            property.setApprovalStatus(ApprovalStatusEnum.approved);
+            property = propertyRepository.save(property);
+            logger.info("Property created successfully by admin with id={}", property.getId());
+            return propertyMapperUtil.mapToDto(property);
+        } catch (LocationCreationException | PropertyMappingException ex) {
+            logger.error("Property creation failed: {}", ex.getMessage(), ex);
+            throw ex;
+        } catch (Exception ex) {
+            logger.error("Unexpected error during property creation", ex);
+            throw new PropertySaveException("Failed to create property");
         }
     }
 

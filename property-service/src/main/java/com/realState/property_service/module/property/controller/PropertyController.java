@@ -1,6 +1,5 @@
 package com.realState.property_service.module.property.controller;
 
-import com.realState.property_service.common.exceptions.property.PropertyNotFoundException;
 import com.realState.property_service.common.utils.ApiResponse;
 import com.realState.property_service.database.enums.StateEnum;
 import com.realState.property_service.database.enums.StatusEnum;
@@ -10,13 +9,11 @@ import com.realState.property_service.module.property.dto.PropertyDTO;
 import com.realState.property_service.module.property.dto.PropertyFilterDTO;
 import com.realState.property_service.module.property.dto.UpdatePropertyDTO;
 import com.realState.property_service.module.property.service.PropertyService;
-import com.realState.property_service.module.property.service.impl.PropertyServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +41,7 @@ public class PropertyController {
 
 
     // ================= Buyer APIs =================
-    /** Get Filtered Properties */
+    /** 1. Get Filtered Properties */
     @GetMapping("/filter")
     public ResponseEntity<ApiResponse<List<PropertyDTO>>> filterPropertiesWithParams(
             @RequestParam(required = false) String status,
@@ -87,7 +84,7 @@ public class PropertyController {
 
 
     /**
-     * Get all approved properties.
+     * 2. Get all approved properties.
      */
     @Operation(
             summary = "Get all approved properties",
@@ -125,7 +122,7 @@ public class PropertyController {
     }
 
     /**
-     * Get property details by IxD.
+     * 3. Get property details by IxD.
      */
     @Operation(
             summary = "Get property details by ID",
@@ -158,7 +155,7 @@ public class PropertyController {
     // ================= Seller APIs =================
 
     /**
-     * Create a new property draft.
+     * 1. Create a new property draft.
      */
     @Operation(
             summary = "Create a new property draft",
@@ -184,7 +181,7 @@ public class PropertyController {
     }
 
     /**
-     * Get all properties for a specific owner.
+     * 2. Get all properties for a specific owner.
      */
     @Operation(
             summary = "Get all properties for a specific owner",
@@ -229,7 +226,7 @@ public class PropertyController {
     }
 
     /**
-     * Update an existing property draft.
+     * 3. Update an existing property draft.
      */
     @Operation(
             summary = "Update an existing property draft",
@@ -260,7 +257,7 @@ public class PropertyController {
     }
 
     /**
-     * Submit a property for approval.
+     * 4. Submit a property for approval.
      */
     @Operation(
             summary = "Submit a property for approval",
@@ -298,7 +295,7 @@ public class PropertyController {
     // ================= Admin APIs =================
 
     /**
-     * Get all properties pending approval.
+     * 1. Get all properties pending approval.
      */
     @Operation(
             summary = "Get all properties pending approval",
@@ -335,7 +332,7 @@ public class PropertyController {
     }
 
     /**
-     * Approve a property.
+     * 2. Approve a property.
      */
     @Operation(
             summary = "Approve a property",
@@ -371,7 +368,7 @@ public class PropertyController {
     }
 
     /**
-     * Reject a property.
+     * 3. Reject a property.
      */
     @Operation(
             summary = "Reject a property",
@@ -407,7 +404,7 @@ public class PropertyController {
     }
 
     /**
-     * Archive a property.
+     * 4. Archive a property.
      */
     @Operation(
             summary = "Archive a property",
@@ -443,10 +440,7 @@ public class PropertyController {
     }
 
     /**
-     * Delete a property by ID.
-     * <p>
-     * ⚠️ TODO: Replace delete with archive in future for soft-deletion.
-     * </p>
+     * 5. Delete a property by ID.
      */
     @Operation(
             summary = "Delete a property by ID",
@@ -477,7 +471,7 @@ public class PropertyController {
     }
 
     /**
-     * Get all properties.
+     * 6. Get all properties.
      */
     @Operation(
             summary = "Get all properties",
@@ -512,5 +506,31 @@ public class PropertyController {
         int pageNumber = page - 1;
 
         return ResponseEntity.ok(propertyService.getAllProperty(pageNumber, size));
+    }
+
+    /**
+     * 1. Create a new property approved.
+     */
+    @Operation(
+            summary = "Create a new property",
+            description = "Create a new property (Admin)",
+            tags = { "Admin APIs" }
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "201",
+                    description = "Property created successfully",
+                    content = @Content(schema = @Schema(implementation = PropertyDTO.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data"
+            )
+    })
+    @PostMapping("/admin/create")
+    public ResponseEntity<ApiResponse<PropertyDTO>> createAdminApprovedProperty(
+            @Valid @RequestBody CreatePropertyDTO dto) {
+        PropertyDTO property = propertyService.createAdminApprovedProperty(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(property));
     }
 }
