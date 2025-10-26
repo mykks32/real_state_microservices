@@ -30,8 +30,8 @@ export class PropertyUrlBuilder {
    * @readonly
    * @type {string}
    */
-  getPropertyByOwnerIdUrl(ownerId: string): string {
-    return `${this.configService.propertyServiceUrl}/properties/owner/${ownerId}`;
+  getPropertyByOwnerIdUrl(): string {
+    return `${this.configService.propertyServiceUrl}/properties/owner/`;
   }
 
   /**

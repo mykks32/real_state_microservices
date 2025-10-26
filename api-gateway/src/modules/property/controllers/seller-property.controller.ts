@@ -1,6 +1,7 @@
 import { RequestWithUserContext } from '../../../common/types/request-with-context.type';
 import { PropertyUrlBuilder } from '../utils/property-url.builder';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -151,13 +152,22 @@ export class SellerPropertyController {
 
     const ownerId = req.user.id;
 
+    if (!ownerId) {
+      throw new BadRequestException(
+        `OwnerId missing in request context | requestId=${requestId}`,
+      );
+    }
+
     this.logger.log(
       `Fetching Properties | ownerId= ${ownerId} | request_id = ${requestId}`,
     );
 
     const response = await firstValueFrom(
-      this.httpService.get<IApiResponse<IProperty[]>>(
-        this.propertyUrlBuilder.getPropertyByOwnerIdUrl(ownerId),
+      this.httpService.post<IApiResponse<IProperty[]>>(
+        this.propertyUrlBuilder.getPropertyByOwnerIdUrl(),
+        {
+          ownerId: ownerId,
+        },
         {
           headers: {
             'x-request-id': requestId,

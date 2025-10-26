@@ -1,14 +1,10 @@
-import { IUser } from 'src/modules/auth/interfaces/user.interface';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { IUser } from 'src/modules/auth/interfaces/user.interface';
+import { Role } from 'src/modules/auth/enums/roles.enum';
 
-/**
- * DTO for user registration.
- *
- * Includes email, username, and password fields.
- */
 export class CreateUserDto
-  implements Pick<IUser, 'email' | 'username' | 'password'>
+  implements Pick<IUser, 'email' | 'username' | 'password' | 'roles'>
 {
   @ApiProperty({
     description: 'User email address',
@@ -33,4 +29,19 @@ export class CreateUserDto
   })
   @IsNotEmpty({ message: 'Password is required' })
   password: string;
+
+  @ApiProperty({
+    description: 'User roles (defaults to BUYER if not provided)',
+    example: [Role.BUYER],
+    isArray: true,
+    enum: [Role.BUYER, Role.SELLER],
+    required: false,
+    default: [Role.BUYER],
+  })
+  @IsOptional()
+  @IsEnum(Role, {
+    each: true,
+    message: 'Each role must be either BUYER or SELLER',
+  })
+  roles: Role[] = [Role.BUYER];
 }

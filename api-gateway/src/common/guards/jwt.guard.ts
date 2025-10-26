@@ -107,9 +107,14 @@ export class JwtGatewayGuard implements CanActivate {
           return true;
         }
       } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? `ErrorName: ${err.name}, ErrorMessage: ${err.message}`
+            : 'Unauthorized: No access token';
+
         this.logger.warn(
           'Access token invalid or expired, attempting refresh if available',
-          err,
+          errorMessage,
         );
       }
     }

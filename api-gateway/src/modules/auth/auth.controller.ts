@@ -211,7 +211,7 @@ export class AuthController {
   /**
    * Logs out a user by clearing the refresh token cookie.
    *
-   * @route POST /auth/logout
+   * @route GET /auth/logout
    * @status 200 - OK
    *
    * @param {Request} req - Incoming HTTP request.

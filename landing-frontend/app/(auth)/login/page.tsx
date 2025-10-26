@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "react-query";
-import { Mail, Lock } from "lucide-react";
+import {Mail, Lock, EyeOff, Eye} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+
     const { login } = useAuthStore();
 
     const form = useForm<LoginFormValues>({
@@ -91,12 +93,19 @@ export default function LoginPage() {
                         <div className="relative">
                             <Lock className="absolute left-3 top-3 h-5 w-5 text-violet-500/50 pointer-events-none"/>
                             <Input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="••••••••"
                                 disabled={loginMutation.isLoading}
                                 className="pl-10 bg-white/5 border-white/20 text-white placeholder-white/40"
                                 {...form.register("password")}
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                className="absolute right-3 top-3 text-violet-400/70 hover:text-violet-300 focus:outline-none"
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                         {form.formState.errors.password && (
                             <p className="text-xs text-red-400">{form.formState.errors.password.message}</p>
