@@ -59,7 +59,7 @@ export default function LoginPage() {
                     <h1 className="text-3xl font-bold text-white">Sign In</h1>
                     <p className="text-sm text-blue-200/70">
                         New here?{" "}
-                        <a href="/singup" className="text-brown-400 hover:text-blue-300 font-medium">
+                        <a href="/signup" className="text-brown-400 hover:text-blue-300 font-medium">
                             Create account
                         </a>
                     </p>

@@ -10,8 +10,9 @@ import {Plus} from "lucide-react";
 import {Role} from "@/enums";
 import CreatePropertyDialog from "@/components/Dashboard/Seller/Dialog/create-property-dialog";
 import {CreatePropertyDTO} from "@/schemas/property/property-schema";
-import {useMutation} from "react-query";
+import {useMutation, useQueryClient} from "react-query";
 import SellerPropertyService from "@/services/property/seller-property-serive"
+import AdminPropertyService from "@/services/property/admin-property-service"
 
 // Lazy-load PropertyTab
 const AdminPropertyTab = lazy(() => import("@/components/Dashboard/Admin/Tabs/property-tab"));
@@ -29,11 +30,47 @@ export default function Dashboard() {
     const loading = useAuthStore((state) => state.loading);
     const logout = useAuthStore((state) => state.logout);
     const router = useRouter();
+    const queryClient = useQueryClient()
+
 
     const draftPropertyMutation = useMutation({
         mutationFn: async (data: CreatePropertyDTO) => {
             await SellerPropertyService.createProperty(data);
         },
+        onSuccess: () => {
+            setIsDialogOpen(false)
+            queryClient
+                .invalidateQueries({ queryKey: ["seller-properties"] })
+                .then(() => {
+                    console.log("Query invalidated successfully");
+                })
+                .catch((err) => {
+                    console.error("Invalidation failed:", err);
+                });
+        },
+        onError: (error: any) => {
+            console.error("Update property error:", error)
+        }
+    });
+
+    const approvedPropertyMutation = useMutation({
+        mutationFn: async (data: CreatePropertyDTO) => {
+            await AdminPropertyService.createApprovedProperty(data);
+        },
+        onSuccess: () => {
+            setIsDialogOpen(false)
+            queryClient
+                .invalidateQueries({ queryKey: ["all-properties"] })
+                .then(() => {
+                    console.log("Query invalidated successfully");
+                })
+                .catch((err) => {
+                    console.error("Invalidation failed:", err);
+                });
+        },
+        onError: (error: any) => {
+            console.error("Update property error:", error)
+        }
     });
 
     useEffect(() => {
@@ -51,6 +88,10 @@ export default function Dashboard() {
         draftPropertyMutation.mutate(data)
     };
 
+    const handleApprovedProperty = (data: CreatePropertyDTO) => {
+        approvedPropertyMutation.mutate(data)
+    }
+
     if (loading || !user) {
         return (
             <div className="h-20 w-full items-center justify-center flex">
@@ -66,10 +107,11 @@ export default function Dashboard() {
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold">Welcome, {user.username}</h1>
                     <div className="flex flex-col md:flex-row gap-2">
-                        {/* Post Property Button */}
+                        {/* Post Seller Property Button */}
                         {user.roles.includes(Role.SELLER) && (
                             <CreatePropertyDialog
                                 isOpen={isDialogOpen}
+                                createType={"Draft"}
                                 onClose={() => setIsDialogOpen(false)}
                                 onSubmit={handleDraftProperty}
                                 trigger={
@@ -78,6 +120,23 @@ export default function Dashboard() {
                                         onClick={() => setIsDialogOpen(true)}
                                     >
                                         <Plus size={16}/> Draft Property
+                                    </Button>
+                                }
+                            />
+                        )}
+                        {/* Post Property Button */}
+                        {user.roles.includes(Role.ADMIN) && (
+                            <CreatePropertyDialog
+                                createType={"Post"}
+                                isOpen={isDialogOpen}
+                                onClose={() => setIsDialogOpen(false)}
+                                onSubmit={handleApprovedProperty}
+                                trigger={
+                                    <Button
+                                        className="bg-blue-500 text-white px-4 py-2"
+                                        onClick={() => setIsDialogOpen(true)}
+                                    >
+                                        <Plus size={16}/> Post Property
                                     </Button>
                                 }
                             />

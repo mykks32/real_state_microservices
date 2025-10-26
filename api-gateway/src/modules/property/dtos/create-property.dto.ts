@@ -1,7 +1,6 @@
-import { IsEnum, IsUUID } from 'class-validator';
+import { IsUUID } from 'class-validator';
 import { RequestCreatePropertyDTO } from './request-create-property.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { ApprovalStatusEnum } from '../enums/approval-status.enum';
 
 /**
  * Data Transfer Object for creating a new property with owner association

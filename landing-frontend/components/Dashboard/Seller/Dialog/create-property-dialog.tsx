@@ -19,12 +19,13 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 
 interface PropertyDialogProps {
     isOpen: boolean;
+    createType: "Draft" | "Post"
     onClose: () => void;
     onSubmit: (data: CreatePropertyDTO) => void;
     trigger?: React.ReactNode;
 }
 
-export default function CreatePropertyDialog({isOpen, onClose, onSubmit, trigger,}: PropertyDialogProps) {
+export default function CreatePropertyDialog({isOpen, onClose, onSubmit, createType, trigger,}: PropertyDialogProps) {
     const defaultPropertyValues: CreatePropertyDTO = {
         title: "",
         description: "",
@@ -67,7 +68,7 @@ export default function CreatePropertyDialog({isOpen, onClose, onSubmit, trigger
             <DialogContent className="max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle
-                        className="flex justify-center text-2xl font-bold">"Create Property"</DialogTitle>
+                        className="flex justify-center text-2xl font-bold">{createType} Property</DialogTitle>
                 </DialogHeader>
 
                 <form
@@ -190,7 +191,7 @@ export default function CreatePropertyDialog({isOpen, onClose, onSubmit, trigger
                         <Button variant="outline" type="button" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button className="bg-blue-500" type="submit">"Draft"</Button>
+                        <Button className="bg-blue-500" type="submit">{createType}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

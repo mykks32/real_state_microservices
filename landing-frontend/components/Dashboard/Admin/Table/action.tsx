@@ -1,32 +1,28 @@
 "use client"
 
 import {Row} from "@tanstack/react-table"
-import {MoreHorizontal} from "lucide-react"
-
+import {MoreHorizontal, Check, X, Archive, Trash} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {PropertySchema} from "@/schemas/property/property-schema";
-import {useMutation, useQueryClient} from "react-query";
-import AdminPropertyService from "@/services/property/admin-property-service";
-import {toast} from "sonner";
+import {PropertySchema} from "@/schemas/property/property-schema"
+import {useMutation, useQueryClient} from "react-query"
+import AdminPropertyService from "@/services/property/admin-property-service"
+import {toast} from "sonner"
+import {ApprovalStatusEnum} from "@/enums"
 
 interface DataTableRowActionsProps<TData> {
     row: Row<TData>
 }
 
-export function Action<TData>({
-                                               row,
-                                           }: DataTableRowActionsProps<TData>) {
+export function Action<TData>({row}: DataTableRowActionsProps<TData>) {
     const property = PropertySchema.parse(row.original)
-
-    const queryClient = useQueryClient();
+    const queryClient = useQueryClient()
 
     const mutation = useMutation({
         mutationFn: async (action: "approve" | "reject" | "archive" | "delete") => {
@@ -39,21 +35,12 @@ export function Action<TData>({
                     return await AdminPropertyService.archiveProperty(property.id)
                 case "delete":
                     return await AdminPropertyService.deleteProperty(property.id)
-                default:
-                    throw new Error("Invalid action")
             }
         },
         onSuccess: (response, action) => {
             if (response?.success) {
                 toast.success(`Property ${action}d successfully.`)
-                queryClient
-                    .invalidateQueries({ queryKey: ["all-properties"] })
-                    .then(() => {
-                        console.log("Query invalidated successfully");
-                    })
-                    .catch((err) => {
-                        console.error("Invalidation failed:", err);
-                    });
+                queryClient.invalidateQueries({queryKey: ["all-properties"]})
             } else {
                 toast.error(`Failed to ${action} property.`)
             }
@@ -67,48 +54,61 @@ export function Action<TData>({
         mutation.mutate(action)
     }
 
+    const approvalStatus = property.approvalStatus as ApprovalStatusEnum
+
+    const canApprove = approvalStatus === ApprovalStatusEnum.PendingApproval
+    const canReject = approvalStatus === ApprovalStatusEnum.PendingApproval
+    const canArchive = approvalStatus === ApprovalStatusEnum.Approved
+    const canDelete =
+        approvalStatus === ApprovalStatusEnum.Rejected ||
+        approvalStatus === ApprovalStatusEnum.Archived ||
+        approvalStatus === ApprovalStatusEnum.Draft
+
+    const hasButtonsAboveSeparator = canApprove || canReject || canArchive
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="data-[state=open]:bg-muted size-8"
-                >
+                <Button variant="ghost" size="icon" className="data-[state=open]:bg-muted size-8">
                     <MoreHorizontal/>
                     <span className="sr-only">Open menu</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[160px]">
-                <DropdownMenuItem
-                    disabled={mutation.isLoading}
-                    onClick={() => handleAction("approve")}
-                >
-                    Approve
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    disabled={mutation.isLoading}
-                    onClick={() => handleAction("reject")}
-                >
-                    Reject
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    disabled={mutation.isLoading}
-                    onClick={() => handleAction("archive")}
-                >
-                    Archive
-                </DropdownMenuItem>
 
-                <DropdownMenuSeparator/>
+            <DropdownMenuContent align="end" className="w-[180px]">
+                {canApprove && (
+                    <DropdownMenuItem className="flex justify-between" disabled={mutation.isLoading} onClick={() => handleAction("approve")}>
+                        Approve
+                        <Check className="mr-2 h-4 w-4"/>
+                    </DropdownMenuItem>
+                )}
 
-                <DropdownMenuItem
-                    disabled={mutation.isLoading}
-                    onClick={() => handleAction("delete")}
-                    className="text-red-600 focus:text-red-600"
-                >
-                    Delete
-                    <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-                </DropdownMenuItem>
+                {canReject && (
+                    <DropdownMenuItem className="flex justify-between" disabled={mutation.isLoading} onClick={() => handleAction("reject")}>
+                        Reject
+                        <X className="mr-2 h-4 w-4"/>
+                    </DropdownMenuItem>
+                )}
+
+                {canArchive && (
+                    <DropdownMenuItem className="flex justify-between" disabled={mutation.isLoading} onClick={() => handleAction("archive")}>
+                        Archive
+                        <Archive className="mr-2 h-4 w-4"/>
+                    </DropdownMenuItem>
+                )}
+
+                {hasButtonsAboveSeparator && canDelete && <DropdownMenuSeparator/>}
+
+                {canDelete && (
+                    <DropdownMenuItem
+                        disabled={mutation.isLoading}
+                        onClick={() => handleAction("delete")}
+                        className="text-red-600 flex justify-between focus:text-red-600"
+                    >
+                        Delete
+                        <Trash className="mr-2 h-4 w-4"/>
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     )
