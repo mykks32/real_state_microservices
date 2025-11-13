@@ -23,40 +23,53 @@ The platform follows a microservices pattern with the following components:
 ## Quick Start
 
 ### Prerequisites
+
 - Docker & Docker Compose
 - Node.js 18+ (for local development)
 - Java 17+ (for Property service development)
 
 ### Environment Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/mykks32/real_state_microservices.git
-   cd real_state_microservices
-   ```
+#### 1. Clone the repository
 
-2. **Create environment files**
-   ```bash
-   ./scripts/create-env.sh
-   ```
-
-   Then edit the generated files in `env/` directory with your actual configuration values.
-
-3. **Build Docker images**
-   ```bash
-   ./scripts/docker-build.sh
-   ```
-
-4. **Start the application**
-   ```bash
-   ./scripts/run-prod.sh
-   ```
-
-### Manual Docker Compose
 ```bash
-docker compose up -d
+git clone https://github.com/mykks32/real_state_microservices.git
+cd real_state_microservices
 ```
 
+#### 2. Create environment files
+
+```bash
+./scripts/create-env.sh
+```
+
+Then edit the generated files in the `env/` directory with your actual configuration values.
+
+#### 3. Deployment
+
+**Option 1: Using Scripts**
+
+Build Docker images:
+```bash
+./scripts/docker-build.sh
+```
+
+Start the application:
+```bash
+./scripts/run-prod.sh
+```
+
+**Option 2: Using Docker Compose**
+
+Build and start containers:
+```bash
+docker compose up --build -d
+```
+
+Stop and remove containers:
+```bash
+docker compose down
+```
 ## Project Structure
 
 ```
@@ -390,10 +403,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 For support and questions:
 - Create an issue in the GitHub repository
 - Check the API documentation at `/docs` endpoint
-- Review service-specific README files in each directory
 
 ## Contact
 
 Project Maintainer: [mykks32](https://github.com/mykks32)
-
----
