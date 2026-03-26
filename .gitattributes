@@ -97,10 +97,10 @@ makefile linguist-detectable=true linguist-language=makefile text
 
 # Documentation
 
-*.md linguist-detectable=true linguist-language=markdown text
-*.mdx text
-*.rst text
-*.txt text
+# *.md linguist-detectable=true linguist-language=markdown text
+# *.mdx text
+# *.rst text
+# *.txt text
 
 # Web Assets
 
